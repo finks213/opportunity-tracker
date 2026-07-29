@@ -96,9 +96,27 @@ export function renderCharacterization(r, compare = null) {
   lines.push(`- at least one among shoreline-dominant births: **${pass(r.minimalFunctionality.shorelinePositiveWebbingEvent)}**`);
   lines.push(`- opportunity identity (\`bodyMutationOpportunityCount === allocationMutationOpportunityCount === nonFounderBirthCount\`) holds for every seed: **${pass(r.opportunityIdentityHolds)}**`);
   lines.push("");
-  lines.push("### Surviving webbing carriers");
+  lines.push("### Surviving webbing carriers, by birth dominant-zone bin");
   lines.push("");
   lines.push(`Carrier definition (declared): \`bodyGenome[toe_webbing] >= 0.35\`, measured at generation ${r.declaredGenerations}.`);
+  lines.push("Time allocation is immutable at birth, so a living individual's");
+  lines.push("`argmax(timeAllocation)` **is** its birth dominant-zone bin.");
+  lines.push("");
+  lines.push("Reported per bin so that mutation supply (above) can be compared directly");
+  lines.push("against post-selection carrier survival in the same zone — which is the");
+  lines.push("comparison §21.3 exists to protect.");
+  lines.push("");
+  lines.push("| Birth zone bin | Carriers age 1 | age 2 | age 3+ | Final living | Final carriers | Final prevalence | Median per-seed prevalence | Seeds with any living in bin |");
+  lines.push("|---|---|---|---|---|---|---|---|---|");
+  for (const m of r.mutationSupply) {
+    lines.push(
+      `| ${m.zone} | ${m.survivingCarriersAge1 ?? "—"} | ${m.survivingCarriersAge2 ?? "—"} | ${m.survivingCarriersAge3plus ?? "—"} | ` +
+      `${m.finalLiving ?? "—"} | ${m.finalCarriers ?? "—"} | ${fmt(m.finalCarrierPrevalence)} | ` +
+      `${fmt(m.medianSeedCarrierPrevalence)} | ${m.seedsWithAnyLivingInBin ?? "—"} of ${r.seeds.length} |`
+    );
+  }
+  lines.push("");
+  lines.push("World-wide totals for cross-checking:");
   lines.push("");
   lines.push("| Measure | Value |");
   lines.push("|---|---|");
@@ -164,9 +182,25 @@ export function renderCharacterization(r, compare = null) {
   }
   lines.push(`| allocation-mutation events per non-founder birth | ${fmt(L.allocationMutationEventsPerNonFounderBirth)} |`);
   lines.push(`| allocation transfers into a below-threshold zone | ${L.lowShareTargetTransfers} |`);
-  lines.push(`| seeds reaching adjacency traversal | ${L.seedsReachingAdjacencyTraversal} of ${r.seeds.length} |`);
-  lines.push(`| median first traversal generation | ${fmt(L.medianFirstAdjacencyTraversalGeneration, 1)} |`);
   lines.push(`| zero-allocation fallbacks (must be 0) | ${L.totalZeroAllocationFallbacks} |`);
+  lines.push("");
+  lines.push("### Adjacency traversal, by founder-band ancestry");
+  lines.push("");
+  lines.push("Measured exactly as declared: a lineage descended **only** from one edge");
+  lines.push("band must reach `>= parentalUseEpsilon` share in the **opposite** edge zone,");
+  lines.push("which is only reachable across the forest-floor bridge. Founder-band ancestry");
+  lines.push("is tracked explicitly per individual as a union of its parents' bands.");
+  lines.push("");
+  lines.push('"Holds positive share in both edge zones" is **not** used as a substitute: an');
+  lines.push("ordinary forest-floor descendant satisfies that at generation 1 simply by using");
+  lines.push("both of its legal neighbours, which is not traversal.");
+  lines.push("");
+  const cls = L.canopyLineageReachesShoreline ?? {};
+  const slc = L.shorelineLineageReachesCanopy ?? {};
+  lines.push("| Traversal | Seeds reaching it | Earliest generation | Median first generation |");
+  lines.push("|---|---|---|---|");
+  lines.push(`| canopy-only lineage → shoreline | ${cls.seedsReaching ?? "—"} of ${cls.ofSeeds ?? r.seeds.length} | ${cls.earliestGeneration ?? "—"} | ${fmt(cls.medianFirstGeneration, 1)} |`);
+  lines.push(`| shoreline-only lineage → canopy | ${slc.seedsReaching ?? "—"} of ${slc.ofSeeds ?? r.seeds.length} | ${slc.earliestGeneration ?? "—"} | ${fmt(slc.medianFirstGeneration, 1)} |`);
   lines.push("");
   lines.push("Age distribution at the final generation is preserved per seed in the raw JSON");
   lines.push("under `seeds[].ageDistribution`.");

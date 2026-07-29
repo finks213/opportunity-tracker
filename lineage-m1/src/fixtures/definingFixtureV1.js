@@ -90,7 +90,7 @@ export function assertFixtureConsistency(env) {
  * @returns {Object} biological state
  */
 export function hydrateDefiningFixtureV1(env, trajectorySeed, config = currentModelConfig) {
-  const state = makeEmptyState(createSimRng(trajectorySeed));
+  const state = makeEmptyState(createSimRng(trajectorySeed), config);
   state.schemaVersion = SCHEMA_VERSION;
   state.configVersion = config.version;
   state.generation = env.generation;

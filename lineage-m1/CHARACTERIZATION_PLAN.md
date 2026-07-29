@@ -42,6 +42,11 @@ birth in the batch:
    `bodyGenome[toe_webbing] >= 0.35`), sampled at generation 180;
 7. final carrier prevalence at generation 180.
 
+Items 6 and 7 are reported **per bin**, not only as world totals, so mutation
+supply can be compared directly against post-selection carrier survival in the
+same zone. (The first implementation binned only items 1–5; corrected per
+DECISIONS.md D-021.)
+
 Mutation generation is evaluated as **events per birth**, never as final
 carriers.
 
@@ -114,7 +119,10 @@ Reported across the batch:
 - deaths per generation;
 - age distribution at generation 180;
 - mating-pair count per generation;
-- unmatched eligible adults per generation;
+- unmatched eligible adults per generation — counted **after** survival, as
+  `eligible aged survivors − unique parents used in that generation's mating
+  events`. Only aged survivors are mate-eligible under the frozen lifecycle, so
+  a pre-survival count is wrong (corrected per DECISIONS.md D-020);
 - mean and distribution of mating overlap;
 - population by current zone bin;
 - allocation-mutation frequency (events per non-founder birth);
@@ -123,6 +131,16 @@ Reported across the batch:
   only from canopy-heavy founders, and symmetrically for canopy from
   shoreline-heavy founders, plus the count of allocation-mutation events whose
   `toZone` had share `< parentalUseEpsilon` before the transfer.
+
+  **Implementation note (added after the pass-1 audit, DECISIONS.md D-019).**
+  This declared measure requires ancestry, and the first implementation did not
+  track it — it asked only whether any living animal held share in both edge
+  zones, which an ordinary forest-floor descendant satisfies immediately. The
+  measure is now implemented literally: founder-band ancestry is carried per
+  individual as a union of its parents' bands, and traversal is reported
+  separately for canopy-only-ancestry lineages reaching the shoreline and
+  shoreline-only-ancestry lineages reaching the canopy. The declared measure
+  itself is unchanged; only the implementation was corrected to match it.
 
 ## 6. Reporting rules (§21.7)
 

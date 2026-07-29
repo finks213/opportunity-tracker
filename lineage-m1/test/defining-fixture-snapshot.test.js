@@ -141,6 +141,39 @@ test("§19 C — hydration initializes simRng only through createSimRng(trajecto
   assert.deepEqual(state.simRng.toState(), expected.toState());
 });
 
+test("§18/§21.7 — canonical state records the configuration that actually produced it", async () => {
+  // Regression test for an audit finding: state creation hardcoded
+  // currentModelConfig.version, so a world built under the superseded
+  // configuration falsely serialized as lineage-m1-config-2. That breaks state
+  // provenance, canonical replay interpretation, and the §21.7 side-by-side.
+  const { createInitialState } = await import("../src/core/individual.js");
+  const { legacyModelConfigV1 } = await import("../src/config/modelConfig.js");
+
+  const current = createInitialState(1, currentModelConfig);
+  const legacy = createInitialState(1, legacyModelConfigV1);
+
+  assert.equal(current.configVersion, currentModelConfig.version);
+  assert.equal(legacy.configVersion, legacyModelConfigV1.version);
+  assert.notEqual(legacy.configVersion, currentModelConfig.version);
+
+  // The recorded version must reach the canonical bytes.
+  assert.ok(serializeCanonicalBiology(current).includes(currentModelConfig.version));
+  assert.ok(serializeCanonicalBiology(legacy).includes(legacyModelConfigV1.version));
+
+  // Otherwise-identical states differing only in config version must not
+  // serialize to the same bytes.
+  const a = createInitialState(1, currentModelConfig);
+  const b = createInitialState(1, currentModelConfig);
+  assert.equal(serializeCanonicalBiology(a), serializeCanonicalBiology(b));
+  b.configVersion = "lineage-m1-config-1";
+  assert.notEqual(serializeCanonicalBiology(a), serializeCanonicalBiology(b));
+
+  // Fixture hydration carries the supplied configuration too.
+  const { envelope } = loadValidatedFixture();
+  const hydratedLegacy = hydrateDefiningFixtureV1(envelope, 1, legacyModelConfigV1);
+  assert.equal(hydratedLegacy.configVersion, legacyModelConfigV1.version);
+});
+
 test("§20.7 — canonical serialization changes when either mutation counter changes", () => {
   const { envelope } = loadValidatedFixture();
   const base = hydrateDefiningFixtureV1(envelope, 5);

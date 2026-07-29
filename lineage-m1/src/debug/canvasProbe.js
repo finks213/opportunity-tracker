@@ -75,8 +75,12 @@ export class CanvasProbe {
     const focalThreshold = opts.focalThreshold ?? 0.5;
     const ctx = this.ctx;
     const W = this.cssWidth || this.canvas.width;
-    const H = this.cssHeight || this.canvas.height;
-    ctx.clearRect(0, 0, W, H);
+    const fullH = this.cssHeight || this.canvas.height;
+    // Legibility mode renders the three-zone world into the upper part of the
+    // canvas and the webbing pairs below, so the world drawing must be able to
+    // occupy a sub-region rather than always the whole canvas.
+    const H = opts.regionHeight ?? fullH;
+    ctx.clearRect(0, 0, W, opts.regionHeight ? H : fullH);
 
     // --- three clearly separated world regions ---
     for (let z = 0; z < ZONE_CANVAS_REGIONS.length; z++) {

@@ -16,7 +16,11 @@ Contents: the complete `lineage-m1/` project directory required by contract §23
 | Final config version | `lineage-m1-config-2` |
 | Final config hash (SHA-256 of canonical config) | `edb81695973b81ab8f87f7ef9dde9d8c5b3d4c7dfbeb45f385547edd86ee86de` |
 | Superseded config retained | `lineage-m1-config-1` as `legacyModelConfigV1` |
-| **Final reported status** | **`M1_AUTOMATED_GATES_PASS — IPAD TEST PENDING`** |
+| **Final reported status** | **`M1_BLOCKED — AWAITING PRINCIPAL DECISION ON THE PROCESS WAIVER`** |
+| Bundle revision | **2** — post-repair, after the pass-1 implementation audit returned `BREAKS-FOUND` |
+| Automated implementation gates | PASS (119/119 tests, fixture and both 500-seed batches re-run from clean) |
+| Physical iPad gate | `PENDING_HUMAN_DEVICE_TEST` |
+| §24 Stage A planning order | VIOLATED — unrepairable, principal decision required (DECISIONS.md D-024) |
 
 ---
 
@@ -26,8 +30,8 @@ Contents: the complete `lineage-m1/` project directory required by contract §23
 # from the bundle root, after extracting; no install step is required
 cd lineage-m1
 
-# 1. every build-blocking invariant and contract test  (expect 116/116, exit 0)
-node --test test/*.test.js            # or: npm test
+# 1. every build-blocking invariant and contract test  (expect 119/119, exit 0)
+node --test test/*.test.js            # or: npm test   (expect 119/119)
 
 # 2. the defining fixture matched trajectory gate, seeds 1..200 at generation 90
 node tools/runFixture.mjs             # writes audit/fixture-results.json   (~180 s)
@@ -83,7 +87,7 @@ Machine-readable proof: `audit/reference-file-hashes.json`.
 
 | Path | Contents |
 |---|---|
-| `audit/test-results.txt` | unedited stdout/stderr from the final clean test run (116/116, exit 0), including the emitted three-zone trait deltas and the §19.3 probe values |
+| `audit/test-results.txt` | unedited stdout/stderr from the final clean test run (119/119, exit 0), including the emitted three-zone trait deltas, the §19.3 probe values, and the post-repair boundary-record counts |
 | `audit/fixture-results.json` | seed-level paired fixture results for seeds 1..200: medians, successes, ties, focal-contribution and whole-world extinction counts, total-population distributions, full paired difference distributions, and the configuration hash |
 | `audit/characterization-results.json` | raw 500-seed metrics under `lineage-m1-config-2`, sufficient to reproduce every table in `CHARACTERIZATION.md`, including every seed-level concentration value |
 | `audit/characterization-results-config1.json` | the same batch under the superseded `lineage-m1-config-1`, for the §21.7 side-by-side |
@@ -125,6 +129,7 @@ does not make the implementation accepted; the pending state is preserved.
 
 ## 7. Every included path
 
+- `AUDIT_PACKAGE_MANIFEST.md`
 - `CHARACTERIZATION.md`
 - `CHARACTERIZATION_PLAN.md`
 - `DECISIONS.md`
@@ -199,7 +204,33 @@ does not make the implementation accepted; the pending state is preserved.
 
 ---
 
-## 8. Authority note
+## 8. Revision history
+
+**Revision 1** reported `M1_AUTOMATED_GATES_PASS — IPAD TEST PENDING`. An
+external implementation audit against v3.3 returned `BREAKS-FOUND` with six
+confirmed implementation/evidence defects and one process finding.
+
+**Revision 2** (this bundle) repairs all six. Each was independently reproduced
+here before repair; the reproductions matched the auditor's figures. Full detail
+is in `DECISIONS.md` D-018 through D-024 and in `FINAL_REPORT.md` §1b:
+
+1. genealogy boundary records grew without bound (§15) — CRITICAL;
+2. adjacency traversal measured the wrong biological event (§21.6);
+3. unmatched eligible adults were counted before survival (§21.6);
+4. per-zone carrier survival was absent (§21.3);
+5. legacy-config states carried the wrong canonical config version (§18/§21.7);
+6. legibility mode omitted the fixture and zone regions (§22);
+7. pre-code planning order (§24) — **not repairable**, principal decision required.
+
+Three regression tests were added (116 → 119). The repairs changed measurement
+and retention code, not biological trajectories: the re-run guardrails and
+fixture results are numerically identical to revision 1, which is the expected
+and intended outcome.
+
+Superseded material is retained rather than deleted, per §27:
+`tools/calibrationSweep.mjs` and `audit/characterization-results-config1.json`.
+
+## 9. Authority note
 
 This bundle is submitted for an implementation audit against
 `LINEAGE_M1_WORLD_MODEL_CONTRACT_v3_3.md`. No superseded architecture brief,

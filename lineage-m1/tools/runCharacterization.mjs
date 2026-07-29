@@ -46,14 +46,36 @@ function runSeed(seed, config, generations) {
   state.diagnostics.allocationMutationOpportunityCount = 0;
   state.diagnostics.nonFounderBirthCount = 0;
 
-  // §21.3 counters keyed by the child's birth dominant-zone bin.
+  // §21.3 counters keyed by the child's birth dominant-zone bin. Items 6 and 7
+  // (surviving carriers by age, and final carrier prevalence) are filled in at
+  // the end of the run and are reported per bin, not only as world aggregates.
   const perBin = ZONES.map(() => ({
     births: 0,
     bodyMutationOpportunities: 0,
     bodyMutationEvents: 0,
     positiveWebbingEvents: 0,
     crossingWebbingEvents: 0,
+    survivingCarriersAge1: 0,
+    survivingCarriersAge2: 0,
+    survivingCarriersAge3plus: 0,
+    finalLiving: 0,
+    finalCarriers: 0,
+    finalCarrierPrevalence: null,
   }));
+
+  // Founder-band ancestry, needed for the declared adjacency-traversal measure.
+  // originBand[id] is a bitmask over founder bands: 1=canopy, 2=forest_floor,
+  // 4=shoreline. A child inherits the union of its parents' bands, so a value of
+  // exactly 1 means "descended only from canopy-heavy founders".
+  const CANOPY_ONLY = 1;
+  const SHORELINE_ONLY = 4;
+  /** @type {Map<number, number>} */
+  let originBand = new Map();
+  for (const ind of state.currentIndividuals) {
+    originBand.set(ind.id, 1 << Math.floor((ind.id - 1) / 40));
+  }
+  let firstCanopyLineageReachesShoreline = null;
+  let firstShorelineLineageReachesCanopy = null;
 
   // §21.6 per-generation series.
   const birthsPerGeneration = [];
@@ -74,9 +96,7 @@ function runSeed(seed, config, generations) {
 
   for (let g = 0; g < generations; g++) {
     if (isExtinct(state)) { extinctAt = state.generation; break; }
-    const eligibleBefore = state.currentIndividuals.filter(
-      (i) => i.ageGenerations + 1 >= 1 && i.ageGenerations + 1 <= 5
-    ).length;
+    const preSurvivalIds = new Set(state.currentIndividuals.map((i) => i.id));
 
     advanceGeneration(state, config);
     const targetGeneration = state.generation;
@@ -87,8 +107,22 @@ function runSeed(seed, config, generations) {
     birthsPerGeneration.push(newBirths.length);
     deathsPerGeneration.push(newDeaths.length);
     matingPairsPerGeneration.push(newMatings.length);
-    unmatchedEligiblePerGeneration.push(Math.max(0, eligibleBefore - newMatings.length * 2));
     for (const m of newMatings) overlapSamples.push(m.overlap);
+
+    // Unmatched eligible adults must be counted AFTER survival: under the
+    // frozen lifecycle only aged survivors are mate-eligible. Counting
+    // pre-survival individuals would credit animals that died this generation.
+    const usedParents = new Set();
+    for (const m of newMatings) {
+      usedParents.add(m.parentAId);
+      usedParents.add(m.parentBId);
+    }
+    let eligibleSurvivors = 0;
+    for (const ind of state.currentIndividuals) {
+      if (!preSurvivalIds.has(ind.id)) continue; // newborn, not a survivor
+      if (ind.ageGenerations >= 1 && ind.ageGenerations <= 5) eligibleSurvivors++;
+    }
+    unmatchedEligiblePerGeneration.push(Math.max(0, eligibleSurvivors - usedParents.size));
 
     // Bin newborns by their birth dominant-zone bin.
     const byId = new Map(state.currentIndividuals.map((i) => [i.id, i]));
@@ -116,17 +150,38 @@ function runSeed(seed, config, generations) {
       const toIndex = ZONES.indexOf(ev.toZone);
       if (ev.preMutationAllocation[toIndex] < config.parentalUseEpsilon) lowShareTargetTransfers++;
     }
-    // Declared traversal marker: first generation any living individual holds
-    // meaningful share in a zone no founder band of its own lineage began with.
-    if (firstAdjacencyTraversalGeneration === null) {
-      for (const ind of state.currentIndividuals) {
-        const a = ind.timeAllocation;
-        if (a[0] >= 0.02 && a[2] >= 0.02) { // spans both edge zones
-          firstAdjacencyTraversalGeneration = targetGeneration;
-          break;
+    // Declared adjacency-traversal measure (§21.6): a lineage descended ONLY
+    // from one edge band must reach meaningful use of the opposite edge zone
+    // through the forest-floor bridge.
+    //
+    // Ancestry is tracked explicitly. "Has positive share in both edge zones"
+    // is NOT a substitute: an ordinary forest-floor descendant satisfies it at
+    // generation 1 simply by using both of its legal neighbours.
+    for (const b of newBirths) {
+      if (!b.parentIds) continue;
+      const a = originBand.get(b.parentIds[0]) ?? 0;
+      const c = originBand.get(b.parentIds[1]) ?? 0;
+      originBand.set(b.childId, a | c);
+    }
+    for (const ind of state.currentIndividuals) {
+      const band = originBand.get(ind.id);
+      if (band === CANOPY_ONLY && ind.timeAllocation[2] >= config.parentalUseEpsilon) {
+        if (firstCanopyLineageReachesShoreline === null) {
+          firstCanopyLineageReachesShoreline = targetGeneration;
+        }
+      }
+      if (band === SHORELINE_ONLY && ind.timeAllocation[0] >= config.parentalUseEpsilon) {
+        if (firstShorelineLineageReachesCanopy === null) {
+          firstShorelineLineageReachesCanopy = targetGeneration;
         }
       }
     }
+    // Keep the ancestry map bounded to the living population.
+    const stillLiving = new Map();
+    for (const ind of state.currentIndividuals) {
+      stillLiving.set(ind.id, originBand.get(ind.id) ?? 0);
+    }
+    originBand = stillLiving;
     previousBirthCount = state.birthEvents.length;
     previousDeathCount = newDeaths.length;
     previousMatingCount = newMatings.length;
@@ -141,16 +196,24 @@ function runSeed(seed, config, generations) {
   const totalLoad = zoneLoad.reduce((a, b) => a + b, 0);
   const concentration = totalLoad > 0 ? Math.max(...zoneLoad) / totalLoad : null;
 
-  // Carriers by age, and final prevalence.
+  // Carriers by age, world-wide AND per birth dominant-zone bin (§21.3 items 6
+  // and 7). Time allocation is immutable at birth, so argmax(timeAllocation) of
+  // a living individual is exactly its birth dominant-zone bin.
   const carriersByAge = { age1: 0, age2: 0, age3plus: 0 };
   let carriers = 0;
   for (const ind of state.currentIndividuals) {
+    const bin = argmax(ind.timeAllocation);
+    perBin[bin].finalLiving++;
     if (ind.bodyGenome[WEBBING] >= CARRIER_THRESHOLD) {
       carriers++;
-      if (ind.ageGenerations === 1) carriersByAge.age1++;
-      else if (ind.ageGenerations === 2) carriersByAge.age2++;
-      else if (ind.ageGenerations >= 3) carriersByAge.age3plus++;
+      perBin[bin].finalCarriers++;
+      if (ind.ageGenerations === 1) { carriersByAge.age1++; perBin[bin].survivingCarriersAge1++; }
+      else if (ind.ageGenerations === 2) { carriersByAge.age2++; perBin[bin].survivingCarriersAge2++; }
+      else if (ind.ageGenerations >= 3) { carriersByAge.age3plus++; perBin[bin].survivingCarriersAge3plus++; }
     }
+  }
+  for (const bin of perBin) {
+    bin.finalCarrierPrevalence = bin.finalLiving > 0 ? bin.finalCarriers / bin.finalLiving : null;
   }
   const ageDistribution = {};
   for (const ind of state.currentIndividuals) {
@@ -180,7 +243,8 @@ function runSeed(seed, config, generations) {
     allocationMutationOpportunityCount: state.diagnostics.allocationMutationOpportunityCount,
     allocationMutationEvents,
     lowShareTargetTransfers,
-    firstAdjacencyTraversalGeneration,
+    firstCanopyLineageReachesShoreline,
+    firstShorelineLineageReachesCanopy,
     zeroAllocationFallbackCount: state.diagnostics.zeroAllocationFallbackCount,
     meanBirthsPerGeneration: mean(birthsPerGeneration),
     meanDeathsPerGeneration: mean(deathsPerGeneration),
@@ -317,6 +381,28 @@ export function runCharacterization(opts = {}) {
     }
     agg.bodyMutationEventsPerBirth = agg.births > 0 ? agg.bodyMutationEvents / agg.births : null;
     agg.positiveWebbingEventsPerBirth = agg.births > 0 ? agg.positiveWebbingEvents / agg.births : null;
+    // §21.3 items 6 and 7, reported per bin so mutation supply can be compared
+    // against post-selection carrier survival in the same zone.
+    agg.survivingCarriersAge1 = 0;
+    agg.survivingCarriersAge2 = 0;
+    agg.survivingCarriersAge3plus = 0;
+    agg.finalLiving = 0;
+    agg.finalCarriers = 0;
+    for (const s of seeds) {
+      agg.survivingCarriersAge1 += s.perBin[z].survivingCarriersAge1;
+      agg.survivingCarriersAge2 += s.perBin[z].survivingCarriersAge2;
+      agg.survivingCarriersAge3plus += s.perBin[z].survivingCarriersAge3plus;
+      agg.finalLiving += s.perBin[z].finalLiving;
+      agg.finalCarriers += s.perBin[z].finalCarriers;
+    }
+    agg.finalCarrierPrevalence = agg.finalLiving > 0 ? agg.finalCarriers / agg.finalLiving : null;
+    // Median across seeds that actually had animals in this bin, so a bin that
+    // is empty in most seeds is visible as a small denominator rather than 0.
+    const perSeedPrev = seeds
+      .map((s) => s.perBin[z].finalCarrierPrevalence)
+      .filter((v) => v !== null);
+    agg.medianSeedCarrierPrevalence = perSeedPrev.length ? ordinaryMedian(perSeedPrev) : null;
+    agg.seedsWithAnyLivingInBin = perSeedPrev.length;
     return agg;
   });
   const canopyBin = mutationSupply[0];
@@ -358,10 +444,24 @@ export function runCharacterization(opts = {}) {
       seeds.reduce((a, s) => a + s.allocationMutationEvents, 0) /
       Math.max(1, seeds.reduce((a, s) => a + s.nonFounderBirthCount, 0)),
     lowShareTargetTransfers: seeds.reduce((a, s) => a + s.lowShareTargetTransfers, 0),
-    seedsReachingAdjacencyTraversal: seeds.filter((s) => s.firstAdjacencyTraversalGeneration !== null).length,
-    medianFirstAdjacencyTraversalGeneration: (() => {
-      const v = seeds.map((s) => s.firstAdjacencyTraversalGeneration).filter((x) => x !== null);
-      return v.length ? ordinaryMedian(v) : null;
+    // Declared adjacency traversal, measured by founder-band ancestry.
+    canopyLineageReachesShoreline: (() => {
+      const v = seeds.map((s) => s.firstCanopyLineageReachesShoreline).filter((x) => x !== null);
+      return {
+        seedsReaching: v.length,
+        ofSeeds: seeds.length,
+        medianFirstGeneration: v.length ? ordinaryMedian(v) : null,
+        earliestGeneration: v.length ? Math.min(...v) : null,
+      };
+    })(),
+    shorelineLineageReachesCanopy: (() => {
+      const v = seeds.map((s) => s.firstShorelineLineageReachesCanopy).filter((x) => x !== null);
+      return {
+        seedsReaching: v.length,
+        ofSeeds: seeds.length,
+        medianFirstGeneration: v.length ? ordinaryMedian(v) : null,
+        earliestGeneration: v.length ? Math.min(...v) : null,
+      };
     })(),
     totalZeroAllocationFallbacks: seeds.reduce((a, s) => a + s.zeroAllocationFallbackCount, 0),
   };

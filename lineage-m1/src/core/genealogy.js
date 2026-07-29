@@ -26,9 +26,6 @@ export function pruneGenealogy(state, config) {
 
   const livingIds = new Set(state.currentIndividuals.map((i) => i.id));
 
-  // Existing boundary coverage (by original individual id) — never recreated.
-  const boundaryFor = new Set(state.prunedAncestorBoundaries.map((b) => b.originalIndividualId));
-
   // 1. Decide which birth records / genealogy entries are retained.
   const keepBirth = (r) => r.generation >= firstRetained || livingIds.has(r.childId);
   state.birthEvents = state.birthEvents.filter(keepBirth);
@@ -42,30 +39,38 @@ export function pruneGenealogy(state, config) {
   state.allocationMutationEvents = state.allocationMutationEvents.filter(keepGen);
 
   // 3. Set of ids whose birth record is still resolvable directly.
-  const retainedChildIds = new Set();
-  for (const r of state.retainedGenealogy) retainedChildIds.add(r.childId);
-  for (const id of livingIds) retainedChildIds.add(id);
+  const resolvable = new Set();
+  for (const r of state.retainedGenealogy) resolvable.add(r.childId);
+  for (const id of livingIds) resolvable.add(id);
 
-  // 4. Create boundary records for parents referenced by a retained child but no
-  //    longer resolvable. Deterministic order: ascending child id, then parent
-  //    order within the child. boundaryId is derived from array position.
-  const sortedChildren = state.retainedGenealogy
-    .filter((r) => r.parentIds !== null)
-    .slice()
-    .sort((a, b) => a.childId - b.childId);
-  for (const r of sortedChildren) {
-    for (const parentId of r.parentIds) {
-      if (retainedChildIds.has(parentId) || boundaryFor.has(parentId)) continue;
-      const boundaryId = state.prunedAncestorBoundaries.length + 1;
-      state.prunedAncestorBoundaries.push({
-        boundaryId,
-        originalIndividualId: parentId,
-        lastRetainedGeneration: firstRetained - 1,
-        reason: "genealogy_retention_boundary",
-      });
-      boundaryFor.add(parentId);
+  // 4. The EXACT set of parent ids that are still referenced by a retained
+  //    record (or by a living individual) but are no longer resolvable.
+  //
+  //    §15 permits only "the minimum explicit boundary records required to
+  //    resolve retained references" and forbids unlimited append-only history,
+  //    so this set is recomputed from scratch every prune. Carrying previously
+  //    created boundary records forward would accumulate obsolete entries
+  //    without bound as the window slides.
+  const needed = new Set();
+  const considerParents = (parentIds) => {
+    if (!parentIds) return;
+    for (const parentId of parentIds) {
+      if (!resolvable.has(parentId)) needed.add(parentId);
     }
-  }
+  };
+  for (const r of state.retainedGenealogy) considerParents(r.parentIds);
+  for (const ind of state.currentIndividuals) considerParents(ind.parentIds);
+
+  // 5. Rebuild the boundary array deterministically: ascending original id,
+  //    boundaryId assigned from that sorted position. Recomputing from the same
+  //    state always yields identical bytes, so pruning stays idempotent.
+  const sortedNeeded = [...needed].sort((a, b) => a - b);
+  state.prunedAncestorBoundaries = sortedNeeded.map((originalIndividualId, index) => ({
+    boundaryId: index + 1,
+    originalIndividualId,
+    lastRetainedGeneration: firstRetained - 1,
+    reason: "genealogy_retention_boundary",
+  }));
 }
 
 /**

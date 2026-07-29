@@ -159,6 +159,66 @@ test("§20.11 — retained complete-event counts do not grow beyond the window w
   assert.ok(Number.isFinite(genealogyBefore));
 });
 
+test("§15 — stored boundary records equal the EXACT set still required, at every depth", () => {
+  // Regression test for an audit finding: carrying previously created boundary
+  // records forward made prunedAncestorBoundaries grow without bound (15,356
+  // stored vs 137 required at generation 600), violating §15's "minimum
+  // explicit boundary records" and "no unlimited append-only history".
+  const state = createInitialState(SEED);
+  const checkpoints = [400, 460, 520, 600];
+  const observed = [];
+  let advanced = 0;
+  for (const target of checkpoints) {
+    while (advanced < target) {
+      if (isExtinct(state)) break;
+      advanceGeneration(state);
+      advanced++;
+    }
+    // The exact set of parent ids referenced but not directly resolvable.
+    const resolvable = new Set(state.retainedGenealogy.map((r) => r.childId));
+    for (const ind of state.currentIndividuals) resolvable.add(ind.id);
+    const required = new Set();
+    const consider = (parentIds) => {
+      if (!parentIds) return;
+      for (const p of parentIds) if (!resolvable.has(p)) required.add(p);
+    };
+    for (const r of state.retainedGenealogy) consider(r.parentIds);
+    for (const ind of state.currentIndividuals) consider(ind.parentIds);
+
+    const stored = state.prunedAncestorBoundaries.map((b) => b.originalIndividualId).sort((a, b) => a - b);
+    const needed = [...required].sort((a, b) => a - b);
+    assert.deepEqual(
+      stored,
+      needed,
+      `generation ${state.generation}: stored ${stored.length} boundary records but exactly ${needed.length} are required`
+    );
+    observed.push({ generation: state.generation, count: stored.length });
+  }
+  console.log(`\n  boundary-record counts: ${observed.map((o) => `gen ${o.generation}=${o.count}`).join(", ")}`);
+
+  // And the count must not grow without bound as the window slides.
+  const last = observed[observed.length - 1].count;
+  const first = observed[0].count;
+  assert.ok(
+    last < first * 10,
+    `boundary records grew from ${first} to ${last}; retention is not bounded`
+  );
+});
+
+test("§15 — canonical state size stabilizes once the window is full", () => {
+  const state = createInitialState(SEED);
+  runGenerations(state, 400, C);
+  const sizeAt400 = serializeCanonicalBiology(state).length;
+  runGenerations(state, 200, C);
+  const sizeAt600 = serializeCanonicalBiology(state).length;
+  // Population fluctuates, so allow generous headroom; unbounded boundary
+  // accumulation previously inflated this by megabytes.
+  assert.ok(
+    sizeAt600 < sizeAt400 * 1.5,
+    `canonical state grew from ${sizeAt400} to ${sizeAt600} bytes between generations 400 and 600`
+  );
+});
+
 test("§20.11 — observer actions do not alter boundary creation or pruning bytes", () => {
   const plain = buildDeep(SEED);
 

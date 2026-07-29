@@ -48,13 +48,21 @@ export function makeIndividual(f) {
 
 /**
  * Create an empty canonical biological state shell (contract §5.2).
+ *
+ * `configVersion` records the configuration that actually produced the state,
+ * so canonical bytes carry true provenance. Callers running a non-default
+ * configuration must pass it here; defaulting silently to the current config
+ * would make a legacy-config state falsely claim it was built under the
+ * current one.
+ *
  * @param {Rng} simRng
+ * @param {Object} [config]
  * @returns {Object}
  */
-export function makeEmptyState(simRng) {
+export function makeEmptyState(simRng, config = currentModelConfig) {
   return {
     schemaVersion: SCHEMA_VERSION,
-    configVersion: currentModelConfig.version,
+    configVersion: config.version,
     generation: 0,
     nextIndividualId: 1,
     nextBirthEventId: 1,
@@ -95,7 +103,7 @@ export function makeEmptyState(simRng) {
  */
 export function createInitialState(trajectorySeed, config = currentModelConfig) {
   const rng = createSimRng(trajectorySeed);
-  const state = makeEmptyState(rng);
+  const state = makeEmptyState(rng, config);
   const bands = [
     { alloc: config.canopyHeavy, count: 40 },
     { alloc: config.forestFloorHeavy, count: 40 },

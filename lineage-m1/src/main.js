@@ -121,9 +121,17 @@ class ProbeApp {
     this.renderPanels();
   }
 
-  setManualTestMode(mode) {
+  async setManualTestMode(mode) {
     this.meter.markInput();
     this.manualTestMode = mode;
+    if (mode === "legibility") {
+      // §22 requires this mode to show the defining fixture; load it so the
+      // mode is self-contained rather than depending on operator sequencing.
+      this.running = false;
+      if (!this.fixtureEnvelope || this.state.currentIndividuals.length === 0) {
+        await this.loadDefiningFixture();
+      }
+    }
     if (mode === "render-stress") {
       // Exactly 360 simultaneously visible glyphs (§22). Rendering benchmark
       // only: it does not alter the biological acceptance model, so it runs on
@@ -186,35 +194,73 @@ class ProbeApp {
     ctx.fillText("render-stress mode — exactly 360 procedural glyphs (rendering benchmark only)", 14, 10);
   }
 
-  /** Legibility mode: ten randomized high-vs-low webbing pairs, uiRng seed 32001. */
+  /**
+   * Legibility mode (§22): the defining fixture with all three zones visible
+   * AND the randomized ten-pair high-versus-low webbing identification check,
+   * present simultaneously in one deterministic mode.
+   *
+   * The world occupies the upper region so zone regions and their animal
+   * occupancy stay assessable; the identification strip sits below it. Pair
+   * order comes from uiRng seed 32001 and never touches biological state.
+   */
   renderLegibility() {
     const ctx = this.probe.ctx;
     const W = this.probe.cssWidth;
     const H = this.probe.cssHeight;
-    ctx.clearRect(0, 0, W, H);
+    const worldH = Math.round(H * 0.56);
+
+    // 1. the defining fixture in all three zones, with per-zone occupancy counts
+    this.probe.render(this.state, {
+      observer: this.observer,
+      selectedId: this.selectedId,
+      regionHeight: worldH,
+    });
+
+    // 2. the ten-pair identification strip
     ctx.fillStyle = "#181d22";
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(0, worldH, W, H - worldH);
+    ctx.fillStyle = "#2b3540";
+    ctx.fillRect(0, worldH, W, 2);
+
     const env = this.fixtureEnvelope;
     const base = env ? env.baselineBodyGenome : currentModelConfig.ancestorBodyGenome;
     const high = base.slice(); high[TRAIT_INDEX.toe_webbing] = env ? env.highWebbing : 0.75;
     const low = base.slice(); low[TRAIT_INDEX.toe_webbing] = env ? env.lowWebbing : 0.15;
     const pairs = buildLegibilityPairs([1], [2]); // deterministic order, seed 32001
+
     ctx.fillStyle = "#f0f2f4";
     ctx.font = "600 13px system-ui, sans-serif";
-    ctx.fillText(`legibility mode — which animal has wider feet? (uiRng seed ${MANUAL_TEST_UI_SEED})`, 14, 10);
-    const rowH = (H - 50) / 10;
+    ctx.textBaseline = "top";
+    ctx.fillText(
+      `legibility check — in each numbered pair, which animal has wider feet? (uiRng seed ${MANUAL_TEST_UI_SEED})`,
+      14,
+      worldH + 8
+    );
+
+    // Two rows of five pairs so glyphs stay large in the reduced strip.
+    const stripTop = worldH + 30;
+    const stripH = H - stripTop - 6;
+    const rows = 2;
+    const cols = 5;
+    const cellW = W / cols;
+    const cellH = stripH / rows;
+    const glyphScale = Math.min(34, cellH * 0.42);
     for (let i = 0; i < pairs.length; i++) {
-      const y = 45 + i * rowH + rowH / 2;
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const cx = col * cellW;
+      const cy = stripTop + row * cellH;
       const leftGenome = pairs[i].highIsLeft ? high : low;
       const rightGenome = pairs[i].highIsLeft ? low : high;
-      // Drawn as large as the row allows: the human tester must score >= 8/10
-      // on this comparison without any raw trait values (§22 pass law).
-      const glyphScale = Math.min(46, rowH * 0.86);
-      drawAnimal(ctx, W * 0.30, y, glyphScale, leftGenome, {});
-      drawAnimal(ctx, W * 0.70, y, glyphScale, rightGenome, {});
+      drawAnimal(ctx, cx + cellW * 0.32, cy + cellH * 0.55, glyphScale, leftGenome, {});
+      drawAnimal(ctx, cx + cellW * 0.74, cy + cellH * 0.55, glyphScale, rightGenome, {});
       ctx.fillStyle = "#9aa4ad";
       ctx.font = "12px system-ui, sans-serif";
-      ctx.fillText(`${i + 1}`, 16, y - 6);
+      ctx.fillText(`${i + 1}`, cx + 8, cy + 4);
+      if (col > 0) {
+        ctx.fillStyle = "#2b3540";
+        ctx.fillRect(cx, cy + 4, 1, cellH - 8);
+      }
     }
   }
 

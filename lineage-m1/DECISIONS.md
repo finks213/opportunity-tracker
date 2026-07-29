@@ -228,6 +228,174 @@ counter was moved to the bottom-right. Cosmetic only; no biological effect.
 
 ---
 
+# Post-audit repairs (AFE-Δ break-report, pass 1)
+
+An external implementation audit against v3.3 returned `BREAKS-FOUND` with six
+confirmed implementation/evidence defects plus one process finding. **Every
+confirmed defect was independently reproduced here before being repaired** — the
+audit was not taken on trust. The reproductions matched the auditor's numbers
+(for example, obsolete boundary records at generation 400: auditor 2,386, local
+reproduction 2,386; unmatched-adult inflation: auditor 0.509 actual, local
+reproduction 0.509).
+
+No architecture was reopened. No acceptance threshold was changed.
+
+## D-018 — REPAIR: genealogy boundary records were unbounded (CRITICAL)
+
+**Defect.** `pruneGenealogy` seeded each prune from the existing boundary array
+and only ever appended, so obsolete `PrunedAncestorBoundary` records accumulated
+forever. Reproduced at seed 71:
+
+| Generation | Stored boundaries | Actually required | Obsolete |
+|---|---|---|---|
+| 360 | 74 | 74 | 0 |
+| 400 | 2,386 | 108 | 2,278 |
+| 460 | 5,796 | 118 | 5,678 |
+| 520 | 9,770 | 117 | 9,653 |
+| 600 | 15,356 | 137 | 15,219 |
+
+This violated §15's "minimum explicit boundary records required to resolve
+retained references" and its prohibition on unlimited append-only history. The
+existing test checked that old *complete* records disappear but never that
+obsolete *boundary* records disappear, so the implementation passed its tests
+while breaking the retention law. That was a genuine gap in my test, not a
+contract ambiguity.
+
+**Repair.** The boundary array is now recomputed from scratch on every prune as
+exactly the set of parent ids referenced by a retained record or living
+individual but not directly resolvable. Records are emitted in ascending
+original-id order with `boundaryId` assigned from that sorted position, so
+pruning stays deterministic and idempotent.
+
+**Post-repair counts** (same seed): generation 400 = 108, 460 = 118, 520 = 117,
+600 = 137 — equal to the required set at every checkpoint.
+
+**New tests.** `genealogy-retention-boundary.test.js` now asserts that stored
+boundary original-ids equal the exact required set at generations 400, 460, 520
+and 600, and that canonical state size does not inflate between generations 400
+and 600.
+
+## D-019 — REPAIR: adjacency traversal measured the wrong event (HIGH)
+
+**Defect.** `CHARACTERIZATION_PLAN.md` declared traversal as a lineage
+*descended only from one edge band* reaching the opposite edge zone. The tool
+instead asked whether **any** living animal held `>= 0.02` in both edge zones,
+ignoring ancestry entirely. That is satisfied at generation 1 by an ordinary
+forest-floor descendant using both of its legal neighbours — the audit's
+falsifier showed exactly such an animal (allocation `[0.02095, 0.94902,
+0.03002]`, both parents from the forest-floor founder band). The reported
+figures characterized the wrong event.
+
+**Repair.** Founder-band ancestry is now tracked explicitly as a bitmask
+(1=canopy, 2=forest_floor, 4=shoreline); a child inherits the union of its
+parents' bands. Traversal is reported separately as:
+
+- canopy-**only** ancestry reaching `shoreline >= parentalUseEpsilon`;
+- shoreline-**only** ancestry reaching `canopy >= parentalUseEpsilon`.
+
+The ancestry map is pruned to the living population each generation so it stays
+bounded.
+
+## D-020 — REPAIR: unmatched eligible adults counted before survival (HIGH)
+
+**Defect.** The tool computed `eligibleBefore − 2 × matingPairs` from the
+**pre-survival** population, counting animals that died that generation. Under
+the frozen lifecycle only aged *survivors* are mate-eligible. Reported 120.378
+unmatched adults per generation against an actual 0.509 — an inflation of about
+119.9, which reverses the interpretation from "almost every surviving eligible
+adult mates" to "roughly 120 go unmatched every generation".
+
+**Repair.** Counted after survival as `eligible aged survivors − unique parents
+used in that generation's mating events`. Local reproduction now yields 0.509
+per generation, matching the auditor's independent figure.
+
+## D-021 — REPAIR: per-zone carrier survival was missing (HIGH)
+
+**Defect.** §21.3 requires items 6 and 7 — surviving carriers at ages 1, 2 and
+3+, and final carrier prevalence — reported **separately by birth dominant-zone
+bin**. Only items 1–5 were binned; carriers were reported as whole-world
+aggregates, which removed the exact mutation-supply-versus-carrier-survival
+comparison the section exists to protect.
+
+**Repair.** `perBin` now carries `survivingCarriersAge1/2/3plus`, `finalLiving`,
+`finalCarriers`, `finalCarrierPrevalence`, plus a median per-seed prevalence and
+the number of seeds with any living animal in that bin. Time allocation is
+immutable at birth, so a living individual's `argmax(timeAllocation)` **is** its
+birth dominant-zone bin. `CHARACTERIZATION.md` renders these beside the supply
+table.
+
+This repair sharpens the shoreline finding rather than softening it: the
+shoreline bin generates ample mutation supply yet holds no living
+shoreline-dominant animals at generation 180 in most seeds.
+
+## D-022 — REPAIR: canonical state recorded the wrong config version (HIGH)
+
+**Defect.** `makeEmptyState()` hardcoded `currentModelConfig.version`, and
+`createInitialState(seed, config)` never overrode it. A world built under
+`legacyModelConfigV1` therefore serialized as `lineage-m1-config-2` while
+numerically running config-1, so the top-level §21.7 report label and the
+canonical states beneath it contradicted each other. This broke state
+provenance, canonical replay interpretation, and config-specific auditability.
+
+**Repair.** `makeEmptyState(simRng, config)` records `config.version`;
+`createInitialState` and `hydrateDefiningFixtureV1` both pass their configuration
+through. New test in `defining-fixture-snapshot.test.js` proves config-1 states
+serialize as config-1, config-2 as config-2, and that two otherwise-identical
+states differing only in config version produce different canonical bytes.
+
+## D-023 — REPAIR: legibility mode omitted the fixture and zones (MEDIUM-HIGH)
+
+**Defect.** §22 requires one deterministic legibility mode containing the
+defining fixture, all three zones visible, visible occupancy, **and** the
+randomized ten-pair check. `renderLegibility()` cleared the canvas and drew only
+the ten pairs, so the fixture and zone regions were absent while the
+identification test was active. They existed as two separate conditions rather
+than the single prescribed mode.
+
+**Repair.** Legibility mode now renders the defining fixture across all three
+zone regions with per-zone occupancy counts in the upper 56% of the canvas, and
+the ten randomized pairs in a two-row strip below, simultaneously. Entering the
+mode auto-loads the fixture so the mode is self-contained. `CanvasProbe.render`
+gained an optional `regionHeight` so the world can occupy a sub-region.
+
+No physical-device claim changes: the iPad gate remains
+`PENDING_HUMAN_DEVICE_TEST`.
+
+## D-024 — PROCESS: pre-code planning order (sponsor-held)
+
+The audit confirms the §24 Stage A ordering violation already disclosed in
+D-000: core simulation modules were written before `PLAN.md`,
+`DECISIONS.md` and `CHARACTERIZATION_PLAN.md`. The disclosure was honest but
+does not undo the violation, and it **cannot be repaired retrospectively**.
+
+This is a principal decision, not an implementer decision. It requires one
+explicit recorded outcome:
+
+```
+PROCESS WAIVER ACCEPTED          — or —          BUILD REJECTED FOR PROCESS NONCOMPLIANCE
+```
+
+Until the principal records one, this repository does **not** claim full
+compliance with the complete v3.3 build procedure, and the overall status is
+held at `M1_BLOCKED` for that reason alone. The substantive protections were
+preserved: no acceptance threshold was chosen or weakened after seeing a result,
+and `CHARACTERIZATION_PLAN.md` was frozen before the declared batch ran.
+
+## Findings deliberately NOT changed
+
+The audit retracted four of its own initial findings on self-verification. Two
+are worth restating because they could otherwise look like unaddressed defects:
+
+- **Shoreline dominant-bin collapse is not a v3.3 gate failure.** The frozen
+  Milestone 1 population gate is load-based, and shoreline load passes. It
+  remains reported as named uncertainty and a Milestone 2 risk (see below), not
+  silently removed.
+- **The capacity change was not a silent tune-away.** The failing original
+  value, the new value, the rationale, and both full batches are all retained
+  and reported (D-009).
+
+---
+
 ## Open uncertainty (not hidden)
 
 - The performance matrix, zone weights, `selectionSlope`, `fitnessZero`, and

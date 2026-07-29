@@ -3,12 +3,31 @@
 ## Status
 
 ```
-M1_AUTOMATED_GATES_PASS — IPAD TEST PENDING
+M1_BLOCKED — AWAITING PRINCIPAL DECISION ON THE PROCESS WAIVER
 ```
 
-Every automated gate in the contract passes. The physical iPad gate has **not**
-been performed and is **not** self-certified; it remains
-`PENDING_HUMAN_DEVICE_TEST`. `M1_ACCEPTED` is therefore **not** claimed.
+**This report is revision 2, issued after an external implementation audit
+(AFE-Δ break-report, pass 1) returned `BREAKS-FOUND` against revision 1.**
+
+Component status:
+
+| Component | Status |
+|---|---|
+| automated implementation gates | **PASS** — post-repair, re-run from clean |
+| the six confirmed implementation/evidence defects | **REPAIRED** — each independently reproduced here first |
+| physical iPad gate | `PENDING_HUMAN_DEVICE_TEST` — not self-certified |
+| §24 Stage A pre-code planning order | **VIOLATED** — unrepairable; principal decision required |
+
+The overall status is held at `M1_BLOCKED` for one reason: the process-order
+violation (D-000, D-024) cannot be repaired retrospectively and cannot be waived
+by the implementer. It requires one explicit recorded principal decision —
+`PROCESS WAIVER ACCEPTED` or `BUILD REJECTED FOR PROCESS NONCOMPLIANCE`. Until
+that exists, this repository does **not** claim full compliance with the
+complete v3.3 build procedure.
+
+Revision 1 reported `M1_AUTOMATED_GATES_PASS — IPAD TEST PENDING`. That verdict
+did not survive audit and has been withdrawn. `M1_ACCEPTED` is not claimed and
+would additionally require the physical iPad gate to pass.
 
 Two statements the contract requires verbatim:
 
@@ -35,7 +54,7 @@ uncertainties appear in the same table as the passes.
 
 | # | Gate | Contract § | Result |
 |---|---|---|---|
-| 1 | Full test suite (116 tests) | §20 | **PASS** — 116/116, exit 0 |
+| 1 | Full test suite (119 tests) | §20 | **PASS** — 119/119, exit 0 (3 new regression tests added by the repairs) |
 | 2 | Fixture raw SHA-256 integrity | §19 A | **PASS** |
 | 3 | Fixture-envelope canonical round trip | §19 B | **PASS** |
 | 4 | Deterministic hydration | §19 C | **PASS** |
@@ -53,16 +72,103 @@ uncertainties appear in the same table as the passes.
 | 16 | Spatial integrity and adjacency | §20.9 | **PASS** — zero fallbacks |
 | 17 | Lifecycle and mating contract | §20.10 | **PASS** |
 | 18 | Genealogy integrity + forced 360-boundary | §20.11 | **PASS** — crossed at generation 400 |
+| 18b | Genealogy boundary records bounded | §15 | **PASS** — post-repair; stored set equals required set at generations 400/460/520/600 |
 | 19 | Exact survival composition | §20.12 | **PASS** — to 1e-12 |
 | 20 | RNG integrity | §20.13 | **PASS** |
 | 21 | Population guardrails, 500 seeds | §21.4 | **PASS** — all four |
 | 22 | Mutation-supply minimal functionality | §21.3 | **PASS** |
 | 23 | Desktop Canvas measurement | §22 | **PASS** (headless Chromium) |
-| 24 | **Physical iPad acceptance** | §22 | **PENDING_HUMAN_DEVICE_TEST** |
+| 24 | Canonical config provenance | §18 / §21.7 | **PASS** — post-repair |
+| 25 | Legibility mode contains fixture + zones + pairs | §22 | **PASS** — post-repair |
+| 26 | **Physical iPad acceptance** | §22 | **PENDING_HUMAN_DEVICE_TEST** |
+| 27 | **§24 Stage A pre-code planning order** | §24 | **VIOLATED — principal decision required** |
 
 **Named uncertainty (not a gate failure):** shoreline *dominant-bin* occupancy is
 zero in 438 of 500 seeds at generation 180, even though shoreline *load* passes
 its guardrail comfortably. Detailed in §6 below and in `CHARACTERIZATION.md`.
+
+---
+
+## 1b. Response to the pass-1 implementation audit
+
+The audit returned six confirmed implementation/evidence defects and one process
+finding. **Every confirmed defect was independently reproduced here before being
+repaired.** The reproductions matched the auditor's figures, which is itself
+evidence the findings were real rather than accepted on trust.
+
+| # | Audit finding | § | Independently reproduced | Repair | Status |
+|---|---|---|---|---|---|
+| 1 | Genealogy boundary records grow without bound | §15 | yes — 2,386 stored vs 108 required at gen 400 (auditor: 2,386) | D-018 | **REPAIRED** |
+| 2 | Adjacency traversal measures the wrong event | §21.6 | yes — forest-floor descendants counted as traversal at gen 1 | D-019 | **REPAIRED** |
+| 3 | Unmatched eligible adults counted before survival | §21.6 | yes — 120.378 reported vs 0.509 actual (auditor: 0.509) | D-020 | **REPAIRED** |
+| 4 | Per-zone carrier survival absent | §21.3 | yes — `perBin` held only items 1–5 | D-021 | **REPAIRED** |
+| 5 | Legacy-config states carry the wrong config version | §18 / §21.7 | yes — config-1 world serialized as `lineage-m1-config-2` | D-022 | **REPAIRED** |
+| 6 | Legibility mode omits the fixture and zones | §22 | yes — `renderLegibility()` drew only the pairs | D-023 | **REPAIRED** |
+| 7 | Pre-code planning order violated | §24 | already self-disclosed in D-000 | — | **UNREPAIRABLE — principal decision required** |
+
+### Repair evidence
+
+**Genealogy boundedness.** Stored boundary records, seed 71:
+
+| Generation | Before repair | After repair | Exactly required |
+|---|---|---|---|
+| 400 | 2,386 | **108** | 108 |
+| 460 | 5,796 | **118** | 118 |
+| 520 | 9,770 | **117** | 117 |
+| 600 | 15,356 | **137** | 137 |
+
+**Unmatched eligible adults.** 120.378 → **0.516** per generation over the
+re-run 500-seed batch, matching the auditor's independently computed 0.509 on
+their ten-seed diagnostic.
+
+**Adjacency traversal**, now measured by explicit founder-band ancestry:
+
+| Traversal | Seeds reaching it | Earliest | Median first generation |
+|---|---|---|---|
+| canopy-**only** lineage → shoreline | 495 of 500 | 2 | 3 |
+| shoreline-**only** lineage → canopy | 499 of 500 | 2 | 3 |
+
+**Per-zone carrier survival**, now reported per birth dominant-zone bin. This
+repair *sharpens* rather than softens the central result — it exposes exactly
+the mutation-supply-versus-carrier-survival comparison §21.3 exists to protect:
+
+| Birth zone bin | Births | Positive webbing events | Living at gen 180 | Carriers | Carrier prevalence |
+|---|---|---|---|---|---|
+| canopy | 6,070,525 | 60,700 | 74,438 | 5,386 | **0.0724** |
+| forest_floor | 3,010,385 | 30,077 | 52,708 | 5,275 | **0.1001** |
+| shoreline | 1,974,834 | 19,750 | 919 | 490 | **0.5332** |
+
+Mutation supply per birth is essentially identical across zones (~0.0100
+positive webbing events per birth in every bin), yet where shoreline-dominant
+animals persist they are **53%** webbing carriers against **7%** in the canopy.
+Variation is not filtered by usefulness; the consequences differ by context.
+
+**Config provenance.** A config-1 world now serializes with
+`configVersion: "lineage-m1-config-1"` and a config-2 world with
+`"lineage-m1-config-2"`; the top-level report label and the canonical states
+beneath it agree.
+
+**Legibility mode.** One deterministic mode now shows the defining fixture, all
+three zone regions with per-zone occupancy counts, and the ten randomized
+webbing pairs simultaneously; entering the mode auto-loads the fixture.
+
+### Consistency check
+
+The repairs changed measurement and retention code, not biological trajectories.
+As expected, the re-run guardrails are numerically identical to revision 1
+(median population 256; zone loads 117.22 / 108.18 / 30.53; concentration
+0.4686), and the fixture gate reproduces exactly (canopy 200/200, shoreline
+197/200). That the biology did not move is the correct outcome and is itself a
+check that the repairs were confined to what they claimed.
+
+### Findings the audit retracted on self-verification
+
+Recorded so they are not mistaken for unaddressed defects: the missing lockfile
+(none exists — there are no dependencies); the governing contract not being
+inside the bundle (the handoff did not require duplicating it); shoreline
+dominant-bin collapse being a v3.3 gate failure (the frozen gate is load-based
+and passes); and the capacity change being a silent tune-away (the failing
+original, the new value, the rationale, and both full batches are all retained).
 
 ---
 
@@ -265,16 +371,18 @@ substitute for the iPad gate.**
 
 | Measure | Normal mode | Render-stress (exactly 360 glyphs) |
 |---|---|---|
-| frames sampled | 156 | 1496 |
+| frames sampled | 158 | 1527 |
 | median frame time | 16.70 ms | 16.70 ms |
-| 95th-percentile frame time | 17.90 ms | 18.00 ms |
-| maximum after warm-up | 41.10 ms | 69.50 ms |
-| p95 input-to-next-paint | 11.10 ms | 14.50 ms (21 actions) |
+| 95th-percentile frame time | 17.60 ms | 19.20 ms |
+| maximum after warm-up | 34.60 ms | 43.60 ms |
+| p95 input-to-next-paint | 11.60 ms | 10.20 ms (20 actions) |
 | page errors | 0 | 0 |
 
-Memory across a 180-generation run: 3,984,242 → 10,409,802 bytes
-(**+6.43 MB**), with population 234 at generation 181. Raw record:
-`audit/desktop-measurements.json`.
+Memory across a 180-generation run: 4,204,963 → 11,898,432 bytes
+(**+7.69 MB**). Raw record: `audit/desktop-measurements.json`. Note this is
+below the 360-generation retention window, so it does not exercise the repaired
+boundary pruning; the bounded-growth evidence is the generation-400-to-600
+canonical-size test in `genealogy-retention-boundary.test.js`.
 
 ---
 
@@ -293,6 +401,12 @@ reset, and mode-switch controls are instrumented for input-to-next-paint.
 No measurement is supplied. No threshold is claimed as met. Per §22 the gate
 stays `PENDING_HUMAN_DEVICE_TEST` until a human performs the test on an
 A14-class or newer iPad in current Safari.
+
+Post-repair, the legibility mode now satisfies §22's composition requirement:
+the defining fixture, all three zone regions with occupancy counts, and the ten
+randomized pairs are present in one deterministic mode. Revision 1 split these
+across two conditions, which meant the prescribed acceptance procedure could not
+actually be run; that is repaired.
 
 ---
 
@@ -351,6 +465,18 @@ file required by §23 exists at its required path, asserted by
 8. **`retainedGenealogy` keeps birth records for living individuals** past the
    window; under the frozen lifecycle no living individual approaches the
    360-generation boundary, so this never grows without bound.
+9. **Boundary `boundaryId` values are positional, not stable across prunes.**
+   The array is rebuilt each prune as the exact required set in ascending
+   original-id order, so a surviving boundary may be renumbered as older ones
+   drop out. `originalIndividualId` is the stable identity;
+   `lastRetainedGeneration` tracks the current window edge. This is deterministic
+   and idempotent, which is what §15 and §20.11 require.
+10. **Revision 1 of this report shipped six defects that its own test suite did
+   not catch.** The most serious — unbounded genealogy boundary growth — passed
+   because the retention test checked that old *complete* records disappear but
+   never that obsolete *boundary* records do. That was a gap in my tests, not a
+   contract ambiguity, and it is the clearest evidence in this bundle that a
+   passing suite is not proof of contract compliance.
 
 ---
 
@@ -380,7 +506,7 @@ kernel.
 - Observer modules referencing the simulation RNG: **none**.
 - Bare-specifier imports (i.e. runtime dependencies): **none**; `dependencies` is
   empty.
-- Full test suite re-run from clean: **116/116 pass**, raw stdout in
+- Full test suite re-run from clean: **119/119 pass**, raw stdout in
   `audit/test-results.txt`.
 - Fixture and characterization re-run: outputs in `audit/`.
 - Observer strategies compared after every generation: **byte-identical**.
@@ -400,5 +526,10 @@ kernel.
 | genealogy and mating cores remain coherent | met |
 | neutral traits are exactly neutral | met |
 | the difference is visible in the diagnostic probe | met on desktop; **iPad legibility pending human test** |
-| every automated result reproducible from a clean run | met |
-| remaining uncertainty named rather than hidden | met — §6, §11 |
+| every automated result reproducible from a clean run | met — 119/119 from clean; fixture and both batches re-run |
+| remaining uncertainty named rather than hidden | met — §6, §11, and the full audit response in §1b |
+
+**Completion is nonetheless NOT declared.** §24 Stage A ordering was violated
+and cannot be repaired retrospectively (D-000, D-024). That is a principal
+decision, not an implementer decision, and the status stays `M1_BLOCKED` until it
+is recorded. The physical iPad gate also remains `PENDING_HUMAN_DEVICE_TEST`.

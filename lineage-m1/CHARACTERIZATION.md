@@ -60,9 +60,23 @@ Mutation generation is evaluated as **events per birth**, not final carriers.
 - at least one among shoreline-dominant births: **PASS**
 - opportunity identity (`bodyMutationOpportunityCount === allocationMutationOpportunityCount === nonFounderBirthCount`) holds for every seed: **PASS**
 
-### Surviving webbing carriers
+### Surviving webbing carriers, by birth dominant-zone bin
 
 Carrier definition (declared): `bodyGenome[toe_webbing] >= 0.35`, measured at generation 180.
+Time allocation is immutable at birth, so a living individual's
+`argmax(timeAllocation)` **is** its birth dominant-zone bin.
+
+Reported per bin so that mutation supply (above) can be compared directly
+against post-selection carrier survival in the same zone — which is the
+comparison §21.3 exists to protect.
+
+| Birth zone bin | Carriers age 1 | age 2 | age 3+ | Final living | Final carriers | Final prevalence | Median per-seed prevalence | Seeds with any living in bin |
+|---|---|---|---|---|---|---|---|---|
+| canopy | 1364 | 696 | 631 | 74438 | 5386 | 0.0724 | 0.0360 | 498 of 500 |
+| forest_floor | 1356 | 674 | 632 | 52708 | 5275 | 0.1001 | 0.0394 | 500 of 500 |
+| shoreline | 125 | 81 | 59 | 919 | 490 | 0.5332 | 0.0172 | 62 of 500 |
+
+World-wide totals for cross-checking:
 
 | Measure | Value |
 |---|---|
@@ -123,7 +137,7 @@ correlations (§21.5).
 | mean births per generation | 122.84 |
 | mean deaths per generation | 122.09 |
 | mean mating pairs per generation | 61.42 |
-| mean unmatched eligible adults per generation | 119.18 |
+| mean unmatched eligible adults per generation | 0.52 |
 | mean mating overlap | 0.4584 |
 | mating overlap, 5th percentile (median across seeds) | 0.3186 |
 | mating overlap, 95th percentile (median across seeds) | 0.8835 |
@@ -132,9 +146,23 @@ correlations (§21.5).
 | median population in current zone bin — shoreline | 0.0 |
 | allocation-mutation events per non-founder birth | 0.0799 |
 | allocation transfers into a below-threshold zone | 87299 |
-| seeds reaching adjacency traversal | 500 of 500 |
-| median first traversal generation | 1.0 |
 | zero-allocation fallbacks (must be 0) | 0 |
+
+### Adjacency traversal, by founder-band ancestry
+
+Measured exactly as declared: a lineage descended **only** from one edge
+band must reach `>= parentalUseEpsilon` share in the **opposite** edge zone,
+which is only reachable across the forest-floor bridge. Founder-band ancestry
+is tracked explicitly per individual as a union of its parents' bands.
+
+"Holds positive share in both edge zones" is **not** used as a substitute: an
+ordinary forest-floor descendant satisfies that at generation 1 simply by using
+both of its legal neighbours, which is not traversal.
+
+| Traversal | Seeds reaching it | Earliest generation | Median first generation |
+|---|---|---|---|
+| canopy-only lineage → shoreline | 495 of 500 | 2 | 3.0 |
+| shoreline-only lineage → canopy | 499 of 500 | 2 | 3.0 |
 
 Age distribution at the final generation is preserved per seed in the raw JSON
 under `seeds[].ageDistribution`.
