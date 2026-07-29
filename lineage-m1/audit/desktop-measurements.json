@@ -1,0 +1,44 @@
+{
+  "note": "Desktop measurement only (contract §22 'Desktop measurement'). This is headless Chromium on Linux and is NOT a substitute for the physical iPad Safari gate, which remains PENDING_HUMAN_DEVICE_TEST.",
+  "environment": {
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "devicePixelRatio": 1,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.0.0 Safari/537.36"
+  },
+  "browser": "headless Chromium (Playwright 1.56.1)",
+  "normalMode": {
+    "status": "generation 181 · 234 living · canopy 118 · forest floor 116 · shoreline 0",
+    "populationAfter180Generations": 234,
+    "frameCount": 156,
+    "medianFrameTimeMs": 16.699999999720603,
+    "p95FrameTimeMs": 17.899999999906868,
+    "maxFrameTimeMs": 41.09999999962747,
+    "inputActionCount": 1,
+    "p95InputToNextPaintMs": 11.100000000093132,
+    "memory": {
+      "usedJSHeapBytes": 10409802,
+      "available": true
+    }
+  },
+  "renderStressMode360Glyphs": {
+    "frameCount": 1496,
+    "medianFrameTimeMs": 16.699999999720603,
+    "p95FrameTimeMs": 18,
+    "maxFrameTimeMs": 69.5,
+    "inputActionCount": 21,
+    "p95InputToNextPaintMs": 14.5,
+    "memory": {
+      "usedJSHeapBytes": 11219071,
+      "available": true
+    }
+  },
+  "memoryGrowthAcross180Generations": {
+    "beforeBytes": 3984242,
+    "afterBytes": 10409802,
+    "deltaBytes": 6425560
+  },
+  "pageErrors": []
+}

@@ -1,8 +1,25 @@
-import { createInitialState } from "./src/core/individual.js";
-import { runGenerations, isExtinct } from "./src/core/simulation.js";
-import { computeZoneLoads } from "./src/core/survival.js";
-import { currentModelConfig } from "./src/config/modelConfig.js";
-import { ordinaryMedian } from "./src/core/math.js";
+// @ts-check
+/**
+ * Pre-declaration calibration sweep, retained as evidence for DECISIONS.md D-009
+ * and D-010.
+ *
+ * This is the script that selected `zoneCapacity`. It was run BEFORE
+ * CHARACTERIZATION_PLAN.md was frozen and is NOT the declared characterization
+ * batch: it uses seeds 1..40 (and a later 1..12 pass) purely to find a capacity
+ * that can satisfy the §21.4 median-population band. It informed exactly one
+ * constant and nothing else.
+ *
+ * It is kept in the audit bundle rather than deleted because §27 forbids
+ * excluding superseded tuning material just because it looks unhelpful.
+ *
+ * Usage: node tools/calibrationSweep.mjs
+ */
+
+import { createInitialState } from "../src/core/individual.js";
+import { runGenerations, isExtinct } from "../src/core/simulation.js";
+import { computeZoneLoads } from "../src/core/survival.js";
+import { currentModelConfig } from "../src/config/modelConfig.js";
+import { ordinaryMedian } from "../src/core/math.js";
 function trial(overrides, seeds){
   const cfg = {...currentModelConfig, ...overrides};
   const pops=[], concs=[]; let extinct=0; const zoneMed=[[],[],[]];

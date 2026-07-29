@@ -1,0 +1,196 @@
+# LINEAGE Milestone 1 — Characterization
+
+Generated from `audit/characterization-results.json` by
+`tools/writeCharacterization.mjs`. Every number below is read from that raw
+file; none is retyped by hand.
+
+Characterization **describes this first implementation**. It does not define
+biological truth, is not an ecological claim, and is not frozen as a future
+regression target (contract §21).
+
+- configuration: `lineage-m1-config-2`
+- config hash: `edb81695973b81ab8f87f7ef9dde9d8c5b3d4c7dfbeb45f385547edd86ee86de`
+- declared seeds: 1..500
+- declared duration: 180 generations per seed unless extinct
+
+## §21.4 Population guardrails
+
+| Guardrail | Required | Measured | Result |
+|---|---|---|---|
+| whole-world extinction by generation 180 | < 5% | 0.00% | PASS |
+| median total living population | 90..360 | 256.0 | PASS |
+| median effective load — canopy | >= 15 | 117.22 | PASS |
+| median effective load — forest_floor | >= 15 | 108.18 | PASS |
+| median effective load — shoreline | >= 15 | 30.53 | PASS |
+| median concentration | <= 0.80 | 0.4686 | PASS |
+
+**All §21.4 guardrails: PASS**
+
+### Concentration statistic
+
+Defined exactly as §21.4 requires, for every non-extinct seed at generation 180:
+
+```
+totalLoad_s     = sum_z( zoneLoad_s[z] )
+concentration_s = max_z( zoneLoad_s[z] / totalLoad_s )
+```
+
+Included seeds: **500** (extinct seeds excluded only because
+`totalLoad_s = 0`; they remain fully counted by the extinction guardrail).
+Ordinary median of those values: **0.4686**.
+
+Every seed-level concentration value is preserved in
+`audit/characterization-results.json` under `concentrationValues` and per-seed
+under `seeds[].concentration`. Per-zone medians, a median-population seed, and
+independently combined median zone shares are **not** substituted.
+
+## §21.3 Mutation supply by birth dominant-zone bin
+
+Mutation generation is evaluated as **events per birth**, not final carriers.
+
+| Birth zone bin | Births | Body-mutation opportunities | Body-mutation events | Events / birth | Positive webbing events | Crossing <0.20 → >=0.35 |
+|---|---|---|---|---|---|---|
+| canopy | 6070525 | 6070525 | 1212149 | 0.1997 | 60700 | 18535 |
+| forest_floor | 3010385 | 3010385 | 602533 | 0.2002 | 30077 | 9201 |
+| shoreline | 1974834 | 1974834 | 395397 | 0.2002 | 19750 | 2187 |
+
+### Declared minimal functionality
+
+- at least one positive webbing event among canopy-dominant births: **PASS**
+- at least one among shoreline-dominant births: **PASS**
+- opportunity identity (`bodyMutationOpportunityCount === allocationMutationOpportunityCount === nonFounderBirthCount`) holds for every seed: **PASS**
+
+### Surviving webbing carriers
+
+Carrier definition (declared): `bodyGenome[toe_webbing] >= 0.35`, measured at generation 180.
+
+| Measure | Value |
+|---|---|
+| carriers at age 1 (batch total) | 2845 |
+| carriers at age 2 (batch total) | 1451 |
+| carriers at age 3+ (batch total) | 1322 |
+| median final carrier prevalence | 0.0373 |
+
+Equal final carrier prevalence across zones is **not** required and is not
+expected: differential survival should make it unlikely (§21.3).
+
+## §21.5 Trait-effect characterization
+
+Exact logistic survival differences for a declared fixed delta of +0.20 applied
+to one trait at a time on genomes sampled from the batch, with each zone's
+one-hot allocation, age 1, and the batch-median zone loads. Derivative-at-the-
+midpoint approximations are not used.
+
+| Trait | Zone | n | Median Δp | 5th | 95th | Classification |
+|---|---|---|---|---|---|---|
+| toe_webbing | canopy | 1000 | -0.0548 | -0.0892 | -0.0298 | harmful |
+| toe_webbing | forest_floor | 1000 | -0.0076 | -0.0113 | -0.0048 | effectively inactive |
+| toe_webbing | shoreline | 1000 | 0.1426 | 0.0712 | 0.2158 | helpful |
+| curved_claws | canopy | 975 | 0.0244 | 0.0049 | 0.0620 | helpful |
+| curved_claws | forest_floor | 975 | 0.0023 | 0.0005 | 0.0044 | effectively inactive |
+| curved_claws | shoreline | 975 | -0.0285 | -0.0731 | -0.0060 | harmful |
+| dense_fur | canopy | 999 | 0.0050 | 0.0024 | 0.0094 | effectively inactive |
+| dense_fur | forest_floor | 999 | 0.0161 | 0.0093 | 0.0248 | helpful |
+| dense_fur | shoreline | 999 | -0.0256 | -0.0482 | -0.0110 | harmful |
+| long_hindlimbs | canopy | 966 | 0.0093 | 0.0016 | 0.0250 | effectively inactive |
+| long_hindlimbs | forest_floor | 966 | 0.0204 | 0.0038 | 0.0469 | helpful |
+| long_hindlimbs | shoreline | 966 | -0.0234 | -0.0654 | -0.0036 | harmful |
+| strong_tail | canopy | 1000 | -0.0116 | -0.0207 | -0.0060 | harmful |
+| strong_tail | forest_floor | 1000 | -0.0168 | -0.0248 | -0.0108 | harmful |
+| strong_tail | shoreline | 1000 | 0.0635 | 0.0303 | 0.1052 | helpful |
+| large_eyes | canopy | 998 | 0.0056 | 0.0021 | 0.0110 | effectively inactive |
+| large_eyes | forest_floor | 998 | 0.0214 | 0.0083 | 0.0337 | helpful |
+| large_eyes | shoreline | 998 | -0.0196 | -0.0380 | -0.0065 | harmful |
+| streamlined_body | canopy | 1000 | -0.0273 | -0.0469 | -0.0144 | harmful |
+| streamlined_body | forest_floor | 1000 | -0.0068 | -0.0102 | -0.0043 | effectively inactive |
+| streamlined_body | shoreline | 1000 | 0.0835 | 0.0403 | 0.1354 | helpful |
+
+### Neutral traits
+
+Exact causal difference must be zero **by invariant**, not inferred from noisy
+correlations (§21.5).
+
+| Neutral trait | Max absolute exact difference | Exactly zero |
+|---|---|---|
+| coat_shade | 0 | yes |
+| ear_tip_shape | 0 | yes |
+| tail_tip_marking | 0 | yes |
+
+## §21.6 Lifecycle characterization
+
+| Measure | Value |
+|---|---|
+| mean births per generation | 122.84 |
+| mean deaths per generation | 122.09 |
+| mean mating pairs per generation | 61.42 |
+| mean unmatched eligible adults per generation | 119.18 |
+| mean mating overlap | 0.4584 |
+| mating overlap, 5th percentile (median across seeds) | 0.3186 |
+| mating overlap, 95th percentile (median across seeds) | 0.8835 |
+| median population in current zone bin — canopy | 159.0 |
+| median population in current zone bin — forest_floor | 95.0 |
+| median population in current zone bin — shoreline | 0.0 |
+| allocation-mutation events per non-founder birth | 0.0799 |
+| allocation transfers into a below-threshold zone | 87299 |
+| seeds reaching adjacency traversal | 500 of 500 |
+| median first traversal generation | 1.0 |
+| zero-allocation fallbacks (must be 0) | 0 |
+
+Age distribution at the final generation is preserved per seed in the raw JSON
+under `seeds[].ageDistribution`.
+
+### Named limitation — zone load versus zone-bin occupancy
+
+Reported because it is a real property of this implementation, not tuned away.
+
+| Zone | min load | 5th | median | 95th | seeds with **zero** dominant-bin animals |
+|---|---|---|---|---|---|
+| canopy | 47.41 | 86.48 | 117.20 | 140.06 | 2 of 500 |
+| forest_floor | 58.00 | 84.94 | 108.13 | 130.84 | 0 of 500 |
+| shoreline | 13.98 | 18.59 | 30.52 | 56.63 | 438 of 500 |
+
+**All three zones remain meaningfully populated by the contract's own measure.**
+§21.4 defines zone population as *effective load*, and every zone clears it: no
+seed in the batch has any zone load below 1, and 497 of 500 seeds hold every
+zone at load 15 or more.
+
+However, the **debug zone-bin view** tells a different story about the shoreline:
+in 438 of 500 seeds, no living individual has the shoreline as its
+`argmax(timeAllocation)` at generation 180. The shoreline is used *part-time by
+many animals* rather than *full-time by a resident subpopulation*: roughly 30
+units of shoreline load are spread thinly across canopy- and forest-floor-
+dominant animals.
+
+This is not a §25 halt condition — the zone bin is explicitly a debug-only
+grouping with no persistent identity and no biological role (§5.4), and the
+contract's zone-population guardrail is load-based and passes. It is recorded
+here as **named remaining uncertainty** (§28: "remaining uncertainty is named
+rather than hidden") and as a concrete input to Milestone 2, where a visibly
+empty shoreline late in a run would matter to what a child actually sees.
+
+## §21.7 Side-by-side configuration comparison
+
+Required because `zoneCapacity` changed from the contract's provisional
+`[90,90,90]` to `[55,55,55]` (see `DECISIONS.md` D-009). Both batches use the
+same declared seeds and duration.
+
+| Guardrail | Required | `lineage-m1-config-1` | `lineage-m1-config-2` |
+|---|---|---|---|
+| extinction rate | < 5% | 0.00%  | 0.00%  |
+| median population | 90..360 | 421.0 **FAIL** | 256.0  |
+| median load — canopy | >= 15 | 189.10 | 117.22 |
+| median load — forest_floor | >= 15 | 179.68 | 108.18 |
+| median load — shoreline | >= 15 | 51.24 | 30.53 |
+| median concentration | <= 0.80 | 0.4615  | 0.4686  |
+| all guardrails | — | **FAIL** | PASS |
+
+**No claim is made that the newer configuration is automatically correct.**
+`lineage-m1-config-2` was adopted for exactly one reason: `lineage-m1-config-1` misses the
+predeclared median-population band. Both capacities are authored model
+controls, not ecological claims.
+
+## Reporting status (§21.7)
+
+Every declared guardrail and minimal-functionality requirement in this batch
+reports `PASS`. No metric was altered after results were seen. No measured
+median is frozen as a future target in this session.
