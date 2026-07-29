@@ -1,6 +1,6 @@
 # LINEAGE Milestone 1 — Audit Package Manifest
 
-Bundle: `LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE.zip`
+Bundle: `LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV3.zip`
 Contents: the complete `lineage-m1/` project directory required by contract §23.
 
 ---
@@ -16,11 +16,11 @@ Contents: the complete `lineage-m1/` project directory required by contract §23
 | Final config version | `lineage-m1-config-2` |
 | Final config hash (SHA-256 of canonical config) | `edb81695973b81ab8f87f7ef9dde9d8c5b3d4c7dfbeb45f385547edd86ee86de` |
 | Superseded config retained | `lineage-m1-config-1` as `legacyModelConfigV1` |
-| **Final reported status** | **`M1_BLOCKED — AWAITING PRINCIPAL DECISION ON THE PROCESS WAIVER`** |
-| Bundle revision | **2** — post-repair, after the pass-1 implementation audit returned `BREAKS-FOUND` |
-| Automated implementation gates | PASS (119/119 tests, fixture and both 500-seed batches re-run from clean) |
+| **Final reported status** | **`M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED`** |
+| Bundle revision | **3** — after the pass-2 AFE-Δ break-report and an independent structural audit both returned `BREAKS-FOUND` |
+| Automated implementation gates | **NOT CLAIMED** — repaired and re-run, but no pass is self-certified until revision 3 survives independent re-audit |
 | Physical iPad gate | `PENDING_HUMAN_DEVICE_TEST` |
-| §24 Stage A planning order | VIOLATED — unrepairable, principal decision required (DECISIONS.md D-024) |
+| §24 Stage A planning order | VIOLATED — unrepairable, principal decision required (DECISIONS.md D-024). **Not** the only blocker. |
 
 ---
 

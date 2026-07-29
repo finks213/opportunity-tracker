@@ -24,6 +24,7 @@ import {
   createObserverState,
   createTracerChannel,
   tracerBirthHook,
+  observerAfterGenerationHook,
 } from "./observer/tracerChannels.js";
 import { zoneBinCounts } from "./observer/currentZoneBins.js";
 import { CanvasProbe } from "./debug/canvasProbe.js";
@@ -44,7 +45,16 @@ class ProbeApp {
     this.selectedId = null;
     this.showRawValues = false;
     this.manualTestMode = null;
+    // Parsed fixture metadata cache. Its presence says the FILE was once
+    // loaded; it says nothing about which world is currently active.
     this.fixtureEnvelope = null;
+    // Explicit identity of the CURRENT biological world (revision-3 repair).
+    // Revision 2 used `fixtureEnvelope` as a proxy, so "load fixture -> reset
+    // random -> enter legibility" left the random world on screen while the mode
+    // claimed to be the fixture. Kept outside biological state.
+    /** @type {"random"|"defining_fixture"} */
+    this.worldSource = "random";
+    this.fixtureLoadError = null;
     this.lastAdvance = 0;
     this.meter = new FrameMeter();
     this.meter.start(0);
@@ -76,18 +86,38 @@ class ProbeApp {
     this.probe.jitter.clear();
     this.selectedId = null;
     this.manualTestMode = null;
+    this.worldSource = "random";
+    this.fixtureLoadError = null;
     this.refreshChannelSelect();
     this.renderPanels();
   }
 
+  /**
+   * Hydrate the defining fixture as the active world.
+   * Returns true on success. On failure the world is left untouched, an explicit
+   * error state is recorded, and NO fixture-valid mode is entered.
+   * @returns {Promise<boolean>}
+   */
   async loadDefiningFixture(opts = {}) {
     this.meter.markInput();
-    if (!this.fixtureEnvelope) {
-      const response = await fetch("./fixtures/defining_fixture_v1.json");
-      const text = await response.text();
-      this.fixtureEnvelope = parseEnvelope(text);
-      assertFixtureConsistency(this.fixtureEnvelope);
+    try {
+      if (!this.fixtureEnvelope) {
+        const response = await fetch("./fixtures/defining_fixture_v1.json");
+        if (!response.ok) throw new Error(`fixture fetch failed: HTTP ${response.status}`);
+        const text = await response.text();
+        const parsed = parseEnvelope(text);
+        assertFixtureConsistency(parsed);
+        this.fixtureEnvelope = parsed;
+      }
+    } catch (err) {
+      // Explicit failure: do not switch worldSource, do not enter a mode that
+      // claims to show the fixture.
+      this.fixtureLoadError = String(err && err.message ? err.message : err);
+      this.manualTestMode = null;
+      this.renderPanels();
+      return false;
     }
+    this.fixtureLoadError = null;
     const env = this.fixtureEnvelope;
     this.state = hydrateDefiningFixtureV1(env, this.seed, currentModelConfig);
     if (opts.highWebbing) {
@@ -98,38 +128,82 @@ class ProbeApp {
     this.observer = createObserverState();
     this.probe.jitter.clear();
     this.selectedId = null;
+    this.worldSource = "defining_fixture";
     this.refreshChannelSelect();
     this.renderPanels();
+    return true;
   }
 
+  /**
+   * Create an observer tracer channel from CURRENTLY LIVING individuals.
+   *
+   * Revision-3 repair. Revision 2 used the cached fixture focal ids whenever the
+   * metadata had ever been loaded, so two failures were reachable: seeding
+   * fixture ids into a random world, and seeding twelve already-dead ids when
+   * the tracer was created at a later generation. Both produced a
+   * valid-looking channel whose living contribution was permanently 0, which a
+   * user cannot distinguish from "this lineage genuinely died out".
+   *
+   * Now the founder set is always resolved against the living population, and an
+   * empty resolution returns an explicit unavailable result instead of a
+   * plausible zero channel.
+   *
+   * @returns {{created:boolean, reason?:string, founderCount?:number}}
+   */
   createTracer(channelId, which) {
     this.meter.markInput();
-    const env = this.fixtureEnvelope;
-    let founders;
-    if (env && which === "canopy") founders = env.canopyFocalIds;
-    else if (env && which === "shoreline") founders = env.shorelineFocalIds;
-    else {
-      // Random world: seed from the strongest current bin members.
-      const bin = which === "canopy" ? 0 : 2;
-      founders = this.state.currentIndividuals
-        .filter((i) => i.timeAllocation[bin] >= 0.5)
-        .slice(0, 12)
-        .map((i) => i.id);
+    const living = this.state.currentIndividuals;
+    const livingIds = living.map((i) => i.id);
+    const livingIdSet = new Set(livingIds);
+    const bin = which === "canopy" ? 0 : 2;
+
+    let founders = [];
+    if (this.worldSource === "defining_fixture" && this.fixtureEnvelope) {
+      // Requested focal set, intersected with the animals actually alive now.
+      const requested =
+        which === "canopy" ? this.fixtureEnvelope.canopyFocalIds : this.fixtureEnvelope.shorelineFocalIds;
+      founders = requested.filter((id) => livingIdSet.has(id));
+      if (founders.length === 0) {
+        // The declared founders are all dead. Fall back to their living
+        // descendants by current habitat use, which is a defensible observer
+        // selection, rather than seeding dead ids.
+        founders = living.filter((i) => i.timeAllocation[bin] >= 0.5).slice(0, 12).map((i) => i.id);
+      }
+    } else {
+      founders = living.filter((i) => i.timeAllocation[bin] >= 0.5).slice(0, 12).map((i) => i.id);
     }
-    createTracerChannel(this.observer, channelId, founders, this.state.currentIndividuals.map((i) => i.id));
+
+    if (founders.length === 0) {
+      this.tracerUnavailableReason =
+        `no living animals currently use ${which === "canopy" ? "the canopy" : "the shoreline"} enough to follow`;
+      this.renderPanels();
+      return { created: false, reason: this.tracerUnavailableReason };
+    }
+    this.tracerUnavailableReason = null;
+    createTracerChannel(this.observer, channelId, founders, livingIds);
     this.refreshChannelSelect();
     this.renderPanels();
+    return { created: true, founderCount: founders.length };
   }
 
   async setManualTestMode(mode) {
     this.meter.markInput();
     this.manualTestMode = mode;
     if (mode === "legibility") {
-      // §22 requires this mode to show the defining fixture; load it so the
-      // mode is self-contained rather than depending on operator sequencing.
+      // §22 requires this mode to show the DEFINING FIXTURE. Decide from the
+      // actual world identity, never from whether the metadata happens to be
+      // cached: "load fixture -> reset random -> enter legibility" must still
+      // end up on the fixture.
       this.running = false;
-      if (!this.fixtureEnvelope || this.state.currentIndividuals.length === 0) {
-        await this.loadDefiningFixture();
+      if (this.worldSource !== "defining_fixture") {
+        const ok = await this.loadDefiningFixture();
+        if (!ok) {
+          // Fixture unavailable: stay out of legibility mode entirely rather
+          // than rendering a plausible-looking test over the wrong world.
+          this.manualTestMode = null;
+          this.renderPanels();
+          return false;
+        }
       }
     }
     if (mode === "render-stress") {
@@ -140,6 +214,7 @@ class ProbeApp {
       this.meter.start(30000);
     }
     this.renderPanels();
+    return true;
   }
 
   // ---- simulation ----
@@ -147,6 +222,8 @@ class ProbeApp {
     if (this.state.currentIndividuals.length === 0) return;
     advanceGeneration(this.state, currentModelConfig, {
       onBirth: tracerBirthHook(this.observer),
+      // Keeps tracer maps bounded to the living population across long runs.
+      afterGeneration: observerAfterGenerationHook(this.observer),
     });
   }
 
@@ -269,9 +346,24 @@ class ProbeApp {
     const counts = zoneBinCounts(this.state.currentIndividuals);
     const statusEl = doc.getElementById("status");
     if (statusEl) {
+      const source = this.worldSource === "defining_fixture" ? "defining fixture" : "random world";
       statusEl.textContent =
-        `generation ${this.state.generation} · ${this.state.currentIndividuals.length} living · ` +
+        `${source} · generation ${this.state.generation} · ${this.state.currentIndividuals.length} living · ` +
         `canopy ${counts[0]} · forest floor ${counts[1]} · shoreline ${counts[2]}`;
+    }
+    // Explicit, distinguishable failure states (revision-3 repair).
+    const noticeEl = doc.getElementById("notice");
+    if (noticeEl) {
+      if (this.fixtureLoadError) {
+        noticeEl.textContent = `Defining fixture could not be loaded: ${this.fixtureLoadError}. Legibility mode is unavailable.`;
+        noticeEl.hidden = false;
+      } else if (this.tracerUnavailableReason) {
+        noticeEl.textContent = `Tracer not created — ${this.tracerUnavailableReason}.`;
+        noticeEl.hidden = false;
+      } else {
+        noticeEl.textContent = "";
+        noticeEl.hidden = true;
+      }
     }
     const inspectorEl = doc.getElementById("inspector");
     if (inspectorEl) {

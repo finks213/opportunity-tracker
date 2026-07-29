@@ -6,6 +6,15 @@
  *
  * Channel values propagate from already-fixed parent ids after biological child
  * creation:  tracer[k][child] = (tracer[k][parentA] + tracer[k][parentB]) / 2.
+ *
+ * MEMORY BOUND (revision-3 repair). Revision 2 retained a value for every
+ * individual that had ever lived, so a single channel grew with cumulative
+ * births rather than with the living world: 21,510 entries at generation 180
+ * and 107,760 by generation 800 while only ~250 animals were alive. Because
+ * propagation only ever reads the values of parents — who are by construction
+ * living survivors at the moment of birth — entries for dead individuals are
+ * never needed again and are pruned after each generation. Pruning touches only
+ * observer state and cannot change canonical biological bytes.
  */
 
 /**
@@ -68,6 +77,56 @@ export function propagateBirth(observer, childId, parentAId, parentBId) {
  */
 export function tracerBirthHook(observer) {
   return (info) => propagateBirth(observer, info.childId, info.parentAId, info.parentBId);
+}
+
+/**
+ * Remove entries for individuals that are no longer alive, in every channel.
+ *
+ * Safe because tracer propagation reads only parent values, and a parent is
+ * always a living survivor when its child is created. Bounded independently per
+ * channel, so N channels cost N x living, never N x cumulative births.
+ *
+ * @param {ObserverState} observer
+ * @param {Iterable<number>} livingIds
+ * @returns {number} number of entries removed
+ */
+export function pruneObserverToLiving(observer, livingIds) {
+  const alive = livingIds instanceof Set ? livingIds : new Set(livingIds);
+  let removed = 0;
+  for (const channel of observer.channels.values()) {
+    for (const id of [...channel.values.keys()]) {
+      if (!alive.has(id)) {
+        channel.values.delete(id);
+        removed++;
+      }
+    }
+  }
+  // Inspected ids that refer to dead animals are also dropped.
+  if (observer.inspectedIds.length > 0) {
+    observer.inspectedIds = observer.inspectedIds.filter((id) => alive.has(id));
+  }
+  return removed;
+}
+
+/**
+ * Build an afterGeneration hook that keeps observer state bounded to the living
+ * population. Consumes no RNG and never touches biological state.
+ * @param {ObserverState} observer
+ * @returns {(livingIds:number[])=>void}
+ */
+export function observerAfterGenerationHook(observer) {
+  return (livingIds) => pruneObserverToLiving(observer, livingIds);
+}
+
+/**
+ * Total retained entries across all channels. Diagnostic for the memory tests.
+ * @param {ObserverState} observer
+ * @returns {number}
+ */
+export function totalRetainedTracerEntries(observer) {
+  let n = 0;
+  for (const channel of observer.channels.values()) n += channel.values.size;
+  return n;
 }
 
 /**

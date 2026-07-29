@@ -63,6 +63,24 @@ export class CanvasProbe {
   }
 
   /**
+   * Drop cached jitter for individuals that are no longer rendered.
+   * @param {Array<{id:number}>} rendered
+   * @returns {number} entries removed
+   */
+  pruneJitterTo(rendered) {
+    if (this.jitter.size <= rendered.length) return 0;
+    const keep = new Set(rendered.map((i) => i.id));
+    let removed = 0;
+    for (const id of [...this.jitter.keys()]) {
+      if (!keep.has(id)) {
+        this.jitter.delete(id);
+        removed++;
+      }
+    }
+    return removed;
+  }
+
+  /**
    * Render one frame.
    * @param {Object} state biological state (read-only)
    * @param {Object} opts
@@ -101,6 +119,12 @@ export class CanvasProbe {
 
     // --- place animals by current zone bin, jittered with uiRng only ---
     this.layout.clear();
+    // Bound the jitter cache to the animals actually rendered (revision-3
+    // repair): it previously created one entry per rendered individual and never
+    // removed entries for deaths, so continuous probe use grew linearly with
+    // cumulative births. Ids are never reused, so dropping dead ids is safe and
+    // keeps rendering deterministic.
+    this.pruneJitterTo(state.currentIndividuals);
     const counts = [0, 0, 0];
     const perZone = [[], [], []];
     for (const ind of state.currentIndividuals) {

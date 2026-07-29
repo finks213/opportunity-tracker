@@ -24,6 +24,7 @@ import {
   createObserverState,
   createTracerChannel,
   tracerBirthHook,
+  observerAfterGenerationHook,
   livingFounderContribution,
 } from "../src/observer/tracerChannels.js";
 import { zoneBinCounts } from "../src/observer/currentZoneBins.js";
@@ -104,7 +105,13 @@ export function buildObserverInvarianceEvidence() {
     const strategy = make(state);
     const hashes = [sha256(serializeCanonicalBiology(state))];
     for (let g = 0; g < GENERATIONS; g++) {
-      advanceGeneration(state, currentModelConfig, strategy.hook ? { onBirth: strategy.hook } : {});
+      advanceGeneration(
+        state,
+        currentModelConfig,
+        strategy.observer
+          ? { onBirth: strategy.hook, afterGeneration: observerAfterGenerationHook(strategy.observer) }
+          : {}
+      );
       strategy.perGeneration(state);
       hashes.push(sha256(serializeCanonicalBiology(state)));
     }

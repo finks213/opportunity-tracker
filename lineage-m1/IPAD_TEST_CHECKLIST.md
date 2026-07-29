@@ -3,8 +3,18 @@
 **Status: `PENDING_HUMAN_DEVICE_TEST`**
 
 Claude Code cannot self-certify this gate. It requires a human with a physical
-device. Until every measurement below is supplied by a human, the Milestone 1
-status remains `M1_AUTOMATED_GATES_PASS — IPAD TEST PENDING` (contract §22, §26).
+device.
+
+> **DO NOT PERFORM THIS TEST YET.** The overall milestone status is
+> `M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED`.
+> The device test is gated behind revision 3 surviving independent re-audit
+> (structural code audit and AFE-Δ evidence audit). Running it earlier measures a
+> build that is not yet accepted for device testing.
+
+> **SECURITY NOTE.** `tools/serve.mjs` is bound on the local network for this
+> workflow. Revision 2 contained a path-traversal defect that returned
+> out-of-root files; it is repaired in revision 3 and covered by
+> `test/server-containment.test.js`. Run that test before exposing the server.
 
 Any supplied measurement that violates a threshold makes this gate `FAIL` and
 the overall status `M1_BLOCKED` until repaired and retested.
@@ -132,12 +142,15 @@ webbingIdentificationScore >= 8 of 10
 Circle one and record it in `FINAL_REPORT.md`:
 
 - ☐ **PASS** — every threshold above met. Milestone 1 may then be reported
-  `M1_ACCEPTED`, provided every automated gate also passes.
+  `M1_ACCEPTED` only if every automated gate has ALSO passed independent
+  re-audit. A device pass alone does not lift
+  `M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED`.
 - ☐ **FAIL** — at least one supplied measurement violates a threshold. Overall
   status becomes `M1_BLOCKED` until repaired and retested.
 - ☑ **PENDING_HUMAN_DEVICE_TEST** — current state. No physical device test has
   been performed. Milestone 1 is reported
-  `M1_AUTOMATED_GATES_PASS — IPAD TEST PENDING`.
+  `M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED`,
+  with the process waiver and the device test separately pending.
 
 Once completed, include this filled checklist and any measurement notes in the
 audit bundle. Their absence alone does **not** make the implementation accepted;

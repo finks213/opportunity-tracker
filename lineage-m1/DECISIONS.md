@@ -396,6 +396,300 @@ are worth restating because they could otherwise look like unaddressed defects:
 
 ---
 
+# Revision-3 repairs (AFE-Δ pass 2 + independent structural audit)
+
+Revision 2 was audited twice. The AFE-Δ break-report (pass 2) and an independent
+structural integrity audit both returned `BREAKS-FOUND`, together identifying ten
+verified defects: 1 CRITICAL, 3 HIGH, 3 MEDIUM-CRITICAL, 2 MEDIUM, 1 MEDIUM-MINOR.
+
+**Every defect was independently reproduced here before repair.** The
+reproductions matched the auditors' figures, which is itself evidence the
+findings were real rather than accepted on trust. No architecture was reopened;
+no acceptance threshold was changed. The Stage A planning-order violation remains
+principal-held and is **not** decided here.
+
+Required status during this pass, carried in every official artifact:
+
+```
+M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED
+```
+
+## D-025 — REPAIR: device-test server path traversal (CRITICAL)
+
+**Reproduction.** With a canary file one level above the served root:
+
+```bash
+echo "secret-canary-content" > ../lineage-m1-secret.txt
+node tools/serve.mjs 8111 &
+curl "http://localhost:8111/..%2flineage-m1-secret.txt"
+#   -> secret-canary-content    HTTP 200
+```
+
+**Cause.** Containment used `resolved.startsWith(ROOT)`, a string-prefix test.
+With root `/.../lineage-m1`, the sibling `/.../lineage-m1-secret.txt` shares the
+prefix and passed. The server is deliberately bound on the local network for the
+iPad workflow, so this was remotely reachable.
+
+**Repair.** `tools/serve.mjs` now decides containment with `path.relative()`: a
+target is inside the root only when the relative path is non-absolute, is not
+`".."`, and does not begin with a parent segment. Percent-decoding happens
+exactly once; malformed encoding, control bytes, NULs, and backslashes are
+refused; after `stat` the path is re-verified through `realpath` so a symlink
+cannot escape; only GET/HEAD are served; directory listing is refused.
+
+**Verification.** `test/server-containment.test.js` — 4 tests covering valid
+in-root files, plain and encoded traversal, the sibling-prefix falsifier,
+malformed paths, symlink escape, directories, and non-read methods. The live
+falsifier now returns `403 forbidden` with no content.
+
+## D-026 — REPAIR: configuration identity did not identify the biological model (HIGH)
+
+**Reproduction.** Mutating a trait effect changed production survival while the
+reported hash was unchanged, because `EFFECT`, `UPKEEP`, zone adjacency, and the
+trait/dimension orders were module globals excluded from `currentModelConfig` and
+from `canonicalStringify(config)`.
+
+**Repair.** New `src/config/modelDefinition.js` builds ONE complete canonical
+model definition containing every biology-affecting value the contract names:
+trait order, performance-dimension order, trait-effect matrix, upkeep costs, zone
+order, adjacency, zone weights, zone capacities, zone scarcity, ancestor genome,
+founder centroids, founder age values, founder spread, starting population, all
+survival constants, lifecycle constants, body-mutation constants,
+allocation-mutation constants, mating constants, and genealogy constants. Every
+evidence generator now publishes `modelDefinitionHash` over that object, and
+keeps `tuningConfigHash` beside it as an explicitly-labelled subset.
+
+Also repaired in the same defect family:
+
+- `deepFreeze` replaces shallow `Object.freeze`, so nested arrays and their rows
+  are immutable; `EFFECT` and each row, `UPKEEP`, `ZONES`, and `ZONE_NEIGHBORS`
+  are frozen too;
+- `legacyModelConfigV1` is built with `deepClonePlain`, not object spread, so
+  config-1 and config-2 share **no** mutable nested references (revision 2 shared
+  `zoneWeights`, `ancestorBodyGenome`, `fitnessZero`, `ageSurvivalMultiplier`);
+- the stale `ZONE_CAPACITY = [90,90,90]` export was removed from
+  `src/config/zones.js`; capacities now live only in the versioned configuration,
+  so there is exactly one authority;
+- `founderAgeForId(id, config)` uses the SUPPLIED configuration. Revision 2 read
+  `currentModelConfig` internally, so a supplied `founderAgeValues: [2]` still
+  produced ages 0,1,2.
+
+**Verification.** `test/model-identity.test.js` proves each cell of the effect
+matrix, upkeep, adjacency, trait order, founder ages, and capacity all move the
+hash; that both configs are deeply frozen; that they share no mutable nested
+references; and that `founderAgeValues: [2]` yields founders of age 2.
+
+## D-027 — REPAIR: state progression was not bound to its configuration (HIGH)
+
+**Reproduction.** Two states initialized under config 1; one advanced with the
+default call (silently config 2), one explicitly under config 1. Both kept
+`configVersion = "lineage-m1-config-1"`, populations 132 vs 160, canonical bytes
+different — two different worlds under one label.
+
+**Repair.** `advanceGeneration()` and `runGenerations()` call
+`assertConfigMatchesState(state, config)` and throw on
+`config.version !== state.configVersion`. The check runs **before** any RNG draw,
+counter increment, event, population change, or canonical byte, so a rejected
+call is a true no-op.
+
+**Verification.** `test/model-identity.test.js` proves config-1 + config 2 is
+rejected, config-2 + config 1 is rejected, the bare default call is rejected for
+a config-1 state, and rejection leaves canonical bytes, RNG state, every counter,
+and the population untouched.
+
+## D-028 — REPAIR: observer and Canvas memory grew with cumulative births (HIGH)
+
+**Reproduction**, seed 71, one tracer channel — matching the auditor exactly:
+
+| Generation | Living | Tracer entries |
+|---|---|---|
+| 180 | 254 | 21,510 |
+| 400 | 257 | 52,194 |
+| 600 | 238 | 80,016 |
+| 800 | 246 | 107,760 |
+
+**Repair.** Tracer propagation only ever reads PARENT values, and a parent is by
+construction a living survivor when its child is created, so entries for dead
+individuals are never needed again. `pruneObserverToLiving()` and
+`observerAfterGenerationHook()` drop them; `advanceGeneration` gained an
+observer-only `afterGeneration(livingIds)` hook called once the transition is
+complete. `CanvasProbe.pruneJitterTo()` bounds the jitter cache to rendered
+individuals. Stale `inspectedIds` are dropped too.
+
+**Post-repair**, same seed:
+
+| Generation | Living | Tracer entries | Cumulative births |
+|---|---|---|---|
+| 180 | 254 | **254** | 21,390 |
+| 400 | 257 | **257** | 52,074 |
+| 600 | 238 | **238** | 79,896 |
+| 800 | 246 | **246** | 107,640 |
+| 1000 | 323 | **323** | 134,980 |
+
+**Verification.** `test/observer-memory-bounds.test.js` — bounds at generations
+180/400/600/800/1000; tracer values for living descendants compared against an
+unpruned reference channel and identical; living founder contribution identical;
+canonical biological bytes unchanged across 60 generations; determinism preserved;
+five channels bounded by `channels x living` rather than `channels x births`; and
+the Canvas jitter cache bounded from 5,000 entries to 250.
+
+## D-029 — REPAIR: the adjacency statistic ran the wrong experiment (MEDIUM-CRITICAL)
+
+**Reproduction.** `CHARACTERIZATION_PLAN.md` declares a world descended **only**
+from one edge band. Revision 2 built the ordinary mixed 120-founder world and
+filtered by an ancestry bitmask, leaving the other 80 founders ecologically
+active — still affecting zone loads, density factors, survival, mating
+availability, mating order, and population dynamics.
+
+My revision-2 note claimed the measure was "implemented literally" and
+"unchanged". **That claim was false**, and it is withdrawn here.
+
+**Repair.** New `src/fixtures/edgeOnlyWorlds.js` builds genuinely isolated
+40-founder worlds (canopy ids 1..40, shoreline ids 81..120) with a fully frozen
+and documented initializer: preserved founder ids, founder birth records, starting
+population 40, `nextIndividualId`/`nextBirthEventId` at 121, event counters at 1,
+RNG advanced by exactly the draws the mixed initializer consumes for all 120
+founders so post-initialization RNG state matches the mixed world at the same
+seed, unchanged zone capacities, declared duration, extinction handling, and
+`parentalUseEpsilon` as the meaningful-use threshold.
+`tools/runEdgeOnlyTraversal.mjs` runs seeds 1..500 for both directions.
+
+**Result** (seeds 1..500, 180 generations) — matching the auditor's independent
+counterfactual exactly:
+
+| Experiment | Seeds reaching the opposite edge | Earliest | Median | Latest | Extinct |
+|---|---|---|---|---|---|
+| canopy-only → shoreline | **500 / 500** | 2 | 3 | 10 | 0 |
+| shoreline-only → canopy | **500 / 500** | 2 | 3 | 8 | 0 |
+
+The mixed-world ancestry statistic (495/500 and 499/500) is retained in
+`CHARACTERIZATION.md` under its own heading, "Separate additional measure —
+mixed-world single-band ancestry", with an explicit note that it is **not** the
+declared edge-only experiment.
+
+**Verification.** `test/edge-only-traversal.test.js` proves the canopy world
+contains no forest-floor or shoreline founders and vice versa, the frozen
+initializer is internally consistent, RNG state and founder genomes match the
+mixed world at the same seed, the reported generation is genuinely the FIRST
+satisfying the condition, determinism, that the isolated and mixed worlds are
+different systems, and that the isolated worlds still respect the adjacency graph
+(no shoreline share before forest-floor use meets the threshold).
+
+## D-030 — REPAIR: cached fixture metadata used as world identity (MEDIUM-CRITICAL)
+
+**Reproduction.** `load fixture -> reset random world -> enter legibility mode`
+left the RANDOM world active while the mode claimed to show the defining fixture,
+because the guard tested `!this.fixtureEnvelope` (was the FILE ever loaded)
+rather than which world is current. Separately, tracer creation used cached
+fixture focal ids, so it could seed fixture ids into a random world, or seed
+twelve already-dead ids at a later generation — producing a valid-looking channel
+whose living contribution was permanently 0, indistinguishable from a lineage
+that genuinely died out.
+
+**Repair.** An explicit `worldSource: "random" | "defining_fixture"` marker,
+outside biological state. Legibility mode rehydrates the fixture whenever
+`worldSource !== "defining_fixture"`, regardless of cache state. Tracer creation
+resolves founders against the LIVING population, falls back to living
+descendants by current habitat use when the declared founders are dead, and
+returns an explicit `{created: false, reason}` rather than a plausible zero
+channel. Fixture-load failure is handled explicitly: the world is left untouched,
+an error is recorded and surfaced in the UI, and legibility mode is **not**
+entered.
+
+**Verification.** `test/probe-world-identity.test.js` drives the real `ProbeApp`
+controller through the exact failing sequence and asserts the fixture's canonical
+bytes are active afterwards; covers idempotent re-entry, explicit load failure
+with no fixture-valid mode, a tracer created at generation 10 having positive
+living contribution with every seeded founder alive, a random world never seeding
+cached fixture ids, the explicit unavailable result, and that `worldSource` never
+enters canonical biology.
+
+## D-031 — REPAIR: the exact 200-seed fixture gate was outside the suite (MEDIUM-CRITICAL)
+
+**Reproduction.** `test/defining-fixture.test.js` ran seeds 1..12 with a
+proportional floor of `ceil(12 * 0.65)`. The exact gate lived only in
+`tools/runFixture.mjs`, so a regression affecting seeds 13..200 could leave the
+advertised build-blocking suite green. "119/119 tests pass" was not evidence that
+the frozen gate had executed.
+
+**Repair.** That file now executes the declared seeds `1..200` with the exact
+`130/200` floor, asserting `seedRange`, `seedCount`, `successThreshold === 130`,
+and `measurementGeneration === 90`. `npm test` runs it (with a raised test
+timeout, since it is the slowest test by design). The clean audit output in
+`audit/test-results.txt` shows the gate executing under the official command.
+
+## D-032 — REPAIR: four fixture worlds were hydrated four times (MEDIUM)
+
+**Reproduction.** `buildFourWorlds()` called `hydrateDefiningFixtureV1` four
+separate times. §19 D requires one hydration, serialization of its exact
+canonical bytes, and cloning those bytes into four worlds. Deterministic
+hydration made the outputs equal, so the numbers were right, but the mandated
+construction was not performed, and the test checked output equality rather than
+the construction path.
+
+**Repair.** One hydration; `serializeCanonicalBiology` of that baseline; four
+clones via a new `deserializeCanonicalBiology`; then only the declared overrides.
+The function returns `hydrationCount` and `baselineCanonicalBytes` so the
+construction itself is assertable.
+
+**Verification.** A new test asserts `hydrationCount === 1`, that both low worlds
+equal the baseline bytes exactly, that each high world differs from the baseline
+in exactly the twelve declared `toe_webbing` values and nothing else, that RNG
+state and every counter come straight from the baseline, and that clones are
+independent object graphs rather than aliases.
+
+## D-033 — REPAIR: contradictory official status artifacts (MEDIUM)
+
+**Reproduction.** `FINAL_REPORT.md` said the automated gates passed and the Stage
+A waiver was the only blocker; `IPAD_TEST_CHECKLIST.md` still told the operator to
+report `M1_AUTOMATED_GATES_PASS — IPAD TEST PENDING`. Both were false while
+implementation and evidence defects were open.
+
+**Repair.** `FINAL_REPORT.md`, `AUDIT_PACKAGE_MANIFEST.md`,
+`IPAD_TEST_CHECKLIST.md`, and `README.md` all now carry
+`M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED`, with the process
+waiver and the device test named as **separately** pending. The checklist gains a
+"DO NOT PERFORM THIS TEST YET" gate and a security note about the server. No
+artifact claims the automated gates pass.
+
+**Verification.** `test/status-consistency.test.js` makes status drift a build
+failure: every artifact must carry the required status, none may present
+`M1_AUTOMATED_GATES_PASS` as current, none may claim `M1_ACCEPTED`, the report
+must not present the waiver as the sole blocker, and the manifest must name the
+revision-3 bundle.
+
+## D-034 — REPAIR: the limitation table used the lower middle value (MEDIUM-MINOR)
+
+**Reproduction.** The named-limitation table computed
+`v[Math.floor(0.5 * (n - 1))]`, selecting the lower middle observation for an even
+count. With 500 seeds it reported item 250 instead of averaging 250 and 251:
+canopy 117.202731 against the guardrail's 117.223028.
+
+**Repair.** The table uses the shared `ordinaryMedian` for the centre and
+nearest-rank only for the 5th/95th tails. Both tables now print 117.22 / 108.18 /
+30.53.
+
+**Verification.** `test/median-consistency.test.js` covers odd counts, even
+counts, empty input, non-mutation of the input, negatives and non-integers, and
+renders a synthetic even-count batch to prove the guardrail and limitation tables
+print the same medians.
+
+While restoring this section I briefly deleted the named-limitation block during
+an edit and the median test caught it. The shoreline dominant-bin disclosure is
+restored intact — it is significant honest reporting and must not be lost.
+
+## Withdrawn revision-2 claims
+
+Recorded explicitly rather than quietly corrected:
+
+1. "Adjacency traversal … implemented literally … the declared measure itself is
+   unchanged" — **false**. It measured a mixed-world ancestry subset. See D-029.
+2. "Automated implementation gates: PASS" and "the overall status is held at
+   `M1_BLOCKED` for one reason" — **false** while the ten defects above were open.
+   See D-033.
+
+---
+
 ## Open uncertainty (not hidden)
 
 - The performance matrix, zone weights, `selectionSlope`, `fitnessZero`, and

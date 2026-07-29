@@ -25,9 +25,23 @@ import { currentModelConfig } from "../config/modelConfig.js";
  * @param {Object} [hooks]
  * @param {(info:{childId:number, parentAId:number, parentBId:number, generation:number})=>void} [hooks.onBirth]
  *        observer-only callback invoked after each biological birth is complete
+ * @param {(livingIds:number[])=>void} [hooks.afterGeneration]
+ *        observer-only callback invoked once the transition is complete
  * @returns {Object} state
  */
 export function advanceGeneration(state, config = currentModelConfig, hooks = {}) {
+  // Revision-3 repair: bind progression to the state's configuration identity.
+  //
+  // Previously this accepted any configuration and defaulted to the current one,
+  // so `advanceGeneration(config1State)` silently advanced a config-1 world under
+  // config 2 while the state kept its `lineage-m1-config-1` label. Two different
+  // biological worlds could then serialize under the same configuration label,
+  // destroying replay and audit attribution.
+  //
+  // The check runs BEFORE any RNG draw, counter increment, event, population
+  // change, or canonical byte is touched, so a rejected call is a no-op.
+  assertConfigMatchesState(state, config);
+
   const sourceGeneration = state.generation;
   const targetGeneration = sourceGeneration + 1;
   const nZones = ZONES.length;
@@ -105,7 +119,30 @@ export function advanceGeneration(state, config = currentModelConfig, hooks = {}
   // Retention/pruning (§15) at the new generation.
   pruneGenealogy(state, config);
 
+  // Observer-only notification, after biology is completely fixed. Used by the
+  // observer layer to keep its own maps bounded to the living population. It
+  // receives ids only, consumes no simRng, and cannot alter canonical bytes.
+  if (hooks.afterGeneration) {
+    hooks.afterGeneration(state.currentIndividuals.map((i) => i.id));
+  }
+
   return state;
+}
+
+/**
+ * Reject a configuration whose version does not match the state's recorded
+ * `configVersion`. Throws before mutating anything (contract §18 provenance,
+ * §21.7 side-by-side integrity).
+ * @param {Object} state
+ * @param {Object} config
+ */
+export function assertConfigMatchesState(state, config) {
+  if (config.version !== state.configVersion) {
+    throw new Error(
+      `configuration mismatch: state.configVersion="${state.configVersion}" but supplied config.version="${config.version}". ` +
+      "A biological state may only be advanced under the model that produced it."
+    );
+  }
 }
 
 /**
@@ -127,6 +164,8 @@ export function isExtinct(state) {
  * @returns {Object} state
  */
 export function runGenerations(state, generations, config = currentModelConfig, hooks = {}) {
+  // Fail fast before the first transition rather than partway through a batch.
+  assertConfigMatchesState(state, config);
   for (let i = 0; i < generations; i++) {
     if (isExtinct(state)) break;
     advanceGeneration(state, config, hooks);

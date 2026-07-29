@@ -114,5 +114,16 @@ an acceptance target here.**
 
 ## Status
 
-See `FINAL_REPORT.md`. The physical iPad gate is not self-certified and remains
-`PENDING_HUMAN_DEVICE_TEST` until a human performs the §22 device test.
+```
+M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED
+```
+
+Revision 3. Revision 2 was audited twice and both audits returned
+`BREAKS-FOUND` with ten verified defects, including a CRITICAL path-traversal
+defect in `tools/serve.mjs`. All ten are repaired here, each independently
+reproduced first, but **no automated-gate pass is self-certified**: the status
+holds until revision 3 survives independent re-audit.
+
+Separately pending: `PROCESS WAIVER: PENDING PRINCIPAL DECISION` and
+`IPAD TEST: PENDING_HUMAN_DEVICE_TEST`. See `FINAL_REPORT.md` §1b and
+`DECISIONS.md` D-025 through D-034.

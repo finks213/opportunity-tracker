@@ -10,35 +10,35 @@
   },
   "browser": "headless Chromium (Playwright 1.56.1)",
   "normalMode": {
-    "status": "generation 181 · 234 living · canopy 118 · forest floor 116 · shoreline 0",
+    "status": "defining fixture · generation 181 · 234 living · canopy 118 · forest floor 116 · shoreline 0",
     "populationAfter180Generations": 234,
-    "frameCount": 182,
-    "medianFrameTimeMs": 16.600000000093132,
-    "p95FrameTimeMs": 19,
-    "maxFrameTimeMs": 30.800000000046566,
+    "frameCount": 206,
+    "medianFrameTimeMs": 16.700000000186265,
+    "p95FrameTimeMs": 20.5,
+    "maxFrameTimeMs": 27.59999999962747,
     "inputActionCount": 1,
-    "p95InputToNextPaintMs": 15.100000000093132,
+    "p95InputToNextPaintMs": 9.899999999906868,
     "memory": {
-      "usedJSHeapBytes": 11898432,
+      "usedJSHeapBytes": 16290684,
       "available": true
     }
   },
   "renderStressMode360Glyphs": {
-    "frameCount": 1527,
-    "medianFrameTimeMs": 16.699999999953434,
-    "p95FrameTimeMs": 19.199999999953434,
-    "maxFrameTimeMs": 43.5999999998603,
+    "frameCount": 1544,
+    "medianFrameTimeMs": 16.700000000186265,
+    "p95FrameTimeMs": 20,
+    "maxFrameTimeMs": 43.39999999990687,
     "inputActionCount": 20,
-    "p95InputToNextPaintMs": 10.200000000186265,
+    "p95InputToNextPaintMs": 9.899999999906868,
     "memory": {
-      "usedJSHeapBytes": 10589992,
+      "usedJSHeapBytes": 15365089,
       "available": true
     }
   },
   "memoryGrowthAcross180Generations": {
-    "beforeBytes": 4204963,
-    "afterBytes": 11898432,
-    "deltaBytes": 7693469
+    "beforeBytes": 3759944,
+    "afterBytes": 16290684,
+    "deltaBytes": 12530740
   },
   "pageErrors": []
 }

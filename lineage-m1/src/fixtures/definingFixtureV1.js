@@ -12,7 +12,8 @@
  */
 
 import { makeIndividual, makeEmptyState } from "../core/individual.js";
-import { createSimRng } from "../core/rng.js";
+import { createSimRng, Rng } from "../core/rng.js";
+import { serializeCanonicalBiology } from "../core/canonicalSerialize.js";
 import { computeZoneLoads } from "../core/survival.js";
 import { currentModelConfig, SCHEMA_VERSION } from "../config/modelConfig.js";
 import { ZONES } from "../config/zones.js";
@@ -137,21 +138,72 @@ export function applyWebbingOverride(state, focalIds, webbingValue) {
 }
 
 /**
- * Build the four fixture worlds for one trajectory seed (§19.2). Each world is
- * an independently hydrated state from the same envelope and seed; the high
- * worlds receive only the declared twelve-value toe_webbing override.
+ * Deserialize a canonical biological-state string back into a live state object.
+ * Used by the §19 D single-baseline clone construction, so the four worlds are
+ * genuinely produced from ONE set of canonical baseline bytes.
+ * @param {string} canonicalBytes output of serializeCanonicalBiology
+ * @returns {Object} biological state
+ */
+export function deserializeCanonicalBiology(canonicalBytes) {
+  const plain = JSON.parse(canonicalBytes);
+  const state = makeEmptyState(Rng.fromState(plain.simRngState));
+  state.schemaVersion = plain.schemaVersion;
+  state.configVersion = plain.configVersion;
+  state.generation = plain.generation;
+  state.nextIndividualId = plain.nextIndividualId;
+  state.nextBirthEventId = plain.nextBirthEventId;
+  state.nextMatingEventId = plain.nextMatingEventId;
+  state.nextMutationEventId = plain.nextMutationEventId;
+  state.nextAllocationMutationEventId = plain.nextAllocationMutationEventId;
+  state.currentIndividuals = plain.currentIndividuals.map((i) => makeIndividual(i));
+  state.retainedGenealogy = plain.retainedGenealogy.map((r) => ({ ...r }));
+  state.birthEvents = plain.birthEvents.map((b) => ({ ...b }));
+  state.deathEvents = plain.deathEvents.map((e) => ({ ...e }));
+  state.biologicalMatingEvents = plain.biologicalMatingEvents.map((e) => ({ ...e }));
+  state.bodyMutationEvents = plain.bodyMutationEvents.map((e) => ({ ...e }));
+  state.allocationMutationEvents = plain.allocationMutationEvents.map((e) => ({ ...e }));
+  state.prunedAncestorBoundaries = plain.prunedAncestorBoundaries.map((e) => ({ ...e }));
+  return state;
+}
+
+/**
+ * Build the four fixture worlds for one trajectory seed following §19 D
+ * literally (revision-3 repair):
+ *
+ *   1. hydrate the baseline ONCE;
+ *   2. serialize its exact canonical biological bytes;
+ *   3. clone those bytes into four worlds;
+ *   4. apply only the declared twelve-value toe_webbing override to the two
+ *      high-webbing clones.
+ *
+ * Revision 2 hydrated the envelope four separate times. Deterministic hydration
+ * made the resulting bytes equal, so the numbers were right, but the mandated
+ * single-baseline clone operation was not the construction actually performed.
+ *
  * @param {Object} env
  * @param {number} trajectorySeed
  * @param {Object} [config]
- * @returns {{canopyLow:Object, canopyHigh:Object, shorelineLow:Object, shorelineHigh:Object}}
+ * @returns {{canopyLow:Object, canopyHigh:Object, shorelineLow:Object, shorelineHigh:Object, baselineCanonicalBytes:string, hydrationCount:number}}
  */
 export function buildFourWorlds(env, trajectorySeed, config = currentModelConfig) {
-  const highWebbing = env.highWebbing;
-  const canopyLow = hydrateDefiningFixtureV1(env, trajectorySeed, config);
-  const canopyHigh = hydrateDefiningFixtureV1(env, trajectorySeed, config);
-  applyWebbingOverride(canopyHigh, env.canopyFocalIds, highWebbing);
-  const shorelineLow = hydrateDefiningFixtureV1(env, trajectorySeed, config);
-  const shorelineHigh = hydrateDefiningFixtureV1(env, trajectorySeed, config);
-  applyWebbingOverride(shorelineHigh, env.shorelineFocalIds, highWebbing);
-  return { canopyLow, canopyHigh, shorelineLow, shorelineHigh };
+  // 1. ONE hydration.
+  const baseline = hydrateDefiningFixtureV1(env, trajectorySeed, config);
+  // 2. its exact canonical biological bytes.
+  const baselineCanonicalBytes = serializeCanonicalBiology(baseline);
+  // 3. four clones of those same bytes.
+  const canopyLow = deserializeCanonicalBiology(baselineCanonicalBytes);
+  const canopyHigh = deserializeCanonicalBiology(baselineCanonicalBytes);
+  const shorelineLow = deserializeCanonicalBiology(baselineCanonicalBytes);
+  const shorelineHigh = deserializeCanonicalBiology(baselineCanonicalBytes);
+  // 4. only the declared overrides.
+  applyWebbingOverride(canopyHigh, env.canopyFocalIds, env.highWebbing);
+  applyWebbingOverride(shorelineHigh, env.shorelineFocalIds, env.highWebbing);
+  return {
+    canopyLow,
+    canopyHigh,
+    shorelineLow,
+    shorelineHigh,
+    baselineCanonicalBytes,
+    hydrationCount: 1,
+  };
 }

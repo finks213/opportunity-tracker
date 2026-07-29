@@ -99,3 +99,16 @@ code { background: #0f151b; padding: 1px 4px; border-radius: 3px; font-size: 12p
 @media (max-width: 900px) {
   main { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Explicit failure / unavailable notices (revision-3): a user must be able to
+   tell "the fixture failed to load" and "no living animals to follow" apart
+   from a plausible-looking but wrong display. */
+.notice {
+  margin: 8px 2px 0;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: #ffe0e0;
+  background: #3a1f22;
+  border: 1px solid #5c2f34;
+  border-radius: 6px;
+}

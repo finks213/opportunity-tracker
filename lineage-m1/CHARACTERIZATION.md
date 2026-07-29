@@ -9,7 +9,14 @@ biological truth, is not an ecological claim, and is not frozen as a future
 regression target (contract §21).
 
 - configuration: `lineage-m1-config-2`
-- config hash: `edb81695973b81ab8f87f7ef9dde9d8c5b3d4c7dfbeb45f385547edd86ee86de`
+- complete model-definition hash: `undefined`
+- tuning-config-only hash (subset, for reference): `undefined`
+
+The model-definition hash covers **every** biology-affecting value, including
+the trait-effect matrix, upkeep costs, zone adjacency, and the trait/dimension
+orders. Revision 2 published only the tuning-config hash, which excluded those,
+so a mutated trait effect could change survival without moving the reported
+hash (DECISIONS.md D-026).
 - declared seeds: 1..500
 - declared duration: 180 generations per seed unless extinct
 
@@ -148,34 +155,15 @@ correlations (§21.5).
 | allocation transfers into a below-threshold zone | 87299 |
 | zero-allocation fallbacks (must be 0) | 0 |
 
-### Adjacency traversal, by founder-band ancestry
-
-Measured exactly as declared: a lineage descended **only** from one edge
-band must reach `>= parentalUseEpsilon` share in the **opposite** edge zone,
-which is only reachable across the forest-floor bridge. Founder-band ancestry
-is tracked explicitly per individual as a union of its parents' bands.
-
-"Holds positive share in both edge zones" is **not** used as a substitute: an
-ordinary forest-floor descendant satisfies that at generation 1 simply by using
-both of its legal neighbours, which is not traversal.
-
-| Traversal | Seeds reaching it | Earliest generation | Median first generation |
-|---|---|---|---|
-| canopy-only lineage → shoreline | 495 of 500 | 2 | 3.0 |
-| shoreline-only lineage → canopy | 499 of 500 | 2 | 3.0 |
-
-Age distribution at the final generation is preserved per seed in the raw JSON
-under `seeds[].ageDistribution`.
-
 ### Named limitation — zone load versus zone-bin occupancy
 
 Reported because it is a real property of this implementation, not tuned away.
 
 | Zone | min load | 5th | median | 95th | seeds with **zero** dominant-bin animals |
 |---|---|---|---|---|---|
-| canopy | 47.41 | 86.48 | 117.20 | 140.06 | 2 of 500 |
-| forest_floor | 58.00 | 84.94 | 108.13 | 130.84 | 0 of 500 |
-| shoreline | 13.98 | 18.59 | 30.52 | 56.63 | 438 of 500 |
+| canopy | 47.41 | 86.48 | 117.22 | 140.06 | 2 of 500 |
+| forest_floor | 58.00 | 84.94 | 108.18 | 130.84 | 0 of 500 |
+| shoreline | 13.98 | 18.59 | 30.53 | 56.63 | 438 of 500 |
 
 **All three zones remain meaningfully populated by the contract's own measure.**
 §21.4 defines zone population as *effective load*, and every zone clears it: no
@@ -185,9 +173,7 @@ zone at load 15 or more.
 However, the **debug zone-bin view** tells a different story about the shoreline:
 in 438 of 500 seeds, no living individual has the shoreline as its
 `argmax(timeAllocation)` at generation 180. The shoreline is used *part-time by
-many animals* rather than *full-time by a resident subpopulation*: roughly 30
-units of shoreline load are spread thinly across canopy- and forest-floor-
-dominant animals.
+many animals* rather than *full-time by a resident subpopulation*.
 
 This is not a §25 halt condition — the zone bin is explicitly a debug-only
 grouping with no persistent identity and no biological role (§5.4), and the
@@ -195,6 +181,44 @@ contract's zone-population guardrail is load-based and passes. It is recorded
 here as **named remaining uncertainty** (§28: "remaining uncertainty is named
 rather than hidden") and as a concrete input to Milestone 2, where a visibly
 empty shoreline late in a run would matter to what a child actually sees.
+
+### Adjacency traversal — the DECLARED edge-only-world experiment
+
+`CHARACTERIZATION_PLAN.md` declares traversal in a world descended **only**
+from one edge founder band. That experiment is executed by
+`tools/runEdgeOnlyTraversal.mjs` in genuinely isolated 40-founder worlds and its
+raw output is `audit/edge-only-traversal-results.json`.
+
+| Experiment | Retained founders | Target zone | Seeds reaching | Earliest | Median first generation | Latest | Extinct seeds |
+|---|---|---|---|---|---|---|---|
+| canopyOnly | 1..40 | shoreline | **500 of 500** | 2 | 3.0 | 10 | 0 |
+| shorelineOnly | 81..120 | canopy | **500 of 500** | 2 | 3.0 | 8 | 0 |
+
+The frozen initializer for these worlds is recorded in the raw JSON under
+`frozenInitializer`: retained founder ids and birth records, starting population
+40, preserved ids, next-id counters at 121, event counters at 1, RNG
+initialization matched to the mixed world at the same seed, unchanged zone
+capacities, duration, extinction handling, and the meaningful-use threshold.
+
+Because there is no canopy-shoreline edge, the opposite edge zone is reachable
+only across the forest-floor bridge, which requires forest-floor use to reach
+`parentalUseEpsilon` first.
+
+#### Separate additional measure — mixed-world single-band ancestry
+
+Reported under its own name because it is **not** the declared edge-only
+experiment: all 120 founders remain present and ecologically active, so they
+still affect zone loads, density factors, survival probabilities, mating
+availability, mating order, and population dynamics. A lineage that stays
+genetically single-band is not ecologically isolated.
+
+| Measure (mixed 120-founder world) | Seeds | Earliest | Median first generation |
+|---|---|---|---|
+| canopy-only-ancestry lineage → shoreline | 495 of 500 | 2 | 3.0 |
+| shoreline-only-ancestry lineage → canopy | 499 of 500 | 2 | 3.0 |
+
+Revision 2 presented these mixed-world numbers under the edge-only label. They
+are retained here as a genuine additional statistic, clearly distinguished.
 
 ## §21.7 Side-by-side configuration comparison
 

@@ -17,13 +17,14 @@ import { pathToFileURL } from "node:url";
 import { loadValidatedFixture } from "../src/fixtures/nodeFixtureIO.js";
 import { buildFourWorlds } from "../src/fixtures/definingFixtureV1.js";
 import { advanceGeneration, isExtinct } from "../src/core/simulation.js";
-import { currentModelConfig } from "../src/config/modelConfig.js";
+import { currentModelConfig, modelDefinitionFor } from "../src/config/modelConfig.js";
 import { canonicalStringify } from "../src/core/canonicalSerialize.js";
 import { ordinaryMedian } from "../src/core/math.js";
 import {
   createObserverState,
   createTracerChannel,
   tracerBirthHook,
+  observerAfterGenerationHook,
   livingFounderContribution,
 } from "../src/observer/tracerChannels.js";
 
@@ -38,10 +39,11 @@ export function runWorldWithTracer(state, focalIds, measurementGeneration, confi
   const observer = createObserverState();
   createTracerChannel(observer, "focal", focalIds, state.currentIndividuals.map((i) => i.id));
   const hook = tracerBirthHook(observer);
+  const prune = observerAfterGenerationHook(observer);
   let extinctAt = null;
   for (let g = 0; g < measurementGeneration; g++) {
     if (isExtinct(state)) { extinctAt = state.generation; break; }
-    advanceGeneration(state, config, { onBirth: hook });
+    advanceGeneration(state, config, { onBirth: hook, afterGeneration: prune });
   }
   if (isExtinct(state) && extinctAt === null) extinctAt = state.generation;
   const livingIds = state.currentIndividuals.map((i) => i.id);
@@ -132,13 +134,21 @@ export function runFixtureExperiment(opts = {}) {
     gates.shorelineSuccessAtLeastThreshold &&
     gates.canopySuccessAtLeastThreshold;
 
-  const configHash = createHash("sha256").update(canonicalStringify(config)).digest("hex");
+    // Hash the COMPLETE model definition, not just the tuning config: revision 2
+  // hashed `config` alone, which excluded EFFECT, UPKEEP, adjacency, and the
+  // trait/dimension orders, so a mutated trait effect could change survival
+  // while this hash stayed constant.
+  const modelDefinition = modelDefinitionFor(config);
+  const modelDefinitionHash = createHash("sha256").update(canonicalStringify(modelDefinition)).digest("hex");
+  const tuningConfigHash = createHash("sha256").update(canonicalStringify(config)).digest("hex");
 
   return {
     contractSection: "19.4",
     fixtureRawSha256: rawSha256,
     configVersion: config.version,
-    configHash,
+    modelDefinitionHash,
+    tuningConfigHash,
+    modelDefinition,
     measurementGeneration,
     seedRange: { start: seedStart, endInclusive: seedEnd },
     medians,

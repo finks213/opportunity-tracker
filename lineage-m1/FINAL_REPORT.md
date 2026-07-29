@@ -3,31 +3,41 @@
 ## Status
 
 ```
-M1_BLOCKED — AWAITING PRINCIPAL DECISION ON THE PROCESS WAIVER
+M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED
 ```
 
-**This report is revision 2, issued after an external implementation audit
-(AFE-Δ break-report, pass 1) returned `BREAKS-FOUND` against revision 1.**
+**This report is revision 3.** Revision 2 was audited twice — by the AFE-Δ
+break-report (pass 2) and by an independent structural integrity audit — and both
+returned `BREAKS-FOUND` with ten verified defects, including one CRITICAL
+security defect in the device-test server.
 
-Component status:
+Per the repair-pass instruction, the status stays at
+`M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED`
+and **must not** return to `M1_AUTOMATED_GATES_PASS` until revision 3 survives
+independent re-audit by both the structural code audit and the AFE-Δ evidence and
+claim audit.
 
-| Component | Status |
-|---|---|
-| automated implementation gates | **PASS** — post-repair, re-run from clean |
-| the six confirmed implementation/evidence defects | **REPAIRED** — each independently reproduced here first |
-| physical iPad gate | `PENDING_HUMAN_DEVICE_TEST` — not self-certified |
-| §24 Stage A pre-code planning order | **VIOLATED** — unrepairable; principal decision required |
+Separately pending, and NOT the only blockers:
 
-The overall status is held at `M1_BLOCKED` for one reason: the process-order
-violation (D-000, D-024) cannot be repaired retrospectively and cannot be waived
-by the implementer. It requires one explicit recorded principal decision —
-`PROCESS WAIVER ACCEPTED` or `BUILD REJECTED FOR PROCESS NONCOMPLIANCE`. Until
-that exists, this repository does **not** claim full compliance with the
-complete v3.3 build procedure.
+```
+PROCESS WAIVER: PENDING PRINCIPAL DECISION
+IPAD TEST:      PENDING_HUMAN_DEVICE_TEST
+```
 
-Revision 1 reported `M1_AUTOMATED_GATES_PASS — IPAD TEST PENDING`. That verdict
-did not survive audit and has been withdrawn. `M1_ACCEPTED` is not claimed and
-would additionally require the physical iPad gate to pass.
+Revision 2 stated that the Stage A process waiver was the only remaining blocker.
+That was false while implementation and evidence defects were open, and it has
+been withdrawn. Revision 1 reported `M1_AUTOMATED_GATES_PASS — IPAD TEST PENDING`;
+that was withdrawn in revision 2.
+
+**No claim is made here that the automated gates pass.** The repaired gates were
+re-run and their results are reported below as evidence for the next audit, not
+as a self-certification.
+
+- Configuration: `lineage-m1-config-2`
+- Node: v22.22.2 · Linux 6.18.5 x86_64
+- Fixture SHA-256: `c80aaa523d3b3eec2655502b4eaebdbbb4d12f71f8b3378d9d3be60797342b78` ✔ matches the frozen value
+
+---
 
 Two statements the contract requires verbatim:
 

@@ -13,9 +13,11 @@
  * and zone rows are in canonical zone order [canopy, forest_floor, shoreline].
  */
 
+import { deepFreeze, deepClonePlain, buildModelDefinition } from "./modelDefinition.js";
+
 export const SCHEMA_VERSION = "lineage-biological-state-1";
 
-export const currentModelConfig = Object.freeze({
+export const currentModelConfig = deepFreeze({
   // config-1 used the contract's provisional zoneCapacity [90,90,90]; that
   // value cannot satisfy the §21.4 guardrail medianTotalPopulation <= 360
   // (measured median 418). config-2 lowers capacity to [55,55,55]. See
@@ -92,18 +94,44 @@ export const currentModelConfig = Object.freeze({
  * zone capacities. Retained so §21.7's required side-by-side comparison can be
  * reproduced from a clean run. Not used by production code paths.
  */
-export const legacyModelConfigV1 = Object.freeze({
-  ...currentModelConfig,
+export const legacyModelConfigV1 = deepFreeze({
+  // deepClonePlain, not object spread: a spread copies nested ARRAY REFERENCES,
+  // so revision 2 had config-1 and config-2 sharing zoneWeights,
+  // ancestorBodyGenome, and others. Mutating one would have silently changed
+  // both without either version string moving.
+  ...deepClonePlain(currentModelConfig),
   version: "lineage-m1-config-1",
   zoneCapacity: [90, 90, 90],
 });
 
 /**
  * Deterministic founder age from an id (§7 documented distribution).
+ * Uses the SUPPLIED configuration, never a module-global one.
  * @param {number} id 1-based individual id
- * @returns {number} 0, 1, or 2
+ * @param {Object} [config]
+ * @returns {number}
  */
-export function founderAgeForId(id) {
-  const vals = currentModelConfig.founderAgeValues;
+export function founderAgeForId(id, config = currentModelConfig) {
+  // Revision-3 repair: this previously read currentModelConfig unconditionally,
+  // so a caller supplying founderAgeValues: [2] still produced ages 0,1,2.
+  const vals = config.founderAgeValues;
   return vals[(id - 1) % vals.length];
 }
+
+/**
+ * The COMPLETE canonical model definition for a configuration (revision-3).
+ *
+ * This is the only correct hash input for evidence provenance: it includes the
+ * trait-effect matrix, upkeep costs, zone adjacency, and orderings that
+ * `currentModelConfig` alone does not contain. Hashing the tuning config by
+ * itself let a mutated trait effect change survival while the reported hash
+ * stayed constant.
+ *
+ * @param {Object} [config]
+ * @returns {Object}
+ */
+export function modelDefinitionFor(config = currentModelConfig) {
+  return deepFreeze(buildModelDefinition(config));
+}
+
+export { deepFreeze, deepClonePlain };

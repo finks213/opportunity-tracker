@@ -13,6 +13,7 @@
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { ZONES } from "../src/config/zones.js";
+import { ordinaryMedian } from "../src/core/math.js";
 
 const fmt = (v, digits = 4) =>
   v === null || v === undefined ? "INCONCLUSIVE" : typeof v === "number" ? v.toFixed(digits) : String(v);
@@ -23,9 +24,16 @@ const pass = (b) => (b ? "PASS" : "**FAIL**");
  * @param {Object|null} compare optional config-1 results
  * @returns {string}
  */
-export function renderCharacterization(r, compare = null) {
+export function renderCharacterization(r, compare = null, edgeOnly = null) {
   const g = r.guardrails;
   const lines = [];
+  const lineage_note = () => {
+    lines.push("experiment: all 120 founders remain present and ecologically active, so they");
+    lines.push("still affect zone loads, density factors, survival probabilities, mating");
+    lines.push("availability, mating order, and population dynamics. A lineage that stays");
+    lines.push("genetically single-band is not ecologically isolated.");
+    lines.push("");
+  };
 
   lines.push("# LINEAGE Milestone 1 — Characterization");
   lines.push("");
@@ -38,7 +46,14 @@ export function renderCharacterization(r, compare = null) {
   lines.push("regression target (contract §21).");
   lines.push("");
   lines.push(`- configuration: \`${r.configVersion}\``);
-  lines.push(`- config hash: \`${r.configHash}\``);
+  lines.push(`- complete model-definition hash: \`${r.modelDefinitionHash}\``);
+  lines.push(`- tuning-config-only hash (subset, for reference): \`${r.tuningConfigHash}\``);
+  lines.push("");
+  lines.push("The model-definition hash covers **every** biology-affecting value, including");
+  lines.push("the trait-effect matrix, upkeep costs, zone adjacency, and the trait/dimension");
+  lines.push("orders. Revision 2 published only the tuning-config hash, which excluded those,");
+  lines.push("so a mutated trait effect could change survival without moving the reported");
+  lines.push("hash (DECISIONS.md D-026).");
   lines.push(`- declared seeds: ${r.declaredSeedRange.start}..${r.declaredSeedRange.endInclusive}`);
   lines.push(`- declared duration: ${r.declaredGenerations} generations per seed unless extinct`);
   lines.push("");
@@ -184,35 +199,21 @@ export function renderCharacterization(r, compare = null) {
   lines.push(`| allocation transfers into a below-threshold zone | ${L.lowShareTargetTransfers} |`);
   lines.push(`| zero-allocation fallbacks (must be 0) | ${L.totalZeroAllocationFallbacks} |`);
   lines.push("");
-  lines.push("### Adjacency traversal, by founder-band ancestry");
-  lines.push("");
-  lines.push("Measured exactly as declared: a lineage descended **only** from one edge");
-  lines.push("band must reach `>= parentalUseEpsilon` share in the **opposite** edge zone,");
-  lines.push("which is only reachable across the forest-floor bridge. Founder-band ancestry");
-  lines.push("is tracked explicitly per individual as a union of its parents' bands.");
-  lines.push("");
-  lines.push('"Holds positive share in both edge zones" is **not** used as a substitute: an');
-  lines.push("ordinary forest-floor descendant satisfies that at generation 1 simply by using");
-  lines.push("both of its legal neighbours, which is not traversal.");
-  lines.push("");
-  const cls = L.canopyLineageReachesShoreline ?? {};
-  const slc = L.shorelineLineageReachesCanopy ?? {};
-  lines.push("| Traversal | Seeds reaching it | Earliest generation | Median first generation |");
-  lines.push("|---|---|---|---|");
-  lines.push(`| canopy-only lineage → shoreline | ${cls.seedsReaching ?? "—"} of ${cls.ofSeeds ?? r.seeds.length} | ${cls.earliestGeneration ?? "—"} | ${fmt(cls.medianFirstGeneration, 1)} |`);
-  lines.push(`| shoreline-only lineage → canopy | ${slc.seedsReaching ?? "—"} of ${slc.ofSeeds ?? r.seeds.length} | ${slc.earliestGeneration ?? "—"} | ${fmt(slc.medianFirstGeneration, 1)} |`);
-  lines.push("");
-  lines.push("Age distribution at the final generation is preserved per seed in the raw JSON");
-  lines.push("under `seeds[].ageDistribution`.");
-  lines.push("");
-
   // ---- named limitation: zone load vs zone-bin occupancy ----
   const nonExtinct = r.seeds.filter((s) => !s.extinct);
   const loadStats = [0, 1, 2].map((z) => {
-    const v = nonExtinct.map((s) => s.zoneLoad[z]).sort((a, b) => a - b);
+    const raw = nonExtinct.map((s) => s.zoneLoad[z]);
+    const v = raw.slice().sort((a, b) => a - b);
     const binZero = nonExtinct.filter((s) => s.zoneBinCounts[z] === 0).length;
-    const pick = (p) => v[Math.floor(p * (v.length - 1))];
-    return { min: v[0], p5: pick(0.05), p50: pick(0.5), p95: pick(0.95), binZero };
+    // Nearest-rank for the tails; the ORDINARY median for the centre.
+    //
+    // Revision-3 repair: this table previously used v[floor(0.5*(n-1))] for the
+    // median too, which selects the lower middle observation for an even count.
+    // With 500 seeds it reported item 250 instead of averaging items 250 and 251
+    // (canopy 117.202731 rather than 117.223028), so the table disagreed with
+    // the guardrail medians computed by ordinaryMedian.
+    const nearestRank = (p) => v[Math.max(0, Math.min(v.length - 1, Math.ceil(p * v.length) - 1))];
+    return { min: v[0], p5: nearestRank(0.05), p50: ordinaryMedian(raw), p95: nearestRank(0.95), binZero };
   });
   lines.push("### Named limitation — zone load versus zone-bin occupancy");
   lines.push("");
@@ -221,9 +222,9 @@ export function renderCharacterization(r, compare = null) {
   lines.push("| Zone | min load | 5th | median | 95th | seeds with **zero** dominant-bin animals |");
   lines.push("|---|---|---|---|---|---|");
   for (let z = 0; z < ZONES.length; z++) {
-    const s = loadStats[z];
+    const st = loadStats[z];
     lines.push(
-      `| ${ZONES[z]} | ${fmt(s.min, 2)} | ${fmt(s.p5, 2)} | ${fmt(s.p50, 2)} | ${fmt(s.p95, 2)} | ${s.binZero} of ${nonExtinct.length} |`
+      `| ${ZONES[z]} | ${fmt(st.min, 2)} | ${fmt(st.p5, 2)} | ${fmt(st.p50, 2)} | ${fmt(st.p95, 2)} | ${st.binZero} of ${nonExtinct.length} |`
     );
   }
   lines.push("");
@@ -235,9 +236,7 @@ export function renderCharacterization(r, compare = null) {
   lines.push("However, the **debug zone-bin view** tells a different story about the shoreline:");
   lines.push(`in ${loadStats[2].binZero} of ${nonExtinct.length} seeds, no living individual has the shoreline as its`);
   lines.push("`argmax(timeAllocation)` at generation 180. The shoreline is used *part-time by");
-  lines.push("many animals* rather than *full-time by a resident subpopulation*: roughly 30");
-  lines.push("units of shoreline load are spread thinly across canopy- and forest-floor-");
-  lines.push("dominant animals.");
+  lines.push("many animals* rather than *full-time by a resident subpopulation*.");
   lines.push("");
   lines.push("This is not a §25 halt condition — the zone bin is explicitly a debug-only");
   lines.push("grouping with no persistent identity and no biological role (§5.4), and the");
@@ -245,6 +244,53 @@ export function renderCharacterization(r, compare = null) {
   lines.push("here as **named remaining uncertainty** (§28: \"remaining uncertainty is named");
   lines.push("rather than hidden\") and as a concrete input to Milestone 2, where a visibly");
   lines.push("empty shoreline late in a run would matter to what a child actually sees.");
+  lines.push("");
+
+  lines.push("### Adjacency traversal — the DECLARED edge-only-world experiment");
+  lines.push("");
+  lines.push("`CHARACTERIZATION_PLAN.md` declares traversal in a world descended **only**");
+  lines.push("from one edge founder band. That experiment is executed by");
+  lines.push("`tools/runEdgeOnlyTraversal.mjs` in genuinely isolated 40-founder worlds and its");
+  lines.push("raw output is `audit/edge-only-traversal-results.json`.");
+  lines.push("");
+  if (edgeOnly) {
+    lines.push("| Experiment | Retained founders | Target zone | Seeds reaching | Earliest | Median first generation | Latest | Extinct seeds |");
+    lines.push("|---|---|---|---|---|---|---|---|");
+    for (const key of ["canopyOnly", "shorelineOnly"]) {
+      const e = edgeOnly[key];
+      lines.push(
+        `| ${key} | ${e.retainedFounderIds} | ${e.targetZone} | **${e.seedsReaching} of ${e.ofSeeds}** | ` +
+        `${e.earliestGeneration ?? "—"} | ${fmt(e.medianFirstGeneration, 1)} | ${e.latestGeneration ?? "—"} | ${e.extinctSeeds} |`
+      );
+    }
+    lines.push("");
+    lines.push("The frozen initializer for these worlds is recorded in the raw JSON under");
+    lines.push("`frozenInitializer`: retained founder ids and birth records, starting population");
+    lines.push("40, preserved ids, next-id counters at 121, event counters at 1, RNG");
+    lines.push("initialization matched to the mixed world at the same seed, unchanged zone");
+    lines.push("capacities, duration, extinction handling, and the meaningful-use threshold.");
+    lines.push("");
+    lines.push("Because there is no canopy-shoreline edge, the opposite edge zone is reachable");
+    lines.push("only across the forest-floor bridge, which requires forest-floor use to reach");
+    lines.push("`parentalUseEpsilon` first.");
+  } else {
+    lines.push("**INCONCLUSIVE — `audit/edge-only-traversal-results.json` was not supplied to");
+    lines.push("this render.** Run `node tools/runEdgeOnlyTraversal.mjs` and re-render.");
+  }
+  lines.push("");
+  lines.push("#### Separate additional measure — mixed-world single-band ancestry");
+  lines.push("");
+  lines.push("Reported under its own name because it is **not** the declared edge-only");
+  lineage_note();
+  const cls = L.canopyLineageReachesShoreline ?? {};
+  const slc = L.shorelineLineageReachesCanopy ?? {};
+  lines.push("| Measure (mixed 120-founder world) | Seeds | Earliest | Median first generation |");
+  lines.push("|---|---|---|---|");
+  lines.push(`| canopy-only-ancestry lineage → shoreline | ${cls.seedsReaching ?? "—"} of ${cls.ofSeeds ?? r.seeds.length} | ${cls.earliestGeneration ?? "—"} | ${fmt(cls.medianFirstGeneration, 1)} |`);
+  lines.push(`| shoreline-only-ancestry lineage → canopy | ${slc.seedsReaching ?? "—"} of ${slc.ofSeeds ?? r.seeds.length} | ${slc.earliestGeneration ?? "—"} | ${fmt(slc.medianFirstGeneration, 1)} |`);
+  lines.push("");
+  lines.push("Revision 2 presented these mixed-world numbers under the edge-only label. They");
+  lines.push("are retained here as a genuine additional statistic, clearly distinguished.");
   lines.push("");
 
   // ---- §21.7 side-by-side ----
@@ -306,6 +352,8 @@ if (isMain) {
   const outPath = at("--out") || "CHARACTERIZATION.md";
   const results = JSON.parse(readFileSync(inPath, "utf8"));
   const compare = existsSync(comparePath) ? JSON.parse(readFileSync(comparePath, "utf8")) : null;
-  writeFileSync(outPath, renderCharacterization(results, compare));
+  const edgeOnlyPath = at("--edge-only") || "audit/edge-only-traversal-results.json";
+  const edgeOnly = existsSync(edgeOnlyPath) ? JSON.parse(readFileSync(edgeOnlyPath, "utf8")) : null;
+  writeFileSync(outPath, renderCharacterization(results, compare, edgeOnly));
   console.log(`wrote ${outPath} from ${inPath}${compare ? ` (compared against ${comparePath})` : ""}`);
 }

@@ -126,7 +126,7 @@ export function createInitialState(trajectorySeed, config = currentModelConfig) 
         id,
         parentIds: null,
         birthGeneration: 0,
-        ageGenerations: founderAgeForId(id),
+        ageGenerations: founderAgeForId(id, config),
         bodyGenome: genome,
         timeAllocation: band.alloc, // exact centroid, no noise (§7)
         birthEventId,

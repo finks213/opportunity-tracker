@@ -10,7 +10,7 @@
  */
 
 /** @type {readonly ["canopy","forest_floor","shoreline"]} */
-export const ZONES = /** @type {const} */ (["canopy", "forest_floor", "shoreline"]);
+export const ZONES = Object.freeze(/** @type {const} */ (["canopy", "forest_floor", "shoreline"]));
 
 /** Canonical zone index lookup. */
 export const ZONE_INDEX = Object.freeze({
@@ -25,17 +25,17 @@ export const ZONE_INDEX = Object.freeze({
  * @type {readonly number[][]}
  */
 export const ZONE_NEIGHBORS = Object.freeze([
-  [1],
-  [0, 2],
-  [1],
+  Object.freeze([1]),
+  Object.freeze([0, 2]),
+  Object.freeze([1]),
 ]);
 
-/**
- * Provisional carrying capacities (contract §6). Model controls, not ecological
- * claims. Fixed before characterization.
- * @type {readonly [number, number, number]}
- */
-export const ZONE_CAPACITY = Object.freeze([90, 90, 90]);
+// NOTE (revision-3 repair): a `ZONE_CAPACITY = [90,90,90]` constant was
+// previously exported here while the operative configuration used [55,55,55].
+// That was a second, stale source of truth for a superseded value. Zone
+// capacities now live ONLY in the versioned model configuration
+// (`currentModelConfig.zoneCapacity`, mirrored into the canonical model
+// definition), so there is exactly one authority.
 
 /**
  * Simple Canvas regions (fractions of the canvas width). Debug probe only;

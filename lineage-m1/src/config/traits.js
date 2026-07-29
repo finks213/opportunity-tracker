@@ -11,7 +11,7 @@
  */
 
 /** Canonical trait order (contract §8). Indices 0..6 meaningful, 7..9 neutral. */
-export const TRAITS = /** @type {const} */ ([
+export const TRAITS = Object.freeze(/** @type {const} */ ([
   "toe_webbing",       // 0
   "curved_claws",      // 1
   "dense_fur",         // 2
@@ -22,7 +22,7 @@ export const TRAITS = /** @type {const} */ ([
   "coat_shade",        // 7 neutral
   "ear_tip_shape",     // 8 neutral
   "tail_tip_marking",  // 9 neutral
-]);
+]));
 
 export const TRAIT_INDEX = Object.freeze(
   Object.fromEntries(TRAITS.map((t, i) => [t, i]))
@@ -36,7 +36,7 @@ export const MEANINGFUL_TRAIT_INDICES = Object.freeze([0, 1, 2, 3, 4, 5, 6]);
 export const NEUTRAL_TRAIT_INDICES = Object.freeze([7, 8, 9]);
 
 /** Canonical performance dimensions (contract §9). */
-export const PERFORMANCE_DIMENSIONS = /** @type {const} */ ([
+export const PERFORMANCE_DIMENSIONS = Object.freeze(/** @type {const} */ ([
   "canopy_grip",             // 0
   "land_mobility",           // 1
   "aquatic_propulsion",      // 2
@@ -44,7 +44,7 @@ export const PERFORMANCE_DIMENSIONS = /** @type {const} */ ([
   "thermal_retention",       // 4
   "visual_sensing",          // 5
   "energy_efficiency",       // 6
-]);
+]));
 
 export const NUM_DIMENSIONS = PERFORMANCE_DIMENSIONS.length; // 7
 
@@ -71,7 +71,7 @@ const CG = 0, LM = 1, WP = 2, DR = 3, TH = 4, VS = 5, EE = 6;
  *
  * @type {number[][]}
  */
-export const EFFECT = buildEffect();
+export const EFFECT = Object.freeze(buildEffect().map((row) => Object.freeze(row)));
 
 function buildEffect() {
   const E = [];

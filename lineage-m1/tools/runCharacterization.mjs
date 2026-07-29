@@ -15,7 +15,7 @@ import { pathToFileURL } from "node:url";
 import { createInitialState } from "../src/core/individual.js";
 import { advanceGeneration, isExtinct } from "../src/core/simulation.js";
 import { computeZoneLoads, survivalProbability } from "../src/core/survival.js";
-import { currentModelConfig, legacyModelConfigV1 } from "../src/config/modelConfig.js";
+import { currentModelConfig, legacyModelConfigV1, modelDefinitionFor } from "../src/config/modelConfig.js";
 import { canonicalStringify } from "../src/core/canonicalSerialize.js";
 import { ordinaryMedian } from "../src/core/math.js";
 import { ZONES } from "../src/config/zones.js";
@@ -475,7 +475,9 @@ export function runCharacterization(opts = {}) {
   return {
     contractSection: "21",
     configVersion: config.version,
-    configHash: createHash("sha256").update(canonicalStringify(config)).digest("hex"),
+    modelDefinitionHash: createHash("sha256").update(canonicalStringify(modelDefinitionFor(config))).digest("hex"),
+    tuningConfigHash: createHash("sha256").update(canonicalStringify(config)).digest("hex"),
+    modelDefinition: modelDefinitionFor(config),
     declaredSeedRange: { start: 1, endInclusive: seedCount },
     declaredGenerations: generations,
     guardrails,

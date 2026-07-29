@@ -1,13 +1,12 @@
 // @ts-check
 /**
- * Contract §19 D, §19.2, §19.3 — paired-world construction and the exact
- * probability gate.
+ * Contract §19 D, §19.2, §19.3, §19.4 — paired-world construction, the exact
+ * probability gate, and the EXACT matched trajectory gate.
  *
- * The full 200-seed §19.4 matched trajectory gate is executed by
- * `tools/runFixture.mjs` (its raw output is audit/fixture-results.json). This
- * test proves construction, the exact probability gate, and a bounded
- * directional slice of the trajectory gate so the suite stays build-blocking
- * without re-running the whole batch.
+ * Revision-3 repair: the §19.4 gate now runs the declared seeds 1..200 with the
+ * frozen 130/200 floor inside this build-blocking file. Revision 2 substituted
+ * seeds 1..12 and a proportional floor, so a regression affecting seeds 13..200
+ * could leave the advertised suite green.
  */
 
 import test from "node:test";
@@ -130,6 +129,61 @@ test("§19 D — the four worlds differ only in the twelve specified toe_webbing
   }
 });
 
+test("§19 D — construction is ONE hydration cloned into four worlds", () => {
+  // Revision-3 repair: buildFourWorlds() previously hydrated the envelope four
+  // separate times. Deterministic hydration made the bytes equal, so the numbers
+  // were right, but the mandated single-baseline clone operation was not the
+  // construction performed. This asserts the construction path itself, not just
+  // output equality.
+  const worlds = buildFourWorlds(envelope, 17, C);
+
+  assert.equal(worlds.hydrationCount, 1, "the envelope must be hydrated exactly once");
+  assert.equal(typeof worlds.baselineCanonicalBytes, "string");
+  assert.ok(worlds.baselineCanonicalBytes.length > 0);
+
+  // All four worlds originate from that one set of baseline bytes: before the
+  // overrides are considered, each low world IS the baseline byte-for-byte.
+  assert.equal(serializeCanonicalBiology(worlds.canopyLow), worlds.baselineCanonicalBytes);
+  assert.equal(serializeCanonicalBiology(worlds.shorelineLow), worlds.baselineCanonicalBytes);
+
+  // The high worlds differ from the baseline in exactly the declared 12 values.
+  for (const [high, focalIds] of [
+    [worlds.canopyHigh, envelope.canopyFocalIds],
+    [worlds.shorelineHigh, envelope.shorelineFocalIds],
+  ]) {
+    const baselineState = JSON.parse(worlds.baselineCanonicalBytes);
+    const baseById = new Map(baselineState.currentIndividuals.map((i) => [i.id, i]));
+    let differing = 0;
+    for (const ind of high.currentIndividuals) {
+      const base = baseById.get(ind.id);
+      for (let t = 0; t < ind.bodyGenome.length; t++) {
+        if (ind.bodyGenome[t] !== base.bodyGenome[t]) {
+          assert.equal(t, TRAIT_INDEX.toe_webbing);
+          assert.ok(focalIds.includes(ind.id));
+          differing++;
+        }
+      }
+    }
+    assert.equal(differing, 12);
+    // RNG state and every unrelated field come straight from the baseline.
+    assert.deepEqual(high.simRng.toState(), baselineState.simRngState);
+    assert.equal(high.generation, baselineState.generation);
+    assert.equal(high.nextIndividualId, baselineState.nextIndividualId);
+    assert.equal(high.nextMutationEventId, baselineState.nextMutationEventId);
+    assert.equal(high.nextAllocationMutationEventId, baselineState.nextAllocationMutationEventId);
+    assert.equal(high.birthEvents.length, baselineState.birthEvents.length);
+    assert.equal(high.configVersion, baselineState.configVersion);
+  }
+
+  // A clone must be an independent object graph, not an alias of the baseline.
+  worlds.canopyHigh.currentIndividuals[0].ageGenerations += 5;
+  assert.notEqual(
+    worlds.canopyLow.currentIndividuals[0].ageGenerations,
+    worlds.canopyHigh.currentIndividuals[0].ageGenerations,
+    "clones must not share individual objects"
+  );
+});
+
 test("§19.2 — the webbing override is a construction operation, not a mutation event", () => {
   const state = hydrateDefiningFixtureV1(envelope, 6, C);
   const beforeBody = state.bodyMutationEvents.length;
@@ -158,39 +212,53 @@ test("§19.2 — the tracer is created in observer state and does not change bio
   );
 });
 
-test("§19.4 — directional slice: webbing helps at the shoreline and hurts in the canopy", () => {
-  // A bounded slice of the declared 1..200 batch so the build-blocking suite
-  // stays fast; tools/runFixture.mjs runs the full gate for the audit record.
-  const SLICE = 12;
-  const measurementGeneration = envelope.measurementGeneration;
-  const canopyLow = [], canopyHigh = [], shoreLow = [], shoreHigh = [];
-  let canopySuccess = 0, shorelineSuccess = 0;
+test("§19.4 — EXACT matched trajectory gate: seeds 1..200, floor 130/200", async () => {
+  // Revision-3 repair. Revision 2 ran only seeds 1..12 here with a proportional
+  // floor of ceil(12 * 0.65), so a regression affecting seeds 13..200 could not
+  // fail the advertised build-blocking suite; the exact gate lived only in a
+  // separate tool outside `npm test`. §19 requires THIS file to prove the gate,
+  // and its exact seed set is 1..200 with a 130/200 floor.
+  //
+  // This is the slowest test in the suite by design. It is part of the official
+  // clean gate, and `npm test` executes it.
+  const { runFixtureExperiment } = await import("../tools/runFixture.mjs");
+  const results = runFixtureExperiment({ config: C });
 
-  for (let seed = envelope.trajectorySeeds.start; seed < envelope.trajectorySeeds.start + SLICE; seed++) {
-    const w = buildFourWorlds(envelope, seed, C);
-    const cl = runWorldWithTracer(w.canopyLow, envelope.canopyFocalIds, measurementGeneration, C).contribution;
-    const ch = runWorldWithTracer(w.canopyHigh, envelope.canopyFocalIds, measurementGeneration, C).contribution;
-    const sl = runWorldWithTracer(w.shorelineLow, envelope.shorelineFocalIds, measurementGeneration, C).contribution;
-    const sh = runWorldWithTracer(w.shorelineHigh, envelope.shorelineFocalIds, measurementGeneration, C).contribution;
-    canopyLow.push(cl); canopyHigh.push(ch); shoreLow.push(sl); shoreHigh.push(sh);
-    if (ch < cl) canopySuccess++;
-    if (sh > sl) shorelineSuccess++;
-  }
+  // The declared seed set, not a reduced one.
+  assert.equal(results.seedRange.start, 1);
+  assert.equal(results.seedRange.endInclusive, 200);
+  assert.equal(results.gates.seedCount, 200);
+  // The exact frozen floor, not a proportion of a smaller set.
+  assert.equal(results.gates.successThreshold, 130, "the floor must be exactly 130 of 200");
+  assert.equal(envelope.measurementGeneration, 90);
 
-  const medians = {
-    canopyLow: ordinaryMedian(canopyLow),
-    canopyHigh: ordinaryMedian(canopyHigh),
-    shorelineLow: ordinaryMedian(shoreLow),
-    shorelineHigh: ordinaryMedian(shoreHigh),
-  };
-  console.log(`\n  §19.4 slice (${SLICE} seeds): canopy median low=${medians.canopyLow.toFixed(3)} high=${medians.canopyHigh.toFixed(3)}`);
-  console.log(`  §19.4 slice: shoreline median low=${medians.shorelineLow.toFixed(3)} high=${medians.shorelineHigh.toFixed(3)}`);
-  console.log(`  §19.4 slice: canopy successes ${canopySuccess}/${SLICE}, shoreline successes ${shorelineSuccess}/${SLICE}`);
+  console.log(
+    `\n  §19.4 EXACT gate: canopy median low=${results.medians.canopyLow.toFixed(4)} high=${results.medians.canopyHigh.toFixed(4)}`
+  );
+  console.log(
+    `  §19.4 EXACT gate: shoreline median low=${results.medians.shorelineLow.toFixed(4)} high=${results.medians.shorelineHigh.toFixed(4)}`
+  );
+  console.log(
+    `  §19.4 EXACT gate: canopy successes ${results.successCounts.canopy}/200, shoreline ${results.successCounts.shoreline}/200, ties ${results.tieCounts.canopy}/${results.tieCounts.shoreline}`
+  );
 
-  assert.ok(medians.canopyHigh < medians.canopyLow, "median canopy-high contribution must be strictly less than canopy-low");
-  assert.ok(medians.shorelineHigh > medians.shorelineLow, "median shoreline-high contribution must be strictly greater than shoreline-low");
-  assert.ok(canopySuccess >= Math.ceil(SLICE * 0.65), `canopy successes ${canopySuccess}/${SLICE} below the 65% floor`);
-  assert.ok(shorelineSuccess >= Math.ceil(SLICE * 0.65), `shoreline successes ${shorelineSuccess}/${SLICE} below the 65% floor`);
+  assert.ok(
+    results.medians.canopyHigh < results.medians.canopyLow,
+    `median canopy-high (${results.medians.canopyHigh}) must be strictly less than canopy-low (${results.medians.canopyLow})`
+  );
+  assert.ok(
+    results.medians.shorelineHigh > results.medians.shorelineLow,
+    `median shoreline-high (${results.medians.shorelineHigh}) must be strictly greater than shoreline-low (${results.medians.shorelineLow})`
+  );
+  assert.ok(
+    results.successCounts.canopy >= 130,
+    `canopy successes ${results.successCounts.canopy} below the frozen floor of 130`
+  );
+  assert.ok(
+    results.successCounts.shoreline >= 130,
+    `shoreline successes ${results.successCounts.shoreline} below the frozen floor of 130`
+  );
+  assert.equal(results.gates.allPass, true);
 });
 
 test("§19 — observer independence within the fixture across all five required strategies", () => {
