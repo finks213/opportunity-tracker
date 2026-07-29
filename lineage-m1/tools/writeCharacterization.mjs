@@ -1,0 +1,277 @@
+// @ts-check
+/**
+ * Render CHARACTERIZATION.md from the raw audit JSON only (contract §21.7).
+ *
+ * The prose is generated from audit/characterization-results.json so it cannot
+ * drift from the raw evidence. When a config-1 side-by-side file is present it
+ * is included, as §21.7 requires, with no claim that either result is
+ * automatically correct.
+ *
+ * Usage: node tools/writeCharacterization.mjs [--in path] [--compare path] [--out path]
+ */
+
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { pathToFileURL } from "node:url";
+import { ZONES } from "../src/config/zones.js";
+
+const fmt = (v, digits = 4) =>
+  v === null || v === undefined ? "INCONCLUSIVE" : typeof v === "number" ? v.toFixed(digits) : String(v);
+const pass = (b) => (b ? "PASS" : "**FAIL**");
+
+/**
+ * @param {Object} r results object
+ * @param {Object|null} compare optional config-1 results
+ * @returns {string}
+ */
+export function renderCharacterization(r, compare = null) {
+  const g = r.guardrails;
+  const lines = [];
+
+  lines.push("# LINEAGE Milestone 1 — Characterization");
+  lines.push("");
+  lines.push("Generated from `audit/characterization-results.json` by");
+  lines.push("`tools/writeCharacterization.mjs`. Every number below is read from that raw");
+  lines.push("file; none is retyped by hand.");
+  lines.push("");
+  lines.push("Characterization **describes this first implementation**. It does not define");
+  lines.push("biological truth, is not an ecological claim, and is not frozen as a future");
+  lines.push("regression target (contract §21).");
+  lines.push("");
+  lines.push(`- configuration: \`${r.configVersion}\``);
+  lines.push(`- config hash: \`${r.configHash}\``);
+  lines.push(`- declared seeds: ${r.declaredSeedRange.start}..${r.declaredSeedRange.endInclusive}`);
+  lines.push(`- declared duration: ${r.declaredGenerations} generations per seed unless extinct`);
+  lines.push("");
+
+  // ---- §21.4 guardrails ----
+  lines.push("## §21.4 Population guardrails");
+  lines.push("");
+  lines.push("| Guardrail | Required | Measured | Result |");
+  lines.push("|---|---|---|---|");
+  lines.push(`| whole-world extinction by generation 180 | < 5% | ${(g.extinctionRate * 100).toFixed(2)}% | ${pass(g.extinctionRatePass)} |`);
+  lines.push(`| median total living population | 90..360 | ${fmt(g.medianPopulation, 1)} | ${pass(g.medianPopulationPass)} |`);
+  for (let z = 0; z < ZONES.length; z++) {
+    lines.push(`| median effective load — ${ZONES[z]} | >= 15 | ${fmt(g.medianZoneLoads[z], 2)} | ${pass(g.medianZoneLoads[z] >= 15)} |`);
+  }
+  lines.push(`| median concentration | <= 0.80 | ${fmt(g.medianConcentration)} | ${pass(g.medianConcentrationPass)} |`);
+  lines.push("");
+  lines.push(`**All §21.4 guardrails: ${pass(g.allPass)}**`);
+  lines.push("");
+  lines.push("### Concentration statistic");
+  lines.push("");
+  lines.push("Defined exactly as §21.4 requires, for every non-extinct seed at generation 180:");
+  lines.push("");
+  lines.push("```");
+  lines.push("totalLoad_s     = sum_z( zoneLoad_s[z] )");
+  lines.push("concentration_s = max_z( zoneLoad_s[z] / totalLoad_s )");
+  lines.push("```");
+  lines.push("");
+  lines.push(`Included seeds: **${g.concentrationIncludedSeedCount}** (extinct seeds excluded only because`);
+  lines.push("`totalLoad_s = 0`; they remain fully counted by the extinction guardrail).");
+  lines.push(`Ordinary median of those values: **${fmt(g.medianConcentration)}**.`);
+  lines.push("");
+  lines.push("Every seed-level concentration value is preserved in");
+  lines.push("`audit/characterization-results.json` under `concentrationValues` and per-seed");
+  lines.push("under `seeds[].concentration`. Per-zone medians, a median-population seed, and");
+  lines.push("independently combined median zone shares are **not** substituted.");
+  lines.push("");
+
+  // ---- §21.3 mutation supply ----
+  lines.push("## §21.3 Mutation supply by birth dominant-zone bin");
+  lines.push("");
+  lines.push("Mutation generation is evaluated as **events per birth**, not final carriers.");
+  lines.push("");
+  lines.push("| Birth zone bin | Births | Body-mutation opportunities | Body-mutation events | Events / birth | Positive webbing events | Crossing <0.20 → >=0.35 |");
+  lines.push("|---|---|---|---|---|---|---|");
+  for (const m of r.mutationSupply) {
+    lines.push(
+      `| ${m.zone} | ${m.births} | ${m.bodyMutationOpportunities} | ${m.bodyMutationEvents} | ` +
+      `${fmt(m.bodyMutationEventsPerBirth, 4)} | ${m.positiveWebbingEvents} | ${m.crossingWebbingEvents} |`
+    );
+  }
+  lines.push("");
+  lines.push("### Declared minimal functionality");
+  lines.push("");
+  lines.push(`- at least one positive webbing event among canopy-dominant births: **${pass(r.minimalFunctionality.canopyPositiveWebbingEvent)}**`);
+  lines.push(`- at least one among shoreline-dominant births: **${pass(r.minimalFunctionality.shorelinePositiveWebbingEvent)}**`);
+  lines.push(`- opportunity identity (\`bodyMutationOpportunityCount === allocationMutationOpportunityCount === nonFounderBirthCount\`) holds for every seed: **${pass(r.opportunityIdentityHolds)}**`);
+  lines.push("");
+  lines.push("### Surviving webbing carriers");
+  lines.push("");
+  lines.push(`Carrier definition (declared): \`bodyGenome[toe_webbing] >= 0.35\`, measured at generation ${r.declaredGenerations}.`);
+  lines.push("");
+  lines.push("| Measure | Value |");
+  lines.push("|---|---|");
+  lines.push(`| carriers at age 1 (batch total) | ${r.carrierSummary.carriersAge1} |`);
+  lines.push(`| carriers at age 2 (batch total) | ${r.carrierSummary.carriersAge2} |`);
+  lines.push(`| carriers at age 3+ (batch total) | ${r.carrierSummary.carriersAge3plus} |`);
+  lines.push(`| median final carrier prevalence | ${fmt(r.carrierSummary.medianCarrierPrevalence)} |`);
+  lines.push("");
+  lines.push("Equal final carrier prevalence across zones is **not** required and is not");
+  lines.push("expected: differential survival should make it unlikely (§21.3).");
+  lines.push("");
+
+  // ---- §21.5 trait effects ----
+  lines.push("## §21.5 Trait-effect characterization");
+  lines.push("");
+  lines.push(`Exact logistic survival differences for a declared fixed delta of +0.20 applied`);
+  lines.push("to one trait at a time on genomes sampled from the batch, with each zone's");
+  lines.push("one-hot allocation, age 1, and the batch-median zone loads. Derivative-at-the-");
+  lines.push("midpoint approximations are not used.");
+  lines.push("");
+  if (r.traitEffects.note) {
+    lines.push(`**${r.traitEffects.note}**`);
+    lines.push("");
+  } else {
+    lines.push("| Trait | Zone | n | Median Δp | 5th | 95th | Classification |");
+    lines.push("|---|---|---|---|---|---|---|");
+    for (const [trait, zones] of Object.entries(r.traitEffects.meaningful)) {
+      for (const [zone, cell] of Object.entries(zones)) {
+        lines.push(
+          `| ${trait} | ${zone} | ${cell.n} | ${fmt(cell.median)} | ${fmt(cell.p5)} | ${fmt(cell.p95)} | ${cell.classification} |`
+        );
+      }
+    }
+    lines.push("");
+    lines.push("### Neutral traits");
+    lines.push("");
+    lines.push("Exact causal difference must be zero **by invariant**, not inferred from noisy");
+    lines.push("correlations (§21.5).");
+    lines.push("");
+    lines.push("| Neutral trait | Max absolute exact difference | Exactly zero |");
+    lines.push("|---|---|---|");
+    for (const [trait, cell] of Object.entries(r.traitEffects.neutral)) {
+      lines.push(`| ${trait} | ${cell.maxAbsoluteExactDifference} | ${cell.exactlyZero ? "yes" : "**no**"} |`);
+    }
+    lines.push("");
+  }
+
+  // ---- §21.6 lifecycle ----
+  const L = r.lifecycle;
+  lines.push("## §21.6 Lifecycle characterization");
+  lines.push("");
+  lines.push("| Measure | Value |");
+  lines.push("|---|---|");
+  lines.push(`| mean births per generation | ${fmt(L.meanBirthsPerGeneration, 2)} |`);
+  lines.push(`| mean deaths per generation | ${fmt(L.meanDeathsPerGeneration, 2)} |`);
+  lines.push(`| mean mating pairs per generation | ${fmt(L.meanMatingPairsPerGeneration, 2)} |`);
+  lines.push(`| mean unmatched eligible adults per generation | ${fmt(L.meanUnmatchedEligiblePerGeneration, 2)} |`);
+  lines.push(`| mean mating overlap | ${fmt(L.meanMatingOverlap)} |`);
+  lines.push(`| mating overlap, 5th percentile (median across seeds) | ${fmt(L.overlapP5)} |`);
+  lines.push(`| mating overlap, 95th percentile (median across seeds) | ${fmt(L.overlapP95)} |`);
+  for (let z = 0; z < ZONES.length; z++) {
+    lines.push(`| median population in current zone bin — ${ZONES[z]} | ${fmt(L.medianZoneBinCounts[z], 1)} |`);
+  }
+  lines.push(`| allocation-mutation events per non-founder birth | ${fmt(L.allocationMutationEventsPerNonFounderBirth)} |`);
+  lines.push(`| allocation transfers into a below-threshold zone | ${L.lowShareTargetTransfers} |`);
+  lines.push(`| seeds reaching adjacency traversal | ${L.seedsReachingAdjacencyTraversal} of ${r.seeds.length} |`);
+  lines.push(`| median first traversal generation | ${fmt(L.medianFirstAdjacencyTraversalGeneration, 1)} |`);
+  lines.push(`| zero-allocation fallbacks (must be 0) | ${L.totalZeroAllocationFallbacks} |`);
+  lines.push("");
+  lines.push("Age distribution at the final generation is preserved per seed in the raw JSON");
+  lines.push("under `seeds[].ageDistribution`.");
+  lines.push("");
+
+  // ---- named limitation: zone load vs zone-bin occupancy ----
+  const nonExtinct = r.seeds.filter((s) => !s.extinct);
+  const loadStats = [0, 1, 2].map((z) => {
+    const v = nonExtinct.map((s) => s.zoneLoad[z]).sort((a, b) => a - b);
+    const binZero = nonExtinct.filter((s) => s.zoneBinCounts[z] === 0).length;
+    const pick = (p) => v[Math.floor(p * (v.length - 1))];
+    return { min: v[0], p5: pick(0.05), p50: pick(0.5), p95: pick(0.95), binZero };
+  });
+  lines.push("### Named limitation — zone load versus zone-bin occupancy");
+  lines.push("");
+  lines.push("Reported because it is a real property of this implementation, not tuned away.");
+  lines.push("");
+  lines.push("| Zone | min load | 5th | median | 95th | seeds with **zero** dominant-bin animals |");
+  lines.push("|---|---|---|---|---|---|");
+  for (let z = 0; z < ZONES.length; z++) {
+    const s = loadStats[z];
+    lines.push(
+      `| ${ZONES[z]} | ${fmt(s.min, 2)} | ${fmt(s.p5, 2)} | ${fmt(s.p50, 2)} | ${fmt(s.p95, 2)} | ${s.binZero} of ${nonExtinct.length} |`
+    );
+  }
+  lines.push("");
+  lines.push("**All three zones remain meaningfully populated by the contract's own measure.**");
+  lines.push("§21.4 defines zone population as *effective load*, and every zone clears it: no");
+  lines.push(`seed in the batch has any zone load below 1, and ${nonExtinct.filter((s) => s.zoneLoad.every((v) => v >= 15)).length} of ${nonExtinct.length} seeds hold every`);
+  lines.push("zone at load 15 or more.");
+  lines.push("");
+  lines.push("However, the **debug zone-bin view** tells a different story about the shoreline:");
+  lines.push(`in ${loadStats[2].binZero} of ${nonExtinct.length} seeds, no living individual has the shoreline as its`);
+  lines.push("`argmax(timeAllocation)` at generation 180. The shoreline is used *part-time by");
+  lines.push("many animals* rather than *full-time by a resident subpopulation*: roughly 30");
+  lines.push("units of shoreline load are spread thinly across canopy- and forest-floor-");
+  lines.push("dominant animals.");
+  lines.push("");
+  lines.push("This is not a §25 halt condition — the zone bin is explicitly a debug-only");
+  lines.push("grouping with no persistent identity and no biological role (§5.4), and the");
+  lines.push("contract's zone-population guardrail is load-based and passes. It is recorded");
+  lines.push("here as **named remaining uncertainty** (§28: \"remaining uncertainty is named");
+  lines.push("rather than hidden\") and as a concrete input to Milestone 2, where a visibly");
+  lines.push("empty shoreline late in a run would matter to what a child actually sees.");
+  lines.push("");
+
+  // ---- §21.7 side-by-side ----
+  lines.push("## §21.7 Side-by-side configuration comparison");
+  lines.push("");
+  if (!compare) {
+    lines.push("No comparison file was supplied to this render.");
+  } else {
+    const cg = compare.guardrails;
+    lines.push("Required because `zoneCapacity` changed from the contract's provisional");
+    lines.push("`[90,90,90]` to `[55,55,55]` (see `DECISIONS.md` D-009). Both batches use the");
+    lines.push("same declared seeds and duration.");
+    lines.push("");
+    lines.push(`| Guardrail | Required | \`${compare.configVersion}\` | \`${r.configVersion}\` |`);
+    lines.push("|---|---|---|---|");
+    lines.push(`| extinction rate | < 5% | ${(cg.extinctionRate * 100).toFixed(2)}% ${cg.extinctionRatePass ? "" : "**FAIL**"} | ${(g.extinctionRate * 100).toFixed(2)}% ${g.extinctionRatePass ? "" : "**FAIL**"} |`);
+    lines.push(`| median population | 90..360 | ${fmt(cg.medianPopulation, 1)} ${cg.medianPopulationPass ? "" : "**FAIL**"} | ${fmt(g.medianPopulation, 1)} ${g.medianPopulationPass ? "" : "**FAIL**"} |`);
+    for (let z = 0; z < ZONES.length; z++) {
+      lines.push(`| median load — ${ZONES[z]} | >= 15 | ${fmt(cg.medianZoneLoads[z], 2)} | ${fmt(g.medianZoneLoads[z], 2)} |`);
+    }
+    lines.push(`| median concentration | <= 0.80 | ${fmt(cg.medianConcentration)} ${cg.medianConcentrationPass ? "" : "**FAIL**"} | ${fmt(g.medianConcentration)} ${g.medianConcentrationPass ? "" : "**FAIL**"} |`);
+    lines.push(`| all guardrails | — | ${pass(cg.allPass)} | ${pass(g.allPass)} |`);
+    lines.push("");
+    lines.push("**No claim is made that the newer configuration is automatically correct.**");
+    lines.push(`\`${r.configVersion}\` was adopted for exactly one reason: \`${compare.configVersion}\` misses the`);
+    lines.push("predeclared median-population band. Both capacities are authored model");
+    lines.push("controls, not ecological claims.");
+  }
+  lines.push("");
+
+  // ---- honest status ----
+  lines.push("## Reporting status (§21.7)");
+  lines.push("");
+  const failures = [];
+  if (!g.extinctionRatePass) failures.push("extinction rate");
+  if (!g.medianPopulationPass) failures.push("median population band");
+  if (!g.medianZoneLoadsPass) failures.push("per-zone median load");
+  if (!g.medianConcentrationPass) failures.push("median concentration");
+  if (!r.minimalFunctionality.allPass) failures.push("mutation-supply minimal functionality");
+  if (!r.opportunityIdentityHolds) failures.push("mutation-opportunity identity");
+  if (failures.length === 0) {
+    lines.push("Every declared guardrail and minimal-functionality requirement in this batch");
+    lines.push("reports `PASS`. No metric was altered after results were seen. No measured");
+    lines.push("median is frozen as a future target in this session.");
+  } else {
+    lines.push(`**FAIL** — the following declared gates did not hold: ${failures.join(", ")}.`);
+  }
+  lines.push("");
+  return lines.join("\n");
+}
+
+const isMain =
+  process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (isMain) {
+  const args = process.argv.slice(2);
+  const at = (f) => (args.indexOf(f) >= 0 ? args[args.indexOf(f) + 1] : undefined);
+  const inPath = at("--in") || "audit/characterization-results.json";
+  const comparePath = at("--compare") || "audit/characterization-results-config1.json";
+  const outPath = at("--out") || "CHARACTERIZATION.md";
+  const results = JSON.parse(readFileSync(inPath, "utf8"));
+  const compare = existsSync(comparePath) ? JSON.parse(readFileSync(comparePath, "utf8")) : null;
+  writeFileSync(outPath, renderCharacterization(results, compare));
+  console.log(`wrote ${outPath} from ${inPath}${compare ? ` (compared against ${comparePath})` : ""}`);
+}

@@ -1,0 +1,29 @@
+{
+  "contractSection": "1 / 24 Stage G / 27",
+  "description": "Hashes proving the quarantined historical Python references were copied unchanged and never modified. These files are defective references and are never imported by any source module.",
+  "expectedSource": "SHA256_MANIFEST.json from LINEAGE_CLAUDE_CODE_STARTER_v3_3",
+  "files": [
+    {
+      "path": "reference/biology.py",
+      "bytes": 19383,
+      "expectedSha256": "ecc9d143a03bf3cf4ac4fab29598acd072396227f6305b212f681b0544b3a1f8",
+      "actualSha256": "ecc9d143a03bf3cf4ac4fab29598acd072396227f6305b212f681b0544b3a1f8",
+      "unchanged": true
+    },
+    {
+      "path": "reference/engine.py",
+      "bytes": 7882,
+      "expectedSha256": "303859044028fa4f4d67e862792090b9094b737e4a75495c338ddde50f22247c",
+      "actualSha256": "303859044028fa4f4d67e862792090b9094b737e4a75495c338ddde50f22247c",
+      "unchanged": true
+    },
+    {
+      "path": "reference/analyze.py",
+      "bytes": 9351,
+      "expectedSha256": "d878c440eef459aa544be0b3ff19ae202e241d690b9df5264e17eabd3d5ab494",
+      "actualSha256": "d878c440eef459aa544be0b3ff19ae202e241d690b9df5264e17eabd3d5ab494",
+      "unchanged": true
+    }
+  ],
+  "allUnchanged": true
+}

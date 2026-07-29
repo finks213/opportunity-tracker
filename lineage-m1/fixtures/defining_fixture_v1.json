@@ -1,0 +1,3826 @@
+{
+  "fixtureSchemaVersion": "lineage-defining-fixture-1",
+  "description": "Frozen generation-zero state for the LINEAGE Milestone 1 defining webbing experiment.",
+  "generation": 0,
+  "nextIndividualId": 121,
+  "nextBirthEventId": 121,
+  "nextMatingEventId": 1,
+  "nextMutationEventId": 1,
+  "nextAllocationMutationEventId": 1,
+  "traitOrder": [
+    "toe_webbing",
+    "curved_claws",
+    "dense_fur",
+    "long_hindlimbs",
+    "strong_tail",
+    "large_eyes",
+    "streamlined_body",
+    "coat_shade",
+    "ear_tip_shape",
+    "tail_tip_marking"
+  ],
+  "zoneOrder": [
+    "canopy",
+    "forest_floor",
+    "shoreline"
+  ],
+  "baselineBodyGenome": [
+    0.15,
+    0.45,
+    0.4,
+    0.45,
+    0.4,
+    0.4,
+    0.35,
+    0.5,
+    0.5,
+    0.5
+  ],
+  "bandAllocations": {
+    "canopy": [
+      0.985,
+      0.014,
+      0.001
+    ],
+    "forest_floor": [
+      0.01,
+      0.98,
+      0.01
+    ],
+    "shoreline": [
+      0.001,
+      0.014,
+      0.985
+    ]
+  },
+  "lowWebbing": 0.15,
+  "highWebbing": 0.75,
+  "canopyFocalIds": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
+  "shorelineFocalIds": [
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92
+  ],
+  "trajectorySeeds": {
+    "start": 1,
+    "endInclusive": 200
+  },
+  "measurementGeneration": 90,
+  "tieTreatment": "ties_do_not_count_as_success",
+  "standardZoneLoads": {
+    "canopy": 39.84,
+    "forest_floor": 40.32,
+    "shoreline": 39.84
+  },
+  "currentIndividuals": [
+    {
+      "id": 1,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 1
+    },
+    {
+      "id": 2,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 2
+    },
+    {
+      "id": 3,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 3
+    },
+    {
+      "id": 4,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 4
+    },
+    {
+      "id": 5,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 5
+    },
+    {
+      "id": 6,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 6
+    },
+    {
+      "id": 7,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 7
+    },
+    {
+      "id": 8,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 8
+    },
+    {
+      "id": 9,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 9
+    },
+    {
+      "id": 10,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 10
+    },
+    {
+      "id": 11,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 11
+    },
+    {
+      "id": 12,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 12
+    },
+    {
+      "id": 13,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 13
+    },
+    {
+      "id": 14,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 14
+    },
+    {
+      "id": 15,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 15
+    },
+    {
+      "id": 16,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 16
+    },
+    {
+      "id": 17,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 17
+    },
+    {
+      "id": 18,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 18
+    },
+    {
+      "id": 19,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 19
+    },
+    {
+      "id": 20,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 20
+    },
+    {
+      "id": 21,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 21
+    },
+    {
+      "id": 22,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 22
+    },
+    {
+      "id": 23,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 23
+    },
+    {
+      "id": 24,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 24
+    },
+    {
+      "id": 25,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 25
+    },
+    {
+      "id": 26,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 26
+    },
+    {
+      "id": 27,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 27
+    },
+    {
+      "id": 28,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 28
+    },
+    {
+      "id": 29,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 29
+    },
+    {
+      "id": 30,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 30
+    },
+    {
+      "id": 31,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 31
+    },
+    {
+      "id": 32,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 32
+    },
+    {
+      "id": 33,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 33
+    },
+    {
+      "id": 34,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 34
+    },
+    {
+      "id": 35,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 35
+    },
+    {
+      "id": 36,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 36
+    },
+    {
+      "id": 37,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 37
+    },
+    {
+      "id": 38,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 38
+    },
+    {
+      "id": 39,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 39
+    },
+    {
+      "id": 40,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.985,
+        0.014,
+        0.001
+      ],
+      "birthEventId": 40
+    },
+    {
+      "id": 41,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 41
+    },
+    {
+      "id": 42,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 42
+    },
+    {
+      "id": 43,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 43
+    },
+    {
+      "id": 44,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 44
+    },
+    {
+      "id": 45,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 45
+    },
+    {
+      "id": 46,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 46
+    },
+    {
+      "id": 47,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 47
+    },
+    {
+      "id": 48,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 48
+    },
+    {
+      "id": 49,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 49
+    },
+    {
+      "id": 50,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 50
+    },
+    {
+      "id": 51,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 51
+    },
+    {
+      "id": 52,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 52
+    },
+    {
+      "id": 53,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 53
+    },
+    {
+      "id": 54,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 54
+    },
+    {
+      "id": 55,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 55
+    },
+    {
+      "id": 56,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 56
+    },
+    {
+      "id": 57,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 57
+    },
+    {
+      "id": 58,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 58
+    },
+    {
+      "id": 59,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 59
+    },
+    {
+      "id": 60,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 60
+    },
+    {
+      "id": 61,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 61
+    },
+    {
+      "id": 62,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 62
+    },
+    {
+      "id": 63,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 63
+    },
+    {
+      "id": 64,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 64
+    },
+    {
+      "id": 65,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 65
+    },
+    {
+      "id": 66,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 66
+    },
+    {
+      "id": 67,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 67
+    },
+    {
+      "id": 68,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 68
+    },
+    {
+      "id": 69,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 69
+    },
+    {
+      "id": 70,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 70
+    },
+    {
+      "id": 71,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 71
+    },
+    {
+      "id": 72,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 72
+    },
+    {
+      "id": 73,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 73
+    },
+    {
+      "id": 74,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 74
+    },
+    {
+      "id": 75,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 75
+    },
+    {
+      "id": 76,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 76
+    },
+    {
+      "id": 77,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 77
+    },
+    {
+      "id": 78,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 78
+    },
+    {
+      "id": 79,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 79
+    },
+    {
+      "id": 80,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.01,
+        0.98,
+        0.01
+      ],
+      "birthEventId": 80
+    },
+    {
+      "id": 81,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 81
+    },
+    {
+      "id": 82,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 82
+    },
+    {
+      "id": 83,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 83
+    },
+    {
+      "id": 84,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 84
+    },
+    {
+      "id": 85,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 85
+    },
+    {
+      "id": 86,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 86
+    },
+    {
+      "id": 87,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 87
+    },
+    {
+      "id": 88,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 88
+    },
+    {
+      "id": 89,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 89
+    },
+    {
+      "id": 90,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 90
+    },
+    {
+      "id": 91,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 91
+    },
+    {
+      "id": 92,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 92
+    },
+    {
+      "id": 93,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 93
+    },
+    {
+      "id": 94,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 94
+    },
+    {
+      "id": 95,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 95
+    },
+    {
+      "id": 96,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 96
+    },
+    {
+      "id": 97,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 97
+    },
+    {
+      "id": 98,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 98
+    },
+    {
+      "id": 99,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 99
+    },
+    {
+      "id": 100,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 100
+    },
+    {
+      "id": 101,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 101
+    },
+    {
+      "id": 102,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 102
+    },
+    {
+      "id": 103,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 103
+    },
+    {
+      "id": 104,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 104
+    },
+    {
+      "id": 105,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 105
+    },
+    {
+      "id": 106,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 106
+    },
+    {
+      "id": 107,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 107
+    },
+    {
+      "id": 108,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 108
+    },
+    {
+      "id": 109,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 109
+    },
+    {
+      "id": 110,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 110
+    },
+    {
+      "id": 111,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 111
+    },
+    {
+      "id": 112,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 112
+    },
+    {
+      "id": 113,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 113
+    },
+    {
+      "id": 114,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 114
+    },
+    {
+      "id": 115,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 115
+    },
+    {
+      "id": 116,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 116
+    },
+    {
+      "id": 117,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 117
+    },
+    {
+      "id": 118,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 1,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 118
+    },
+    {
+      "id": 119,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 2,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 119
+    },
+    {
+      "id": 120,
+      "parentIds": null,
+      "birthGeneration": 0,
+      "ageGenerations": 3,
+      "bodyGenome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "timeAllocation": [
+        0.001,
+        0.014,
+        0.985
+      ],
+      "birthEventId": 120
+    }
+  ],
+  "birthEvents": [
+    {
+      "id": 1,
+      "generation": 0,
+      "childId": 1,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 2,
+      "generation": 0,
+      "childId": 2,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 3,
+      "generation": 0,
+      "childId": 3,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 4,
+      "generation": 0,
+      "childId": 4,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 5,
+      "generation": 0,
+      "childId": 5,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 6,
+      "generation": 0,
+      "childId": 6,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 7,
+      "generation": 0,
+      "childId": 7,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 8,
+      "generation": 0,
+      "childId": 8,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 9,
+      "generation": 0,
+      "childId": 9,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 10,
+      "generation": 0,
+      "childId": 10,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 11,
+      "generation": 0,
+      "childId": 11,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 12,
+      "generation": 0,
+      "childId": 12,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 13,
+      "generation": 0,
+      "childId": 13,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 14,
+      "generation": 0,
+      "childId": 14,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 15,
+      "generation": 0,
+      "childId": 15,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 16,
+      "generation": 0,
+      "childId": 16,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 17,
+      "generation": 0,
+      "childId": 17,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 18,
+      "generation": 0,
+      "childId": 18,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 19,
+      "generation": 0,
+      "childId": 19,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 20,
+      "generation": 0,
+      "childId": 20,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 21,
+      "generation": 0,
+      "childId": 21,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 22,
+      "generation": 0,
+      "childId": 22,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 23,
+      "generation": 0,
+      "childId": 23,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 24,
+      "generation": 0,
+      "childId": 24,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 25,
+      "generation": 0,
+      "childId": 25,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 26,
+      "generation": 0,
+      "childId": 26,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 27,
+      "generation": 0,
+      "childId": 27,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 28,
+      "generation": 0,
+      "childId": 28,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 29,
+      "generation": 0,
+      "childId": 29,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 30,
+      "generation": 0,
+      "childId": 30,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 31,
+      "generation": 0,
+      "childId": 31,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 32,
+      "generation": 0,
+      "childId": 32,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 33,
+      "generation": 0,
+      "childId": 33,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 34,
+      "generation": 0,
+      "childId": 34,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 35,
+      "generation": 0,
+      "childId": 35,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 36,
+      "generation": 0,
+      "childId": 36,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 37,
+      "generation": 0,
+      "childId": 37,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 38,
+      "generation": 0,
+      "childId": 38,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 39,
+      "generation": 0,
+      "childId": 39,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 40,
+      "generation": 0,
+      "childId": 40,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 41,
+      "generation": 0,
+      "childId": 41,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 42,
+      "generation": 0,
+      "childId": 42,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 43,
+      "generation": 0,
+      "childId": 43,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 44,
+      "generation": 0,
+      "childId": 44,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 45,
+      "generation": 0,
+      "childId": 45,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 46,
+      "generation": 0,
+      "childId": 46,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 47,
+      "generation": 0,
+      "childId": 47,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 48,
+      "generation": 0,
+      "childId": 48,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 49,
+      "generation": 0,
+      "childId": 49,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 50,
+      "generation": 0,
+      "childId": 50,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 51,
+      "generation": 0,
+      "childId": 51,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 52,
+      "generation": 0,
+      "childId": 52,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 53,
+      "generation": 0,
+      "childId": 53,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 54,
+      "generation": 0,
+      "childId": 54,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 55,
+      "generation": 0,
+      "childId": 55,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 56,
+      "generation": 0,
+      "childId": 56,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 57,
+      "generation": 0,
+      "childId": 57,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 58,
+      "generation": 0,
+      "childId": 58,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 59,
+      "generation": 0,
+      "childId": 59,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 60,
+      "generation": 0,
+      "childId": 60,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 61,
+      "generation": 0,
+      "childId": 61,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 62,
+      "generation": 0,
+      "childId": 62,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 63,
+      "generation": 0,
+      "childId": 63,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 64,
+      "generation": 0,
+      "childId": 64,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 65,
+      "generation": 0,
+      "childId": 65,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 66,
+      "generation": 0,
+      "childId": 66,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 67,
+      "generation": 0,
+      "childId": 67,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 68,
+      "generation": 0,
+      "childId": 68,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 69,
+      "generation": 0,
+      "childId": 69,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 70,
+      "generation": 0,
+      "childId": 70,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 71,
+      "generation": 0,
+      "childId": 71,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 72,
+      "generation": 0,
+      "childId": 72,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 73,
+      "generation": 0,
+      "childId": 73,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 74,
+      "generation": 0,
+      "childId": 74,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 75,
+      "generation": 0,
+      "childId": 75,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 76,
+      "generation": 0,
+      "childId": 76,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 77,
+      "generation": 0,
+      "childId": 77,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 78,
+      "generation": 0,
+      "childId": 78,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 79,
+      "generation": 0,
+      "childId": 79,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 80,
+      "generation": 0,
+      "childId": 80,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 81,
+      "generation": 0,
+      "childId": 81,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 82,
+      "generation": 0,
+      "childId": 82,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 83,
+      "generation": 0,
+      "childId": 83,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 84,
+      "generation": 0,
+      "childId": 84,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 85,
+      "generation": 0,
+      "childId": 85,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 86,
+      "generation": 0,
+      "childId": 86,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 87,
+      "generation": 0,
+      "childId": 87,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 88,
+      "generation": 0,
+      "childId": 88,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 89,
+      "generation": 0,
+      "childId": 89,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 90,
+      "generation": 0,
+      "childId": 90,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 91,
+      "generation": 0,
+      "childId": 91,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 92,
+      "generation": 0,
+      "childId": 92,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 93,
+      "generation": 0,
+      "childId": 93,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 94,
+      "generation": 0,
+      "childId": 94,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 95,
+      "generation": 0,
+      "childId": 95,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 96,
+      "generation": 0,
+      "childId": 96,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 97,
+      "generation": 0,
+      "childId": 97,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 98,
+      "generation": 0,
+      "childId": 98,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 99,
+      "generation": 0,
+      "childId": 99,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 100,
+      "generation": 0,
+      "childId": 100,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 101,
+      "generation": 0,
+      "childId": 101,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 102,
+      "generation": 0,
+      "childId": 102,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 103,
+      "generation": 0,
+      "childId": 103,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 104,
+      "generation": 0,
+      "childId": 104,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 105,
+      "generation": 0,
+      "childId": 105,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 106,
+      "generation": 0,
+      "childId": 106,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 107,
+      "generation": 0,
+      "childId": 107,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 108,
+      "generation": 0,
+      "childId": 108,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 109,
+      "generation": 0,
+      "childId": 109,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 110,
+      "generation": 0,
+      "childId": 110,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 111,
+      "generation": 0,
+      "childId": 111,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 112,
+      "generation": 0,
+      "childId": 112,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 113,
+      "generation": 0,
+      "childId": 113,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 114,
+      "generation": 0,
+      "childId": 114,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 115,
+      "generation": 0,
+      "childId": 115,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 116,
+      "generation": 0,
+      "childId": 116,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 117,
+      "generation": 0,
+      "childId": 117,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 118,
+      "generation": 0,
+      "childId": 118,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 119,
+      "generation": 0,
+      "childId": 119,
+      "parentIds": null,
+      "founder": true
+    },
+    {
+      "id": 120,
+      "generation": 0,
+      "childId": 120,
+      "parentIds": null,
+      "founder": true
+    }
+  ],
+  "deathEvents": [],
+  "biologicalMatingEvents": [],
+  "bodyMutationEvents": [],
+  "allocationMutationEvents": [],
+  "prunedAncestorBoundaries": []
+}

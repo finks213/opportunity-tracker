@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LINEAGE — Milestone 1 diagnostic probe</title>
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<header>
+  <h1>LINEAGE — Milestone 1 diagnostic probe</h1>
+  <p class="disclaimer">
+    Not the student game. A crude diagnostic that asks one question: can a human
+    see the biological difference the model claims to produce? The model is
+    authored and is <strong>not</strong> biologically validated.
+  </p>
+</header>
+
+<main>
+  <section class="worldpane">
+    <canvas id="world" width="1100" height="620" aria-label="Three simultaneous zones with procedural animals"></canvas>
+    <p id="status" class="status">generation 0</p>
+  </section>
+
+  <aside class="sidebar">
+    <section class="controls">
+      <h2>Controls</h2>
+      <div class="row">
+        <button id="btn-run" type="button">Run</button>
+        <button id="btn-pause" type="button">Pause</button>
+        <button id="btn-step" type="button">Step one generation</button>
+        <span id="run-state" class="tag">paused</span>
+      </div>
+      <div class="row">
+        <label for="seed-input">seed</label>
+        <input id="seed-input" type="number" value="1" min="1" step="1">
+        <button id="btn-reset" type="button">Reset random world</button>
+      </div>
+      <div class="row">
+        <button id="btn-fixture" type="button">Load defining fixture</button>
+        <button id="btn-fixture-high" type="button">Fixture + webbing override</button>
+      </div>
+      <div class="row">
+        <label><input id="toggle-raw" type="checkbox"> show raw allocations and genome values</label>
+      </div>
+    </section>
+
+    <section class="controls">
+      <h2>Observer tracer channels <span class="tag">cannot change biology</span></h2>
+      <div class="row">
+        <button id="btn-tracer-canopy" type="button">Follow canopy focal group</button>
+        <button id="btn-tracer-shoreline" type="button">Follow shoreline focal group</button>
+        <button id="btn-tracer-clear" type="button">Clear</button>
+      </div>
+      <div class="row">
+        <label for="channel-select">active channel</label>
+        <select id="channel-select"><option value="">(no channel)</option></select>
+      </div>
+      <p class="hint">
+        Animals marked with a triangle carry a tracer value of at least 0.5. The
+        threshold is a provisional debug value, not a biological truth and not a
+        rule about a group ending.
+      </p>
+    </section>
+
+    <section class="controls">
+      <h2>Manual device-test modes</h2>
+      <div class="row">
+        <button id="btn-mode-normal" type="button">Normal</button>
+        <button id="btn-mode-legibility" type="button">Legibility</button>
+        <button id="btn-mode-stress" type="button">Render stress (360 glyphs)</button>
+      </div>
+      <p class="hint">
+        Used by IPAD_TEST_CHECKLIST.md. Frame statistics are available in the
+        console via <code>lineageProbe.meter.summary()</code>.
+      </p>
+    </section>
+
+    <section class="controls">
+      <h2>Inspector</h2>
+      <div id="inspector"><p class="hint">Click an animal to inspect it.</p></div>
+    </section>
+  </aside>
+</main>
+
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>

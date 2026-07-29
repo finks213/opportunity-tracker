@@ -1,0 +1,17 @@
+{
+  "name": "lineage-m1",
+  "version": "1.0.0",
+  "description": "LINEAGE Milestone 1 — truthful world model. Deterministic biological simulation with strict observer separation.",
+  "type": "module",
+  "private": true,
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "fixture": "node tools/runFixture.mjs",
+    "characterize": "node tools/runCharacterization.mjs",
+    "report": "node tools/writeCharacterization.mjs",
+    "serve": "node tools/serve.mjs"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
