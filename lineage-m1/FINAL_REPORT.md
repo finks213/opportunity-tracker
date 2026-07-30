@@ -71,7 +71,7 @@ from `audit/test-results.txt` and the JSON files under `audit/`, not retyped.
 
 | # | Gate | Contract § | Result |
 |---|---|---|---|
-| 1 | Full test suite | §20 | **FAIL** — 2 of 249 failing |
+| 1 | Full test suite | §20 | **PASS** — 249/249, 0 failures |
 | 2 | Fixture raw SHA-256 integrity | §19 A | **PASS** |
 | 3 | Fixture-envelope canonical round trip | §19 B | **PASS** |
 | 4 | Deterministic hydration | §19 C | **PASS** |
@@ -114,8 +114,8 @@ and in `CHARACTERIZATION.md`.
 | Field | Value |
 |---|---|
 | tests | 249 |
-| pass | 247 |
-| fail | 2 |
+| pass | 249 |
+| fail | 0 |
 | cancelled | 0 |
 | skipped | 0 |
 | todo | 0 |
@@ -517,7 +517,7 @@ file. The result column is the scan's actual output, not a remembered claim.
 | observer/debug imports in `src/core`, `src/config`, `src/fixtures` | clean |
 | observer modules referencing the simulation RNG | none |
 | bare-specifier imports in `src/` (runtime dependencies) | none; `dependencies` is empty |
-| full test suite from clean | 247/249, 2 failures |
+| full test suite from clean | 249/249, 0 failures |
 | observer strategies compared after every generation | byte-identical: true |
 | quarantined Python references unchanged | true (3 files) |
 | fixture, both characterization batches, edge-only, desktop | regenerated for this revision |
@@ -606,7 +606,7 @@ provenance — make it addable later without rewriting the biological kernel.
 | genealogy and mating cores remain coherent | met |
 | neutral traits are exactly neutral | met |
 | the difference is visible in the diagnostic probe | met on desktop; **iPad legibility pending human test** |
-| every automated result reproducible from a clean run | met — 247/249 from clean; fixture, both batches, edge-only and desktop regenerated |
+| every automated result reproducible from a clean run | met — 249/249 from clean; fixture, both batches, edge-only and desktop regenerated |
 | remaining uncertainty named rather than hidden | met — §6, §11, and the audit response in the repair record |
 
 **Completion is NOT declared** (`mayDeclareCompletion: false`). §24 Stage A ordering was
