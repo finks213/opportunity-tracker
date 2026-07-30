@@ -154,7 +154,20 @@ export function advanceGeneration(state, config = currentModelConfig, hooks = {}
   // same object to `state.lastGenerationResult` — so an external `push()` forged
   // the diagnostic record after the generation completed (revision-5 repair,
   // BUG 9). Nothing mutable is ever exposed now.
-  /** @type {Array<{phase:string, childId?:number, error:unknown}>} */
+  //
+  // REVISION-6 REPAIR (Break 4 / MM-1 / R6-H). Revision 5 froze the record wrapper
+  // but stored the ORIGINAL thrown value under `error`, and froze neither it nor
+  // anything nested in it. Reproduced with 66 observer failures:
+  //
+  //   result frozen true | array frozen true | record frozen true
+  //   thrown payload frozen false | nested payload frozen false
+  //   state diagnostic after external mutation:
+  //     {"message":"FORGED","detail":{"code":"FORGED","nested":{"value":999}}}
+  //
+  // The thrown object is never exposed now. Each failure is converted at capture
+  // time into a plain snapshot of approved primitive fields, which is then deeply
+  // frozen. An arbitrary payload cannot be reached, so it cannot be rewritten.
+  /** @type {Array<Readonly<{phase:string, childId?:number, error:Object}>>} */
   const collectedErrors = [];
 
   // Post-commit, exception-isolated observer dispatch. An observer throwing here
@@ -166,7 +179,9 @@ export function advanceGeneration(state, config = currentModelConfig, hooks = {}
       try {
         hooks.onBirth(record);
       } catch (err) {
-        collectedErrors.push({ phase: "onBirth", childId: record.childId, error: err });
+        collectedErrors.push(
+          Object.freeze({ phase: "onBirth", childId: record.childId, error: diagnosticSnapshot(err) })
+        );
       }
     }
   }
@@ -174,7 +189,7 @@ export function advanceGeneration(state, config = currentModelConfig, hooks = {}
     try {
       hooks.afterGeneration(frozenLivingIds);
     } catch (err) {
-      collectedErrors.push({ phase: "afterGeneration", error: err });
+      collectedErrors.push(Object.freeze({ phase: "afterGeneration", error: diagnosticSnapshot(err) }));
     }
   }
 
@@ -183,12 +198,50 @@ export function advanceGeneration(state, config = currentModelConfig, hooks = {}
     generation: targetGeneration,
     births,
     livingIds: frozenLivingIds,
-    // Each record is frozen, and so is the array holding them.
-    observerErrors: Object.freeze(collectedErrors.map((e) => Object.freeze({ ...e }))),
+    // Each record was frozen at capture time, and so is the array holding them.
+    observerErrors: Object.freeze(collectedErrors.slice()),
   });
 
   state.lastGenerationResult = result;
   return state;
+}
+
+/**
+ * Convert an arbitrary thrown value into an immutable plain diagnostic snapshot
+ * (revision-6 repair, Break 4 / MM-1 / R6-H).
+ *
+ * Only these fields are kept, all primitives, all frozen:
+ *
+ *   name         constructor/`name` of the thrown value, or its typeof
+ *   message      `message` if it is a string, else null
+ *   stack        `stack` if it is a string, else null
+ *   text         a safe string representation, always present
+ *   wasError     whether the thrown value was an Error instance
+ *
+ * The thrown object itself is deliberately NOT retained. Retaining it is what let
+ * external code rewrite `message`, rewrite nested payload properties and add new
+ * ones, all visible afterwards through `state.lastGenerationResult`.
+ *
+ * @param {unknown} err
+ * @returns {Readonly<{name:string, message:string|null, stack:string|null, text:string, wasError:boolean}>}
+ */
+export function diagnosticSnapshot(err) {
+  const isError = err instanceof Error;
+  const str = (v) => (typeof v === "string" ? v : null);
+  let text;
+  try {
+    text = isError ? `${err.name}: ${err.message}` : String(err);
+  } catch {
+    // A thrown object with a hostile toString must not break the transaction.
+    text = "[unrepresentable thrown value]";
+  }
+  return Object.freeze({
+    name: isError ? String(err.name) : typeof err,
+    message: isError ? str(err.message) : null,
+    stack: isError ? str(err.stack) : null,
+    text,
+    wasError: isError,
+  });
 }
 
 /**
@@ -246,8 +299,9 @@ export function assertConfigMatchesState(state, config) {
     throw new Error(
       "missing model identity: canonical biological state must carry `modelIdentityHash`. " +
       `State schema "${state.schemaVersion}" was accepted, but no complete-model identity is ` +
-      "recorded, so the model that produced this state cannot be established. A state " +
-      `serialized before schema "${SCHEMA_VERSION}" must be rejected rather than advanced.`
+      "recorded, so the model that produced this state cannot be established. This check is " +
+      "UNCONDITIONAL and independent of the schema label: a state without a complete model " +
+      "identity is rejected rather than advanced, whatever schema version it declares."
     );
   }
   if (!isWellFormedModelIdentity(stored)) {

@@ -1,0 +1,16 @@
+{
+  "schema": "lineage-m1-runtime-matrix-config-1",
+  "purpose": "The one place that says which Node majors the runtime-matrix gate requires, and how to obtain them. tools/runRuntimeMatrix.mjs and test/runtime-matrix-coverage.test.js both read this file, so the generator cannot succeed on coverage its own build-blocking test rejects (revision-6 repair, Break 5 / M-3 / R6-I).",
+  "declaredCompatibility": ">=18",
+  "declaredCompatibilityNote": "package.json `engines.node`. This is the range the project claims to RUN on. It is NOT a claim about which majors were executed — see `executedMajors` in audit/runtime-matrix.json for that, and never describe a subset as 'every supported Node major'.",
+  "requiredMajors": [20, 21, 22],
+  "requiredMajorsNote": "The majors the gate requires evidence from. Chosen as the majors this project's evidence runs are performed on; extending the list is a deliberate edit here, and the generator then fails until those runtimes are present.",
+  "minimumDistinctMajors": 2,
+  "acquisition": {
+    "preferred": "Set LINEAGE_NODE_BINARIES to a colon-separated list of node binaries, e.g. LINEAGE_NODE_BINARIES=/usr/local/n/versions/node/20.20.2/bin/node:/usr/local/n/versions/node/22.22.2/bin/node",
+    "nvm": "nvm install 20 && nvm install 21 && nvm install 22, then the generator finds them under $NVM_DIR/versions/node/*/bin/node",
+    "container": "for m in 20 21 22; do docker run --rm -v \"$PWD\":/w -w /w node:$m npm test; done",
+    "ci": "a matrix job over node-version: [20, 21, 22] running `npm run audit:tests` and `npm run audit:runtime-matrix`",
+    "note": "Revision 5 discovered runtimes only under /opt/nodeNN, a layout private to one build machine. On any other machine the generator found a single runtime, exited 0, and recorded runtime independence from one sample — which its own test then rejected."
+  }
+}

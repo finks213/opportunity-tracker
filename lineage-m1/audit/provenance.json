@@ -1,0 +1,169 @@
+{
+  "schema": "lineage-m1-provenance-1",
+  "contractSection": "23 / 27 (delivery and audit evidence)",
+  "purpose": "Bind this bundle to the source revision that produced it, without shipping .git. Every value below is recomputable from the extracted bundle except `source.commit`, which is what the binding exists to supply.",
+  "source": {
+    "resolved": true,
+    "commit": "5ba2bfb71b9c5d2e831386e9c05b31fa24e2bf59",
+    "shortCommit": "5ba2bfb71b9c",
+    "branch": "claude/lineage-m1-implementation-1m9zpq",
+    "treeHash": "50fd61d35e85258f8ad5b503c8b7ff281ede645e",
+    "committedAt": "2026-07-30T15:48:55+00:00",
+    "workingTreeClean": false,
+    "uncommittedPaths": [
+      "M lineage-m1/FINAL_REPORT.md",
+      "M lineage-m1/audit/gate-summary.json",
+      "M lineage-m1/package.json",
+      "M lineage-m1/src/config/milestoneStatus.js",
+      "M lineage-m1/src/config/modelConfig.js",
+      "M lineage-m1/src/core/simulation.js",
+      "M lineage-m1/src/fixtures/definingFixtureV1.js",
+      "M lineage-m1/src/main.js",
+      "M lineage-m1/src/observer/tracerChannels.js",
+      "M lineage-m1/test/defining-fixture-snapshot.test.js",
+      "M lineage-m1/test/focal-lineage-integrity.test.js",
+      "M lineage-m1/test/focal-lineage-retention.test.js",
+      "M lineage-m1/test/generation-result-immutable.test.js",
+      "M lineage-m1/test/model-hash-provenance.test.js",
+      "M lineage-m1/test/probe-world-identity.test.js",
+      "M lineage-m1/test/report-determinism.test.js",
+      "M lineage-m1/test/report-integrity.test.js",
+      "M lineage-m1/tools/gateRegistry.mjs",
+      "M lineage-m1/tools/runRuntimeMatrix.mjs",
+      "M lineage-m1/tools/writeFinalReport.mjs",
+      "?? lineage-m1/audit/external-gate-status.json",
+      "?? lineage-m1/runtime-matrix.config.json",
+      "?? lineage-m1/test/exact-membership-underflow.test.js",
+      "?? lineage-m1/test/fixture-transaction-atomicity.test.js",
+      "?? lineage-m1/test/frozen-schema-identity.test.js",
+      "?? lineage-m1/test/maintained-witness-protection.test.js",
+      "?? lineage-m1/test/milestone-scope-observer.test.js",
+      "?? lineage-m1/test/report-end-to-end-injection.test.js",
+      "?? lineage-m1/test/runtime-matrix-coverage.test.js",
+      "?? lineage-m1/tools/verifyProvenance.mjs",
+      "?? lineage-m1/tools/writeProvenance.mjs"
+    ]
+  },
+  "model": {
+    "configVersion": "lineage-m1-config-2",
+    "modelDefinitionHash": "dc444865163deb32a7a9d80bd23f576d1ab5a936896298b5cd13faac6f513b3d",
+    "note": "the authoritative complete-model identity; every evidence file must carry this value"
+  },
+  "fixture": {
+    "path": "fixtures/defining_fixture_v1.json",
+    "sha256": "c80aaa523d3b3eec2655502b4eaebdbbb4d12f71f8b3378d9d3be60797342b78",
+    "bytes": 61269
+  },
+  "testResults": {
+    "path": "audit/test-results.txt",
+    "sha256": "5ea40b28cd7de2333f859d9574f6e0abd14852ae1c536db2bc65b561947e8744",
+    "bytes": 67143,
+    "tests": 300,
+    "pass": 300,
+    "fail": 0
+  },
+  "milestone": {
+    "status": "M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED",
+    "mayDeclareCompletion": false,
+    "blockers": [
+      "desktopCanvasMemory: UNVERIFIED",
+      "ipadGate: PENDING_HUMAN_DEVICE_TEST",
+      "stageAOrder: VIOLATED — principal decision required",
+      "independentClosureAudit: PENDING"
+    ],
+    "automatedGatesPass": true,
+    "externalBlockers": [
+      "desktopCanvasMemory: UNVERIFIED",
+      "ipadGate: PENDING_HUMAN_DEVICE_TEST",
+      "stageAOrder: VIOLATED — principal decision required",
+      "independentClosureAudit: PENDING"
+    ]
+  },
+  "generated": {
+    "FINAL_REPORT.md": {
+      "sha256": "3f0f338b0eb7f73dae0e18fd113031a9b30e6ad48ebe641b6d9530fe9ddb81b6",
+      "bytes": 38019
+    },
+    "CHARACTERIZATION.md": {
+      "sha256": "01f2b6b63038669297fc7be914065845da8ea1108a2691303b5233649faef25a",
+      "bytes": 12809
+    },
+    "AUDIT_PACKAGE_MANIFEST.md": {
+      "sha256": "8bc3b3826b154097b54d8be2445126aea0f6eadd62ea4bd43588a719fe6c1eba",
+      "bytes": 25994
+    },
+    "DECISIONS.md": {
+      "sha256": "1fbf8f16a435bb5f074297a52e6550deebf313474b15e50ea4b6c83f75d9dc69",
+      "bytes": 54972
+    }
+  },
+  "evidence": {
+    "audit/build-environment.json": {
+      "sha256": "d593f77943922a50c7182878f0532e3210b13b2c3bf9291420194c62e64bb9c2",
+      "bytes": 986
+    },
+    "audit/characterization-results-config1.json": {
+      "sha256": "9ab4e24271e6ae08ea2751bb3f900143ee309a7602c6a4233faccbb4f4b2ad26",
+      "bytes": 1443799
+    },
+    "audit/characterization-results.json": {
+      "sha256": "f5cc12d481823b1395cf0a0f7deec95f1c42815d27b51066203e0a5754e36e8c",
+      "bytes": 1436815
+    },
+    "audit/desktop-measurements.json": {
+      "sha256": "7464b23fa0b73f5f7b2716fd781180be1e8c9bf7a1868a1f1d2fd9d334c0da0e",
+      "bytes": 6275
+    },
+    "audit/edge-only-traversal-results.json": {
+      "sha256": "7589820adba42bff0d04625cae3d01cebf3560db6385eb2352306dde56701c33",
+      "bytes": 256588
+    },
+    "audit/external-gate-status.json": {
+      "sha256": "afc1ec80bbfe56727b067c13bf18d68da4d9aac0ace169d1f0fa5a180b29427a",
+      "bytes": 2938
+    },
+    "audit/fixture-results.json": {
+      "sha256": "d5a40817ed3458aff2a068927ea2621895a1bcfdb357dba20dfd77db1abb4c01",
+      "bytes": 184847
+    },
+    "audit/gate-summary.json": {
+      "sha256": "870caf43db0cdaa99a89e7ebe5e2ba679c0eaad41c82d20445604d8fb1719edf",
+      "bytes": 26143
+    },
+    "audit/meaningful-trait-gate.json": {
+      "sha256": "e8a00dc832f2a1bb15cada4f159e0a92a90c7bf4c95e4b220d039c8225166519",
+      "bytes": 4330
+    },
+    "audit/observer-invariance-hashes.json": {
+      "sha256": "3bb19c7207e5ebef76c3dd4cef5e7377a00ce284029efccb597976ec7b59d0e0",
+      "bytes": 12376
+    },
+    "audit/reference-file-hashes.json": {
+      "sha256": "cafb8865b4585ef4a8c32f653dc5da3e2c2d239aef32ea0c84cd7c38acd205d4",
+      "bytes": 1207
+    },
+    "audit/runtime-matrix.json": {
+      "sha256": "547b1a082cfa343c2fe92d1d52409aea8b9f29b63696fb7b1a8c80eb4dbd2911",
+      "bytes": 3081
+    },
+    "audit/test-results.txt": {
+      "sha256": "5ea40b28cd7de2333f859d9574f6e0abd14852ae1c536db2bc65b561947e8744",
+      "bytes": 67143
+    },
+    "audit/tree-integrity.json": {
+      "sha256": "c7f6933cd6449428d3fa5f9bd7ad6f6e98bd2c3717cdf29c350fee4ce3e4f6f8",
+      "bytes": 976
+    }
+  },
+  "archive": {
+    "name": "LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV6.zip",
+    "sha256": null,
+    "note": "An archive cannot contain its own hash. The SHA-256 is published with the delivery and recorded in REVISION_6_REPAIR_RECORD.md; verify with `sha256sum` against that value, then verify every file below against this record from the extraction."
+  },
+  "verification": [
+    "sha256sum LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV6.zip   # compare with the published value",
+    "unzip -q LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV6.zip && cd lineage-m1",
+    "node tools/verifyProvenance.mjs                             # recomputes every hash below",
+    "git -C <clone> cat-file -t <source.commit>                  # binds the extraction to branch history"
+  ]
+}

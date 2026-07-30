@@ -14,37 +14,38 @@
  * scattered across four documents.
  */
 
-/** @type {Readonly<{status:string, processWaiver:string, ipadTest:string, revision:number, reportDate:string, forbiddenStatuses:readonly string[], mayDeclareCompletion:boolean}>} */
+/**
+ * REVISION-6 REPAIR (M-2 / R6-J). This file no longer ASSERTS the milestone
+ * status. Revision 5 kept `status` and `mayDeclareCompletion` as literals here, so
+ * the overall verdict could not move without a human editing source — a controlled
+ * failing run changed gate rows while the milestone verdict kept whatever had been
+ * typed. The status is now DERIVED by `tools/gateRegistry.mjs`
+ * (`deriveMilestoneStatus`) from the published test results plus the externally
+ * determined statuses in `audit/external-gate-status.json`.
+ *
+ * What remains here is policy that is not an evidence question: which statuses may
+ * never be asserted, and which revision and date the generated artifacts carry.
+ *
+ * @type {Readonly<{revision:number, reportDate:string, forbiddenStatuses:readonly string[], statusIsDerived:boolean, derivedBy:string}>}
+ */
 export const MILESTONE_STATUS = Object.freeze({
-  /** The overall milestone status. */
-  status: "M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED",
-
-  /**
-   * Separately pending, and explicitly NOT the only blockers. Revision 2 claimed
-   * the waiver was the sole blocker while ten defects were open; that claim is
-   * withdrawn.
-   */
-  processWaiver: "PROCESS WAIVER: PENDING PRINCIPAL DECISION",
-  ipadTest: "IPAD TEST: PENDING_HUMAN_DEVICE_TEST",
-
   /** Revision of the implementation and of every generated report. */
-  revision: 5,
+  revision: 6,
   reportDate: "2026-07-30",
 
   /**
    * Statuses that must not be asserted as the present state by any artifact.
-   * `status-consistency.test.js` enforces this.
+   * `status-consistency.test.js` enforces this against the DERIVED status too, so
+   * the derivation cannot produce one of them either.
    */
   forbiddenStatuses: Object.freeze([
     "M1_AUTOMATED_GATES_PASS",
     "M1_ACCEPTED",
   ]),
 
-  /**
-   * No generated artifact may declare completion. §24 Stage A ordering was
-   * violated and is a principal decision; the physical iPad gate is unperformed.
-   */
-  mayDeclareCompletion: false,
+  /** Stated explicitly so no reader looks for a status literal that is not here. */
+  statusIsDerived: true,
+  derivedBy: "tools/gateRegistry.mjs deriveMilestoneStatus(), from audit/test-results.txt and audit/external-gate-status.json",
 });
 
 /**

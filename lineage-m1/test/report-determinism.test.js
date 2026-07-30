@@ -25,6 +25,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 import { renderFinalReport } from "../tools/writeFinalReport.mjs";
+import { readMatrixConfig, evaluateCoverage } from "../tools/runRuntimeMatrix.mjs";
 
 const ROOT = resolve(join(dirname(fileURLToPath(import.meta.url)), ".."));
 const read = (p) => readFileSync(join(ROOT, p), "utf8");
@@ -70,28 +71,32 @@ test("§26 — rendering is a pure function of committed evidence", () => {
   assert.equal(read("FINAL_REPORT.md"), a, "the committed report must be that render");
 });
 
-test("§26 — the report renders identically on every recorded runtime", () => {
-  // The cross-runtime evidence is produced by `npm run audit:runtime-matrix`, which
-  // renders the report under each Node major available and hashes the result.
+test("§26 — the report renders identically on every EXECUTED runtime", () => {
+  // The cross-runtime evidence is produced by `npm run audit:runtime-matrix`.
+  //
+  // REVISION-6 REPAIR (Break 5 / R6-I). This test used to carry its own threshold
+  // ("at least two majors"), which the generator did not know about: on a machine
+  // with one Node install the generator exited 0 and wrote evidence that failed
+  // here immediately. Both now read `runtime-matrix.config.json` and apply the
+  // SAME judgement function, so the documented regeneration command cannot succeed
+  // on coverage this test rejects.
   const rel = "audit/runtime-matrix.json";
   assert.ok(existsSync(join(ROOT, rel)), `${rel} is required evidence — run npm run audit:runtime-matrix`);
   const m = readJson(rel);
-  assert.ok(m.runtimes.length >= 2, `at least two majors must be exercised, saw ${m.runtimes.length}`);
-  assert.equal(
-    m.distinctRenderedHashes,
-    1,
-    "every runtime must render byte-identical report content:\n" +
-    m.runtimes.map((r) => `  ${r.nodeVersion} -> ${r.renderedReportSha256}`).join("\n")
+  const config = readMatrixConfig(ROOT);
+  const verdict = evaluateCoverage(m, config);
+
+  assert.deepEqual(verdict.problems, [], "the committed matrix must satisfy runtime-matrix.config.json");
+  assert.equal(verdict.sufficient, true);
+  assert.equal(m.sufficientCoverage, true, "and the generator must have recorded the same verdict");
+  assert.deepEqual(
+    m.executedMajors, verdict.executedMajors,
+    "the record's executed majors must match a fresh evaluation of its own runtimes"
   );
-  assert.equal(m.reportBytesAreRuntimeIndependent, true);
-  assert.equal(
-    m.allRuntimesMatchCommittedReport,
-    true,
-    "every runtime's render must equal the committed report"
-  );
+  assert.equal(m.reportBytesAreRuntimeIndependentAcrossExecutedMajors, true);
   assert.equal(m.allDeterminismTestsPass, true, "the determinism-critical tests must pass on every runtime");
-  // Majors must genuinely differ, or the matrix proves nothing.
-  const majors = new Set(m.runtimes.map((r) => r.major));
-  assert.ok(majors.size >= 2, `expected distinct majors, saw ${[...majors].join(", ")}`);
-  for (const major of majors) assert.ok(major >= 18, `Node ${major} is below the declared floor`);
+  assert.equal(m.probeOnly, false, "the committed evidence must be a full run, not a coverage probe");
+  for (const major of verdict.executedMajors) {
+    assert.ok(major >= 18, `Node ${major} is below the declared floor`);
+  }
 });

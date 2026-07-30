@@ -1,18 +1,83 @@
 {
   "schema": "lineage-m1-gate-summary-1",
   "contractSection": "20 / 26 / 28",
-  "note": "Derived from audit/test-results.txt through tools/gateRegistry.mjs. Every gate maps to named tests; a gate whose evidencing test did not run is UNVERIFIED, never PASS. This file and the report's gate table are generated from the same call.",
+  "note": "Derived from audit/test-results.txt and audit/external-gate-status.json through tools/gateRegistry.mjs. Every machine-verified gate maps to named tests; a gate whose evidencing test did not run is UNVERIFIED, never PASS. Externally determined gates are READ from their named inputs, are never machine-verified, and are counted once — as external — so the categories partition the gate set. The milestone status and completion flag below are derived from the same inputs, not written in source (revision-6, R6-J / R6-K). This file and the report's gate table are generated from the same call.",
   "suite": {
     "tests": 300,
     "pass": 300,
     "fail": 0
   },
+  "externalStatuses": {
+    "desktopCanvasMemory": {
+      "status": "UNVERIFIED",
+      "source": "audit/desktop-measurements.json → desktopCanvasMemory.status",
+      "note": "§22 requires desktop Canvas memory growth across the 180-generation run. This run did not establish it. The Node figures reported separately under NODE_SIMULATION_HEAP measure a different process and object graph and are NOT a substitute.",
+      "determinedBy": "measurement tooling; no supported browser API exposes it on the measured build",
+      "priority": 99,
+      "milestoneStatusWhenUnsatisfied": null
+    },
+    "ipadGate": {
+      "status": "PENDING_HUMAN_DEVICE_TEST",
+      "source": "audit/external-gate-status.json → gates.ipadGate.status",
+      "note": "Not performed. IPAD_TEST_CHECKLIST.md ships unfilled; no physical-device measurement is supplied and no threshold is claimed as met.",
+      "determinedBy": "a human operating a physical iPad",
+      "priority": 2,
+      "milestoneStatusWhenUnsatisfied": "M1_BLOCKED — PHYSICAL IPAD ACCEPTANCE NOT PERFORMED"
+    },
+    "stageAOrder": {
+      "status": "VIOLATED — principal decision required",
+      "source": "audit/external-gate-status.json → gates.stageAOrder.status",
+      "note": "§24 Stage A pre-code planning order was violated and cannot be repaired retrospectively. DECISIONS.md D-000 and D-024. The waiver has not been requested; it is held until revision 6 survives the bounded closure audit.",
+      "determinedBy": "the principal",
+      "priority": 3,
+      "milestoneStatusWhenUnsatisfied": "M1_BLOCKED — §24 STAGE A PROCESS DECISION OUTSTANDING"
+    },
+    "independentClosureAudit": {
+      "status": "PENDING",
+      "source": "audit/external-gate-status.json → gates.independentClosureAudit.status",
+      "note": "Revisions 1 through 5 each returned BREAKS-FOUND, and in every case a green in-house suite coexisted with real defects. No automated pass is self-certified: until an independent closure audit of revision 6 says otherwise, the milestone stays blocked for implementation and evidence repairs. This gate is why a green suite does not by itself move the status.",
+      "determinedBy": "two independent audits: a structural code audit and an AFE-Δ evidence and claim audit",
+      "priority": 1,
+      "milestoneStatusWhenUnsatisfied": "M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED"
+    }
+  },
+  "milestone": {
+    "status": "M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED",
+    "mayDeclareCompletion": false,
+    "blockers": [
+      "desktopCanvasMemory: UNVERIFIED",
+      "ipadGate: PENDING_HUMAN_DEVICE_TEST",
+      "stageAOrder: VIOLATED — principal decision required",
+      "independentClosureAudit: PENDING"
+    ],
+    "automatedGatesPass": true,
+    "externalBlockers": [
+      "desktopCanvasMemory: UNVERIFIED",
+      "ipadGate: PENDING_HUMAN_DEVICE_TEST",
+      "stageAOrder: VIOLATED — principal decision required",
+      "independentClosureAudit: PENDING"
+    ]
+  },
   "summary": {
     "total": 38,
     "pass": 35,
     "fail": 0,
-    "unverified": 1,
+    "unverified": 0,
     "external": 3,
+    "externalByStatus": [
+      {
+        "id": "desktopCanvasMemory",
+        "status": "UNVERIFIED"
+      },
+      {
+        "id": "ipadGate",
+        "status": "PENDING_HUMAN_DEVICE_TEST"
+      },
+      {
+        "id": "stageAOrder",
+        "status": "VIOLATED — principal decision required"
+      }
+    ],
     "suiteHasFailures": false,
     "everyAutomatedResultReproducible": "met"
   },
@@ -409,7 +474,11 @@
       "section": "§22",
       "status": "UNVERIFIED",
       "evidence": "external",
-      "detail": "read from `audit/desktop-measurements.json` → `desktopCanvasMemory.status`; no supported browser API exposes it on the measured build, and the Node simulation heap is NOT a substitute",
+      "machineVerified": false,
+      "evidenceSource": "audit/desktop-measurements.json → desktopCanvasMemory.status",
+      "determinedBy": "measurement tooling; no supported browser API exposes it on the measured build",
+      "detail": "the Node simulation heap is NOT a substitute and is reported separately as `NODE_SIMULATION_HEAP`",
+      "externalNote": "§22 requires desktop Canvas memory growth across the 180-generation run. This run did not establish it. The Node figures reported separately under NODE_SIMULATION_HEAP measure a different process and object graph and are NOT a substitute.",
       "mappedTests": []
     },
     {
@@ -618,7 +687,11 @@
       "section": "§22",
       "status": "PENDING_HUMAN_DEVICE_TEST",
       "evidence": "external",
+      "machineVerified": false,
+      "evidenceSource": "audit/external-gate-status.json → gates.ipadGate.status",
+      "determinedBy": "a human operating a physical device; no automated run can supply it",
       "detail": "no measurement supplied; not performed",
+      "externalNote": "Not performed. IPAD_TEST_CHECKLIST.md ships unfilled; no physical-device measurement is supplied and no threshold is claimed as met.",
       "mappedTests": []
     },
     {
@@ -627,7 +700,11 @@
       "section": "§24",
       "status": "VIOLATED — principal decision required",
       "evidence": "external",
+      "machineVerified": false,
+      "evidenceSource": "audit/external-gate-status.json → gates.stageAOrder.status",
+      "determinedBy": "the principal; a process decision no implementation can make for itself",
       "detail": "unrepairable retrospectively; DECISIONS.md D-000 and D-024",
+      "externalNote": "§24 Stage A pre-code planning order was violated and cannot be repaired retrospectively. DECISIONS.md D-000 and D-024. The waiver has not been requested; it is held until revision 6 survives the bounded closure audit.",
       "mappedTests": []
     }
   ]

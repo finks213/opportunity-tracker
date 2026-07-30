@@ -152,13 +152,17 @@ export function deserializeCanonicalBiology(canonicalBytes) {
   // Revision-5 repair (BUG 4 / R5-3). Revision 4 assigned these three fields
   // straight through, so bytes lacking `modelIdentityHash` produced a state whose
   // identity was `undefined` — and the then-conditional guard let it advance under
-  // any same-version model. Deserialization now refuses to construct a state that
-  // could not be checked, and refuses an older schema outright.
+  // any same-version model. Deserialization refuses to construct a state that
+  // cannot be checked.
+  //
+  // Revision-6 repair (MC-1): the schema identifier is the frozen contract value
+  // again. It is a schema check, nothing more — the identity check below is what
+  // rejects a state whose originating model cannot be established, and it is
+  // unconditional.
   if (plain.schemaVersion !== SCHEMA_VERSION) {
     throw new Error(
       `unsupported biological schema: bytes declare "${plain.schemaVersion}" but this build ` +
-      `requires "${SCHEMA_VERSION}". A state serialized before the complete model identity ` +
-      "became mandatory must be rejected, not advanced."
+      `requires the contract-frozen "${SCHEMA_VERSION}".`
     );
   }
   if (!isWellFormedModelIdentity(plain.modelIdentityHash)) {

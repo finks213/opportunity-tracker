@@ -17,16 +17,26 @@ import { deepFreeze, deepClonePlain, buildModelDefinition } from "./modelDefinit
 import { canonicalModelDefinitionText, modelIdentityDigest } from "./modelIdentity.js";
 
 /**
- * Canonical biological state schema.
+ * Canonical biological state schema — the identifier frozen by the governing
+ * contract's deterministic hydration rule.
  *
- * Bumped to `-2` in revision 5 (R5-3 / BUG 4). Revision 4 added the mandatory
- * `modelIdentityHash` field but kept schema `-1`, the same label used before the
- * field existed, and guarded it only when present. A `-1` state with the field
- * deleted therefore advanced under an arbitrary same-version model. The bump
- * makes "carries a complete model identity" part of the schema contract, so an
- * older state is rejected by version rather than silently accepted.
+ * REVISION-6 REPAIR (MC-1). Revision 5 changed this to `lineage-biological-state-2`
+ * and changed `test/defining-fixture-snapshot.test.js` to require the new value.
+ * That is test-oracle drift, not a contract amendment: the green test proved the
+ * revised code agreed with the revised oracle, while the state produced by fixture
+ * hydration no longer carried the contractually specified schema identity. The
+ * frozen identifier is restored here.
+ *
+ * Nothing the bump was supposed to buy is lost. The bump was justified in revision
+ * 5 as stopping a pre-identity state from masquerading as current, but R5-3 also
+ * made `modelIdentityHash` MANDATORY and UNCONDITIONAL — a state without a
+ * well-formed identity is rejected by `advanceGeneration` and by
+ * `deserializeCanonicalBiology` on the identity check itself, whatever its schema
+ * string says. The version label was never what closed that hole. See
+ * `test/frozen-schema-identity.test.js`, which asserts the frozen value AND that
+ * every identity rejection still fires under it.
  */
-export const SCHEMA_VERSION = "lineage-biological-state-2";
+export const SCHEMA_VERSION = "lineage-biological-state-1";
 
 export const currentModelConfig = deepFreeze({
   // config-1 used the contract's provisional zoneCapacity [90,90,90]; that

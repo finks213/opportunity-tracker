@@ -178,12 +178,23 @@ test("§16 — a tracer created at a later generation is seeded from LIVING indi
     "a newly created tracer must have a positive living contribution, not a silent 0 from dead ids"
   );
 
-  // Every seeded founder must actually be alive right now.
+  // REVISION-6 RE-EXPRESSION (R6-E). The defect this guards against is a channel
+  // carrying DEAD ids, which yields a valid-looking tracer with silently zero
+  // living contribution (the revision-4 defect). Revision 5 re-seeded the channel
+  // from living descendants, so checking `founderIds` was the way to see that; the
+  // channel is now mirrored from the maintained witness, whose `founderIds` name
+  // the generation-0 focal set by design. What must hold is that every id the
+  // channel actually CARRIES is alive — the witness is pruned to the living every
+  // generation — and that is asserted directly.
   const channel = app.observer.channels.get("canopy-focal");
   const livingSet = new Set(livingIds);
-  for (const id of channel.founderIds) {
-    assert.ok(livingSet.has(id), `tracer seeded non-living id ${id}`);
+  for (const id of channel.values.keys()) {
+    assert.ok(livingSet.has(id), `tracer carries non-living id ${id}`);
   }
+  for (const id of channel.members) {
+    assert.ok(livingSet.has(id), `tracer claims non-living member ${id}`);
+  }
+  assert.ok(channel.members.size > 0, "and it must claim at least one living animal");
 
   // And it keeps a positive contribution as the world advances.
   for (let g = 0; g < 5; g++) app.advance();

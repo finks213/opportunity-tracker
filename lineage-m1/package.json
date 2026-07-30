@@ -21,7 +21,9 @@
     "audit:tests": "node tools/runTests.mjs",
     "audit:environment": "node tools/writeBuildEnvironment.mjs",
     "audit:runtime-matrix": "node tools/runRuntimeMatrix.mjs",
-    "audit:tree-integrity": "node tools/proveTreeIntegrity.mjs"
+    "audit:tree-integrity": "node tools/proveTreeIntegrity.mjs",
+    "audit:provenance": "node tools/writeProvenance.mjs",
+    "audit:verify-provenance": "node tools/verifyProvenance.mjs"
   },
   "devDependencies": {
     "playwright": "^1.56.1"

@@ -226,26 +226,40 @@ test("§16 — a nonexistent founder set is UNRESOLVABLE, not extinct", () => {
   assert.deepEqual(out.descendantIds, []);
 });
 
-test("§16 — a maintained channel with zero living contribution reports EXTINCT, not UNRESOLVABLE", () => {
-  // The repair must not turn every zero into UNRESOLVABLE. When a maintained
-  // channel EXISTS, its contribution is authoritative at any generation, so zero
-  // positive members is evidenced extinction.
+test("§16 — a maintained witness matching nobody reports the observation, and no verdict", () => {
+  // REVISION-6 REWRITE, and why it is not a weakened oracle.
+  //
+  // Revision 5 asserted here that this case must read `FOCAL_LINEAGE_EXTINCT`,
+  // reasoning that an existing maintained channel makes a zero "evidenced
+  // extinction". Contract §16 excludes group-ended logic from Milestone 1, so that
+  // outcome should never have existed (structural audit M-1), and the revision-5
+  // reasoning was wrong twice over: the zero it trusted was a `contribution > 0`
+  // test, which underflows to zero on a real one-sided chain at generation 1075.
+  //
+  // What must still hold — and is asserted below — is everything except the
+  // verdict: no substitute group is offered, the answer is attributed to the
+  // witness, and the observation itself is reported rather than hidden.
   //
   // This exercises the decision, not a biological scenario: under the frozen
   // lifecycle a 12-founder set in a 120-founder world does not die out within a
-  // tractable run, so the channel's values are set directly. That is stated
-  // plainly rather than dressed up as an observed extinction.
+  // tractable run, so the channel is emptied directly. That is stated plainly
+  // rather than dressed up as an observed extinction.
   const fresh = hydrateDefiningFixtureV1(ENV, 1, C);
   const observer = createObserverState();
   createMaintainedFocalChannels(observer, fresh, { canopy: ENV.canopyFocalIds });
   const channel = observer.channels.get(maintainedChannelId("canopy"));
   for (const id of [...channel.values.keys()]) channel.values.set(id, 0);
+  channel.members.clear();
 
   const out = resolveFocalLineage(observer, fresh, ENV.canopyFocalIds, { focalSetName: "canopy" });
-  assert.equal(out.outcome, FOCAL_OUTCOME.EXTINCT);
-  assert.equal(out.source, "maintained-channel");
-  assert.deepEqual(out.descendantIds, []);
-  assert.notEqual(out.outcome, FOCAL_OUTCOME.UNRESOLVABLE, "an evidenced zero must not be reported as unknowable");
+  assert.equal(out.outcome, FOCAL_OUTCOME.UNRESOLVABLE);
+  assert.equal(out.source, "maintained-channel", "the answer is still attributed to the witness");
+  assert.deepEqual(out.descendantIds, [], "and no substitute group is offered");
+  assert.equal(out.detail.livingDescendantsObservedNow, 0, "the observation must be reported, not hidden");
+  assert.ok(
+    !Object.values(FOCAL_OUTCOME).some((v) => /EXTINCT|ENDED/i.test(v)),
+    "no lineage-ended outcome may exist to report"
+  );
 });
 
 test("§16 — genealogy reports EXTINCT only while the window still contains the founders", () => {

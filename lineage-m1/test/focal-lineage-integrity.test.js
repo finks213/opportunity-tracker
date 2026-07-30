@@ -212,8 +212,25 @@ test("§16 — following a focal lineage resolves descendants, never habitat sub
   const { envelope } = loadValidatedFixture();
   const truth = new Set(resolveLivingDescendants(app.state, envelope.canopyFocalIds).descendantIds);
   const channel = app.observer.channels.get("canopy-focal");
-  for (const id of channel.founderIds) {
-    assert.ok(truth.has(id), `seeded id ${id} is not a genealogical descendant of the focal lineage`);
+
+  // REVISION-6 RE-EXPRESSION (R6-E), same oracle, new structure. Revision 5 built
+  // this channel by RE-SEEDING it from the living descendants, so `founderIds`
+  // held living animals and this loop checked them. The channel is now MIRRORED
+  // from the maintained witness, so `founderIds` correctly names the generation-0
+  // focal set it is a lineage of, and the living animals it attributes ancestry to
+  // are its members. The substitution check — the thing this test exists for — is
+  // therefore made against the LIVING animals the channel claims, which is exactly
+  // what a habitat substitute would corrupt.
+  assert.deepEqual(
+    channel.founderIds, envelope.canopyFocalIds,
+    "the channel must be a lineage of the requested focal founders"
+  );
+  const claimed = app.state.currentIndividuals
+    .map((i) => i.id)
+    .filter((id) => channel.members.has(id) || (channel.values.get(id) ?? 0) > 0);
+  assert.ok(claimed.length > 0, "the channel must claim someone, or this proves nothing");
+  for (const id of claimed) {
+    assert.ok(truth.has(id), `claimed id ${id} is not a genealogical descendant of the focal lineage`);
   }
   assert.ok(
     livingFounderContribution(app.observer, "canopy-focal", app.state.currentIndividuals.map((i) => i.id)) > 0

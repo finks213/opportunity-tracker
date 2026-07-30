@@ -262,8 +262,10 @@ test("§18 — deserialization refuses bytes with no usable identity or an older
   const nulled = clone(); nulled.modelIdentityHash = null;
   assert.throws(() => deserializeCanonicalBiology(JSON.stringify(nulled)), /no usable model identity/);
 
-  const older = clone(); older.schemaVersion = "lineage-biological-state-1";
-  assert.throws(() => deserializeCanonicalBiology(JSON.stringify(older)), /unsupported biological schema/);
+  // Revision-6 (MC-1): the contract-frozen schema is `-1`, so the unsupported
+  // label to test with is the revision-5 one that must be rejected now.
+  const other = clone(); other.schemaVersion = "lineage-biological-state-2";
+  assert.throws(() => deserializeCanonicalBiology(JSON.stringify(other)), /unsupported biological schema/);
 
   // The legitimate round trip still works and still advances.
   const round = deserializeCanonicalBiology(serializeCanonicalBiology(s));
@@ -272,8 +274,13 @@ test("§18 — deserialization refuses bytes with no usable identity or an older
   assert.equal(round.generation, 1);
 });
 
-test("§18 — the schema version marks the identity as part of the contract", () => {
-  assert.equal(SCHEMA_VERSION, "lineage-biological-state-2");
+test("§18 — the identity travels inside the canonical bytes, under the frozen schema", () => {
+  // Revision 5 asserted `lineage-biological-state-2` here, having changed the
+  // frozen schema identifier to make "carries an identity" part of the schema
+  // label. The contract freezes that identifier; the identity guards are
+  // unconditional and do not need it (revision-6, MC-1). See
+  // test/frozen-schema-identity.test.js for the rejections proven under `-1`.
+  assert.equal(SCHEMA_VERSION, "lineage-biological-state-1");
   const s = createInitialState(1, currentModelConfig);
   assert.equal(s.schemaVersion, SCHEMA_VERSION);
   assert.ok(isWellFormedModelIdentity(s.modelIdentityHash));

@@ -89,6 +89,99 @@ test("§4 — every mutation of the result throws and changes nothing", () => {
   assert.equal(after, before, "no value may change");
 });
 
+// ---------------------------------------------------------------------------
+// Revision-6 repair (Break 4 / MM-1 / R6-H): the NESTED payload.
+//
+// The revision-5 tests above mutate the record wrapper and stop there. Both
+// revision-5 audits went one level deeper and the claim failed. Reproduced with 66
+// observer failures:
+//
+//   result frozen true | array frozen true | record frozen true
+//   thrown payload frozen false | nested payload frozen false
+//   state diagnostic after external mutation:
+//     {"message":"FORGED","detail":{"code":"FORGED","nested":{"value":999}}}
+//
+// The thrown value is no longer retained at all: each failure is converted at
+// capture time into an immutable plain snapshot of approved primitive fields.
+// ---------------------------------------------------------------------------
+
+/** Advance one generation whose observer throws `thrown`, and return the record. */
+function recordFromThrowing(thrown) {
+  const s = createInitialState(1, C);
+  advanceGeneration(s, C, { onBirth: () => { throw thrown; } });
+  const r = s.lastGenerationResult;
+  assert.ok(r.observerErrors.length > 0, "the fixture must actually produce observer errors");
+  return { state: s, record: r.observerErrors[0] };
+}
+
+test("§4 — a thrown Error is captured as an immutable snapshot, never the Error itself", () => {
+  const thrown = new Error("boom");
+  // @ts-expect-error deliberately attaching a mutable payload
+  thrown.detail = { code: "REAL", nested: { value: 1 } };
+  const { state, record } = recordFromThrowing(thrown);
+
+  assert.ok(Object.isFrozen(record.error), "the diagnostic must be frozen");
+  assert.equal(record.error.wasError, true);
+  assert.equal(record.error.name, "Error");
+  assert.equal(record.error.message, "boom");
+  assert.equal(typeof record.error.text, "string");
+  assert.ok(record.error.text.includes("boom"));
+
+  // The arbitrary payload is not reachable at all, so it cannot be rewritten.
+  assert.equal(record.error.detail, undefined, "no arbitrary payload may be exposed");
+  assert.notEqual(record.error, thrown, "the thrown object itself must not be retained");
+
+  // Mutating the ORIGINAL after the fact must not change what state reports.
+  thrown.message = "FORGED";
+  // @ts-expect-error deliberate
+  thrown.detail.code = "FORGED";
+  assert.equal(
+    state.lastGenerationResult.observerErrors[0].error.message,
+    "boom",
+    "the snapshot must be independent of the thrown object"
+  );
+
+  // And every direct mutation attempt throws under strict mode.
+  for (const [label, fn] of Object.entries({
+    "rewrite message": () => { record.error.message = "FORGED"; },
+    "rewrite name": () => { record.error.name = "FORGED"; },
+    "rewrite text": () => { record.error.text = "FORGED"; },
+    "add a field": () => { record.error.forged = true; },
+    "delete a field": () => { delete record.error.message; },
+    "replace the diagnostic": () => { record.error = { message: "FORGED" }; },
+  })) {
+    assert.throws(fn, TypeError, `${label} must throw`);
+  }
+});
+
+test("§4 — a thrown NON-Error object with nested mutable data is equally contained", () => {
+  const thrown = { code: "REAL", nested: { value: 1 }, toString: () => "custom-throw" };
+  const { state, record } = recordFromThrowing(thrown);
+
+  assert.ok(Object.isFrozen(record.error));
+  assert.equal(record.error.wasError, false);
+  assert.equal(record.error.name, "object", "a non-Error is described by its type");
+  assert.equal(record.error.message, null);
+  assert.equal(record.error.stack, null);
+  assert.equal(record.error.text, "custom-throw");
+  assert.equal(record.error.nested, undefined, "the nested payload must not be reachable");
+
+  thrown.nested.value = 999;
+  thrown.code = "FORGED";
+  const viaState = state.lastGenerationResult.observerErrors[0].error;
+  assert.equal(viaState.text, "custom-throw");
+  assert.equal(JSON.stringify(viaState).includes("999"), false, "no forged value may reach state");
+  assert.equal(JSON.stringify(viaState).includes("FORGED"), false);
+});
+
+test("§4 — a hostile thrown value cannot break the transaction or leak a mutable object", () => {
+  const hostile = { get message() { throw new Error("nope"); }, toString() { throw new Error("nope"); } };
+  const { record } = recordFromThrowing(hostile);
+  assert.ok(Object.isFrozen(record.error));
+  assert.equal(record.error.text, "[unrepresentable thrown value]");
+  assert.equal(record.error.wasError, false);
+});
+
 test("§4 — the state-attached record cannot be altered through the returned one", () => {
   const s = withObserverErrors();
   const returned = s.lastGenerationResult;

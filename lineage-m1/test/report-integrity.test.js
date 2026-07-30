@@ -89,7 +89,7 @@ test("§20 — the report's suite counts equal the raw TAP summary", () => {
   // the revision-3 example quoted in §9b rather than the wording this generator emits,
   // so the branch could not fire. It fired for the first time on a genuinely failing
   // run and was wrong; the numbers, not the prose, are what must agree.)
-  const suiteRow = /\| Full test suite \| §20 \| \*\*(PASS|FAIL)\*\* — (\d+)\/(\d+), (\d+) failing \|/;
+  const suiteRow = /\| Full test suite \| §20 \|[^|]*\| \*\*(PASS|FAIL)\*\* — (\d+)\/(\d+), (\d+) failing \|/;
   const row = REPORT.match(suiteRow);
   assert.ok(row, "the report must carry a Full test suite gate row with the raw counts");
   const [, verdict, rowPass, rowTests, rowFail] = row;

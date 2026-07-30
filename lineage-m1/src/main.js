@@ -28,6 +28,9 @@ import {
   resolveFocalLineage,
   createObserverState,
   createTracerChannel,
+  mirrorChannel,
+  clearUserChannels,
+  selectableChannelIds,
   tracerBirthHook,
   observerAfterGenerationHook,
   resolveLivingDescendants,
@@ -60,6 +63,11 @@ class ProbeApp {
     // claimed to be the fixture. Kept outside biological state.
     /** @type {"random"|"defining_fixture"} */
     this.worldSource = "random";
+    // Which fixture variant the ACTIVE world was built from. Part of the atomic
+    // world transaction (revision-6, R6-B) so a variant label can never survive
+    // from a superseded request.
+    /** @type {"baseline"|"high_webbing"|null} */
+    this.fixtureVariant = null;
     this.fixtureLoadError = null;
     this.lastAdvance = 0;
     // ---- world-change transaction identity (revision-5 repair, BUG 2 / R5-2) ----
@@ -81,6 +89,10 @@ class ProbeApp {
     this.meter = new FrameMeter();
     this.meter.start(0);
     this.seed = 1;
+    /** Why a requested tracer could not be created, in the user's words. */
+    this.tracerUnavailableReason = null;
+    /** @type {{created:string[], skipped:Array<{name:string, reason:string}>}|null} */
+    this.maintainedFocalChannels = null;
 
     canvas.addEventListener("click", (ev) => {
       const rect = canvas.getBoundingClientRect();
@@ -121,7 +133,21 @@ class ProbeApp {
   stepOnce() { this.meter.markInput(); this.advance(); this.renderPanels(); }
   setShowRawValues(v) { this.showRawValues = v; this.renderPanels(); }
   setActiveChannel(id) { this.observer.activeChannel = id; this.renderPanels(); }
-  clearTracers() { this.observer.channels.clear(); this.observer.activeChannel = null; this.refreshChannelSelect(); }
+  /**
+   * Clear the tracers the USER created (revision-6 repair, Break 2 / R6-D).
+   *
+   * Revision 5 called `this.observer.channels.clear()`, which also destroyed the
+   * protected maintained witnesses created with the world — the only observer-side
+   * evidence that survives the 360-generation genealogy window. Reproduced: after
+   * pressing this control and advancing to generation 400 with 270 animals alive,
+   * both focal lineages became `FOCAL_ANCESTRY_UNRESOLVABLE`. Protected witnesses
+   * are not user-created, are not offered in the channel selector, and are not
+   * removed here.
+   */
+  clearTracers() {
+    clearUserChannels(this.observer);
+    this.refreshChannelSelect();
+  }
 
   resetRandomWorld(seed) {
     this.meter.markInput();
@@ -152,14 +178,30 @@ class ProbeApp {
     // A caller that already opened a transaction (setManualTestMode) passes its
     // token in so the two do not fight over which is newest.
     const token = opts.worldChangeToken ?? this.beginWorldChange();
+    // REQUEST-LOCAL until the commit gate (revision-6 repair, MC-2 / Break 1 / R6-B).
+    //
+    // Revision 5 assigned `this.fixtureEnvelope = parsed` here, BEFORE the token
+    // check below, so a superseded request returned false while still replacing
+    // shared state. Reproduced with two structurally valid envelopes resolving in
+    // reverse order:
+    //
+    //   newer result true  | canopy first id now 1  | highWebbing 0.75
+    //   stale result false | canopy first id now 81 | highWebbing 0.99
+    //   follow outcome {"created":true,...,"reason":"FOCAL_LINEAGE_RESOLVED"}
+    //   requested founders[0] 81   maintained channel founders[0] 1
+    //
+    // The rejected request poisoned the cache, and the interface then reported one
+    // lineage while following another. Nothing below leaves this variable until the
+    // request is known to be the current one.
+    let envelope = this.fixtureEnvelope;
     try {
-      if (!this.fixtureEnvelope) {
+      if (!envelope) {
         const response = await fetch("./fixtures/defining_fixture_v1.json");
         if (!response.ok) throw new Error(`fixture fetch failed: HTTP ${response.status}`);
         const text = await response.text();
         const parsed = parseEnvelope(text);
         assertFixtureConsistency(parsed);
-        this.fixtureEnvelope = parsed;
+        envelope = parsed;
       }
     } catch (err) {
       // A failed request must not clobber a newer world's state either — not even
@@ -173,31 +215,46 @@ class ProbeApp {
       return false;
     }
     // ---- COMMIT GATE ----
-    // Everything above is I/O. Everything below mutates the world, so a
-    // superseded request stops here and commits nothing.
+    // Everything above is I/O against a request-local envelope. Everything below
+    // mutates shared state, so a superseded request stops here and commits
+    // NOTHING — not biology, not the observer, not the cached envelope, not the
+    // variant, not `worldSource`, not a UI label (revision-6, R6-B).
     if (!this.isCurrentWorldChange(token)) return false;
-    this.fixtureLoadError = null;
-    const env = this.fixtureEnvelope;
-    this.state = hydrateDefiningFixtureV1(env, this.seed, currentModelConfig);
+
+    // Build the whole world first, then publish it in one uninterrupted block.
+    // `await` never appears between the first assignment and the last, so no
+    // other request can observe a half-committed world.
+    const env = envelope;
+    const nextState = hydrateDefiningFixtureV1(env, this.seed, currentModelConfig);
     if (opts.highWebbing) {
       // Fixture construction operation, before generation 1 (§19.2).
-      applyWebbingOverride(this.state, env.canopyFocalIds, env.highWebbing);
-      applyWebbingOverride(this.state, env.shorelineFocalIds, env.highWebbing);
+      applyWebbingOverride(nextState, env.canopyFocalIds, env.highWebbing);
+      applyWebbingOverride(nextState, env.shorelineFocalIds, env.highWebbing);
     }
-    this.observer = createObserverState();
+    const nextObserver = createObserverState();
     // Revision-5 repair (BUG 1 / R5-1). The contract-required focal sets get
     // maintained channels at world creation, while every founder is still alive —
-    // the only moment a generation-zero focal set can be captured exactly. They
-    // stay dormant (the UI does not show them until asked) but are propagated
+    // the only moment a generation-zero focal set can be captured exactly. They are
+    // PROTECTED (revision-6, R6-D): the visible Clear control cannot delete them,
+    // and they are not offered as ordinary selectable tracers. They are propagated
     // through every birth, so late activation never depends on the rolling
     // genealogy window. Storage stays bounded to the living population.
-    this.maintainedFocalChannels = createMaintainedFocalChannels(this.observer, this.state, {
+    const nextMaintained = createMaintainedFocalChannels(nextObserver, nextState, {
       canopy: env.canopyFocalIds,
       shoreline: env.shorelineFocalIds,
     });
+
+    // ---- one atomic publish ----
+    this.fixtureLoadError = null;
+    this.fixtureEnvelope = env;
+    this.state = nextState;
+    this.observer = nextObserver;
+    this.maintainedFocalChannels = nextMaintained;
+    this.fixtureVariant = opts.highWebbing ? "high_webbing" : "baseline";
+    this.worldSource = "defining_fixture";
     this.probe.jitter.clear();
     this.selectedId = null;
-    this.worldSource = "defining_fixture";
+    this.tracerUnavailableReason = null;
     this.refreshChannelSelect();
     this.renderPanels();
     return true;
@@ -219,13 +276,18 @@ class ProbeApp {
    * revision-4 conflation of the last two is gone:
    *
    *   FOCAL_LINEAGE_RESOLVED      living descendants established
-   *   FOCAL_LINEAGE_EXTINCT       genuinely none, and the evidence supports that
-   *   FOCAL_ANCESTRY_UNRESOLVABLE cannot be established either way — asserts nothing
+   *   FOCAL_ANCESTRY_UNRESOLVABLE cannot be established — asserts nothing
    *
-   * Revision 4 returned `FOCAL_LINEAGE_UNAVAILABLE` for the third case, which
+   * Revision 4 returned `FOCAL_LINEAGE_UNAVAILABLE` for the second case, which
    * asserted biological absence. Reproduced at generation 400: 293 living animals,
    * all 293 with positive focal contribution, resolver 0, UI "no living descendant
    * remains".
+   *
+   * REVISION-6 REPAIRS. Revision 5 added a third outcome, `FOCAL_LINEAGE_EXTINCT`,
+   * which is precisely the "group ended" logic contract §16 excludes from Milestone
+   * 1; it is removed (R6-G). The visible channel is now MIRRORED from the maintained
+   * witness rather than rebuilt, so the fractional inherited contribution survives
+   * the follow (R6-E) — revision 5 rebuilt it and every descendant came out at 1.
    *
    * Starting a fresh group is a separate, explicitly named action
    * (`followNewHabitatGroup`).
@@ -255,26 +317,44 @@ class ProbeApp {
     const { descendantIds } = outcome;
 
     if (outcome.outcome === FOCAL_OUTCOME.UNRESOLVABLE) {
-      // Say "cannot be established", never "no descendant remains".
+      // Say "cannot be established". Never "no descendant remains", and never any
+      // other lineage-ended wording: §16 excludes that determination from
+      // Milestone 1. When the witness simply matched nobody this generation, the
+      // OBSERVATION is reported and left as an observation.
+      const d = outcome.detail ?? {};
+      let why;
+      if (d.founderSetMismatch) {
+        why =
+          `the maintained witness for "${which}" was created from a different founder set than the ` +
+          "one requested, so following it would show one lineage under another's name";
+      } else if (d.livingDescendantsObservedNow === 0) {
+        why =
+          `no living animal matched the ${which} focal witness at generation ${this.state.generation}. ` +
+          "That is the observation; Milestone 1 draws no conclusion about whether the lineage ended";
+      } else {
+        why =
+          "the genealogy retention window no longer contains its founders and no maintained " +
+          "witness exists for this world";
+      }
       this.tracerUnavailableReason =
         `FOCAL_ANCESTRY_UNRESOLVABLE — the ${which} focal lineage cannot be established at ` +
-        `generation ${this.state.generation}: the genealogy retention window no longer contains its ` +
-        "founders and no maintained channel exists for this world. This is NOT a claim that the " +
-        "lineage is extinct.";
+        `generation ${this.state.generation}: ${why}. This is NOT a claim that the lineage ended.`;
       this.renderPanels();
       return { created: false, reason: FOCAL_OUTCOME.UNRESOLVABLE, detail: outcome.detail };
-    }
-    if (outcome.outcome === FOCAL_OUTCOME.EXTINCT) {
-      this.tracerUnavailableReason =
-        `FOCAL_LINEAGE_EXTINCT — no living descendant of the ${which} focal lineage remains ` +
-        `(established from the ${outcome.source}). Following a different group is a separate choice.`;
-      this.renderPanels();
-      return { created: false, reason: FOCAL_OUTCOME.EXTINCT, detail: outcome.detail };
     }
 
     this.tracerUnavailableReason = null;
     try {
-      createTracerChannel(this.observer, channelId, descendantIds, this.state.currentIndividuals.map((i) => i.id));
+      if (outcome.channelId && this.observer.channels.has(outcome.channelId)) {
+        // MIRROR the maintained witness (revision-6, R6-E): the visible channel
+        // carries the same propagated fractional contributions and the same exact
+        // membership. Revision 5 called `createTracerChannel(...)` here, which
+        // reset every descendant to 1 — reproduced at generation 10 as
+        // 0.09375..0.40625 (sum 22.23046875) becoming 1..1 (sum 83).
+        mirrorChannel(this.observer, outcome.channelId, channelId);
+      } else {
+        createTracerChannel(this.observer, channelId, descendantIds, this.state.currentIndividuals.map((i) => i.id));
+      }
     } catch (err) {
       this.tracerUnavailableReason = `tracer not created — ${err.message}`;
       this.renderPanels();
@@ -287,6 +367,7 @@ class ProbeApp {
       founderCount: descendantIds.length,
       source: outcome.source,
       reason: FOCAL_OUTCOME.RESOLVED,
+      mirroredFrom: outcome.channelId ?? null,
     };
   }
 
@@ -600,8 +681,12 @@ class ProbeApp {
   refreshChannelSelect() {
     const sel = /** @type {HTMLSelectElement|null} */ (this.doc.getElementById("channel-select"));
     if (!sel) return;
+    // Protected maintained witnesses are internal observer state, not user
+    // tracers. Offering them here would let the user select and (before R6-D)
+    // delete the evidence that makes late focal resolution possible, and would
+    // present an internal channel as an ordinary one (revision-6, R6-D).
     sel.innerHTML = `<option value="">(no channel)</option>` +
-      [...this.observer.channels.keys()].map((k) => `<option value="${k}">${k}</option>`).join("");
+      selectableChannelIds(this.observer).map((k) => `<option value="${k}">${k}</option>`).join("");
     sel.value = this.observer.activeChannel ?? "";
   }
 }

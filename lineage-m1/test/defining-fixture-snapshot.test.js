@@ -110,12 +110,15 @@ test("§19 C — hydration copies biological counters and excludes fixture metad
   const { envelope } = loadValidatedFixture();
   const state = hydrateDefiningFixtureV1(envelope, 1);
   assert.equal(state.schemaVersion, SCHEMA_VERSION);
-  // Pinned literal so a schema bump is a deliberate edit, never incidental.
-  // Bumped to `-2` in revision 5 (R5-3): carrying a complete `modelIdentityHash`
-  // is now part of the schema contract, so a pre-identity `-1` state is rejected
-  // by version instead of being advanced under an arbitrary same-version model.
-  assert.equal(state.schemaVersion, "lineage-biological-state-2");
-  assert.ok(state.modelIdentityHash, "a schema-2 state must carry a complete model identity");
+  // Pinned literal so a schema change is a deliberate edit, never incidental.
+  //
+  // REVISION-6 (MC-1). Revision 5 changed this literal to `-2` alongside the
+  // implementation, which is oracle drift rather than a contract amendment: the
+  // governing contract freezes the hydration schema identifier. Restored, together
+  // with the identity assertion the bump was supposed to guarantee — that one is
+  // enforced unconditionally by the guards, not by the label.
+  assert.equal(state.schemaVersion, "lineage-biological-state-1");
+  assert.ok(state.modelIdentityHash, "every hydrated state must carry a complete model identity");
   assert.equal(state.configVersion, currentModelConfig.version);
   assert.equal(state.generation, envelope.generation);
   assert.equal(state.nextIndividualId, envelope.nextIndividualId);

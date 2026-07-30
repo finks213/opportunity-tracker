@@ -18,6 +18,8 @@ import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { MILESTONE_STATUS } from "../src/config/milestoneStatus.js";
+import { parseTap } from "../tools/writeFinalReport.mjs";
+import { deriveGateStatuses, deriveMilestoneStatus, readExternalStatuses } from "../tools/gateRegistry.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -88,9 +90,12 @@ test("the process waiver and iPad gate are named as separately pending", () => {
   assert.ok(report.includes("PENDING_HUMAN_DEVICE_TEST"), "the iPad gate must be named");
   // And the report must not present the waiver as the only blocker.
   assert.ok(
-    /not the only blocker|NOT the only blockers|Separately pending/i.test(report),
+    /not the only blocker|NOT the only blockers|Separately pending|Neither is the only blocker/i.test(report),
     "the report must not present the process waiver as the sole blocker"
   );
+  // Revision 6: the full blocker list is derived and printed, so the claim is
+  // checkable rather than rhetorical.
+  assert.match(report, /Why it reads that way — every blocker the derivation found:/);
 });
 
 test("the iPad checklist does not instruct the operator to report a passing status", () => {
@@ -157,14 +162,50 @@ test("the audit manifest names the CURRENT bundle revision", () => {
   );
 });
 
-test("the status source of truth agrees with the literal this test enforces", () => {
-  // Revision-4 guard. `src/config/milestoneStatus.js` feeds the generated report,
-  // so if it could drift from the string asserted above, a generated artifact
-  // could carry a status this test never checked.
-  assert.equal(MILESTONE_STATUS.status, REQUIRED_STATUS);
-  assert.equal(MILESTONE_STATUS.processWaiver, "PROCESS WAIVER: PENDING PRINCIPAL DECISION");
-  assert.equal(MILESTONE_STATUS.ipadTest, "IPAD TEST: PENDING_HUMAN_DEVICE_TEST");
-  assert.equal(MILESTONE_STATUS.mayDeclareCompletion, false);
+test("the DERIVED status agrees with the literal this test enforces", () => {
+  // REVISION-6 CHANGE (M-2 / R6-J). Revision 5 kept the status as a literal in
+  // `src/config/milestoneStatus.js` and this test compared that literal with its
+  // own — two constants agreeing with each other. The status is now derived from
+  // the published run plus the externally determined inputs, so the comparison
+  // that matters is between the DOCUMENTS and the DERIVATION.
+  const tap = parseTap(read("audit/test-results.txt"));
+  const external = readExternalStatuses(read);
+  const derived = deriveGateStatuses(tap, external);
+  const milestone = deriveMilestoneStatus(derived, external);
+
+  assert.equal(
+    milestone.status,
+    REQUIRED_STATUS,
+    "the evidence must derive the status the documents state"
+  );
+  assert.equal(milestone.mayDeclareCompletion, false);
+  assert.ok(milestone.blockers.length > 0, "and it must name why");
+
+  // The derivation may never produce a forbidden status, whatever the inputs.
+  for (const forbidden of MILESTONE_STATUS.forbiddenStatuses) {
+    assert.ok(!milestone.status.includes(forbidden), `the derivation emitted ${forbidden}`);
+  }
+
+  // The policy file keeps policy, and asserts no status of its own.
+  assert.equal(MILESTONE_STATUS.statusIsDerived, true);
+  assert.equal(MILESTONE_STATUS.status, undefined, "no status literal may return to this file");
+  assert.equal(MILESTONE_STATUS.mayDeclareCompletion, undefined);
   assert.deepEqual([...MILESTONE_STATUS.forbiddenStatuses], ["M1_AUTOMATED_GATES_PASS", "M1_ACCEPTED"]);
-  assert.ok(Object.isFrozen(MILESTONE_STATUS), "the status object must be frozen");
+  assert.ok(Object.isFrozen(MILESTONE_STATUS), "the policy object must be frozen");
+});
+
+test("the two contract-named conditions are rendered from the external inputs", () => {
+  // These literals are required wording. They must appear in the report because the
+  // external evidence says so, not because a source file spells them out.
+  const external = readExternalStatuses(read);
+  assert.equal(external.ipadGate.status, "PENDING_HUMAN_DEVICE_TEST");
+  assert.match(external.stageAOrder.status, /VIOLATED/);
+  const report = read("FINAL_REPORT.md");
+  assert.ok(report.includes("IPAD TEST: PENDING_HUMAN_DEVICE_TEST"));
+  assert.ok(report.includes("PROCESS WAIVER: PENDING PRINCIPAL DECISION"));
+  // Each external gate must name its source and its determiner in the report.
+  for (const [id, rec] of Object.entries(external)) {
+    assert.ok(report.includes(`\`${id}\``), `the report must list the external gate ${id}`);
+    assert.ok(report.includes(rec.source), `the report must name where ${id} was read from`);
+  }
 });

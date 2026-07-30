@@ -1,0 +1,35 @@
+{
+  "schema": "lineage-m1-external-gate-status-2",
+  "purpose": "Machine-readable statuses for the gates NO automated run can decide. FINAL_REPORT.md and the derived milestone status read this file; nothing in the report or in source hardcodes these values (revision-6 repair, M-2 / R6-J).",
+  "rule": "A gate here counts as satisfied only when its status is PASS, SATISFIED or MEASURED. Any other value — including a missing or unreadable file — leaves the milestone blocked. No value in this file may be set by an automated run: each is recorded by the party named in determinedBy, and the recorder is stated.",
+  "statusPolicy": "When the automated gates are not all passing the milestone status is `M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED`. When they are, the status is the `milestoneStatusWhenUnsatisfied` of the unsatisfied external gate with the lowest priority number. When every gate of both kinds is satisfied the status is `M1_ALL_GATES_SATISFIED`. The implementation never selects the string itself.",
+  "gates": {
+    "independentClosureAudit": {
+      "status": "PENDING",
+      "priority": 1,
+      "milestoneStatusWhenUnsatisfied": "M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED",
+      "determinedBy": "two independent audits: a structural code audit and an AFE-Δ evidence and claim audit",
+      "note": "Revisions 1 through 5 each returned BREAKS-FOUND, and in every case a green in-house suite coexisted with real defects. No automated pass is self-certified: until an independent closure audit of revision 6 says otherwise, the milestone stays blocked for implementation and evidence repairs. This gate is why a green suite does not by itself move the status.",
+      "recordedBy": "implementation, stating that the audit has not been performed",
+      "recordedOn": "2026-07-30"
+    },
+    "ipadGate": {
+      "status": "PENDING_HUMAN_DEVICE_TEST",
+      "priority": 2,
+      "milestoneStatusWhenUnsatisfied": "M1_BLOCKED — PHYSICAL IPAD ACCEPTANCE NOT PERFORMED",
+      "determinedBy": "a human operating a physical iPad",
+      "note": "Not performed. IPAD_TEST_CHECKLIST.md ships unfilled; no physical-device measurement is supplied and no threshold is claimed as met.",
+      "recordedBy": "implementation, stating the absence of the measurement",
+      "recordedOn": "2026-07-30"
+    },
+    "stageAOrder": {
+      "status": "VIOLATED — principal decision required",
+      "priority": 3,
+      "milestoneStatusWhenUnsatisfied": "M1_BLOCKED — §24 STAGE A PROCESS DECISION OUTSTANDING",
+      "determinedBy": "the principal",
+      "note": "§24 Stage A pre-code planning order was violated and cannot be repaired retrospectively. DECISIONS.md D-000 and D-024. The waiver has not been requested; it is held until revision 6 survives the bounded closure audit.",
+      "recordedBy": "implementation, stating the violation",
+      "recordedOn": "2026-07-30"
+    }
+  }
+}

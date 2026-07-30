@@ -32,7 +32,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, join, resolve } from "node:path";
 import { ZONES } from "../src/config/zones.js";
 import { MILESTONE_STATUS, HASH_LABELS } from "../src/config/milestoneStatus.js";
-import { deriveGateStatuses } from "./gateRegistry.mjs";
+import { deriveGateStatuses, readExternalStatuses, deriveMilestoneStatus } from "./gateRegistry.mjs";
 
 const ROOT = resolve(join(dirname(fileURLToPath(import.meta.url)), ".."));
 const read = (rel) => readFileSync(join(ROOT, rel), "utf8");
@@ -259,9 +259,23 @@ export function selfAuditScans(root = ROOT) {
 
 /**
  * Build the whole report.
+ *
+ * ROOT-PARAMETERISED (revision-6 repair, M-2 / R6-J). The structural audit's
+ * objection to the revision-5 injection proof was that it exercised the pure gate
+ * function with a synthetic map and never generated a report from a controlled
+ * failing RUN. It can now render from any directory, so
+ * `test/report-end-to-end-injection.test.js` copies the evidence to a temporary
+ * tree, plants a failing test in the TAP, regenerates, and compares the whole
+ * report — gate rows, totals, completion claim and milestone status.
+ *
+ * @param {{root?:string}} [opts]
  * @returns {string}
  */
-export function renderFinalReport() {
+export function renderFinalReport(opts = {}) {
+  const base = opts.root ?? ROOT;
+  const read = (rel) => readFileSync(join(base, rel), "utf8");
+  const readJson = (rel) => JSON.parse(read(rel));
+  const has = (rel) => existsSync(join(base, rel));
   // ---- raw evidence ----
   const tap = parseTap(read("audit/test-results.txt"));
   const fixture = readJson("audit/fixture-results.json");
@@ -286,7 +300,12 @@ export function renderFinalReport() {
     ? readJson("audit/build-environment.json")
     : null;
 
-  const scan = selfAuditScans();
+  const scan = selfAuditScans(base);
+  // Externally determined statuses and the DERIVED milestone status (revision-6,
+  // R6-J). Both come from files; neither is written in source.
+  const external = readExternalStatuses(read);
+  const derived = deriveGateStatuses(tap, external);
+  const milestone = deriveMilestoneStatus(derived, external);
   const g = char.guardrails;
   const L = char.lifecycle;
   const S = MILESTONE_STATUS;
@@ -298,27 +317,58 @@ export function renderFinalReport() {
     "# LINEAGE Milestone 1 — Final Implementation Report",
     "",
     "> **GENERATED FILE.** Produced by `tools/writeFinalReport.mjs` (`npm run report:final`)",
-    "> from the raw evidence under `audit/` and from `src/config/milestoneStatus.js`. Do not",
-    "> hand-edit: `test/report-integrity.test.js` fails the build when this file disagrees",
-    "> with the raw evidence, and any manual change is overwritten on the next generation.",
+    "> from the raw evidence under `audit/`. Do not hand-edit:",
+    "> `test/report-integrity.test.js` fails the build when this file disagrees with the raw",
+    "> evidence, and any manual change is overwritten on the next generation.",
     "",
     "## Status",
     "",
     "```",
-    S.status,
+    milestone.status,
     "```",
     "",
-    `**This report is revision ${S.revision}** (generated ${S.reportDate}). Revisions 1, 2 and 3 were each`,
-    "audited and each returned `BREAKS-FOUND`. The status stays at the value above and",
-    "**must not** advance until revision 4 survives independent re-audit by both the",
-    "structural code audit and the AFE-Δ evidence and claim audit.",
+    "**This status is DERIVED, not declared** (revision-6 repair R6-J). It is computed by",
+    "`deriveMilestoneStatus()` in `tools/gateRegistry.mjs` from the published run in",
+    "`audit/test-results.txt` and the externally determined statuses in",
+    "`audit/external-gate-status.json`. No source file asserts it, and a failing run",
+    "changes it without anybody editing code.",
     "",
-    "Separately pending, and NOT the only blockers:",
+    "Why it reads that way — every blocker the derivation found:",
+    "",
+    ...(milestone.blockers.length === 0
+      ? ["- none; every automated and externally determined gate is satisfied"]
+      : milestone.blockers.map((b) => `- ${b}`)),
+    "",
+    `**This report is revision ${S.revision}** (generated ${S.reportDate}). Revisions 1, 2, 3, 4`,
+    "and 5 were each audited and each returned `BREAKS-FOUND`. The status above may not",
+    "advance until revision 6 survives independent re-audit by both the structural code",
+    "audit and the AFE-Δ evidence and claim audit — that requirement is itself one of the",
+    "externally determined gates, so it is visible in the list above rather than asserted",
+    "here.",
+    "",
+    "Externally determined gates, each read from its named input:",
+    "",
+    "| Gate | Status | Determined by | Read from |",
+    "|---|---|---|---|",
+    ...Object.entries(external).map(
+      ([id, rec]) => `| \`${id}\` | ${rec.status} | ${rec.determinedBy ?? "—"} | \`${rec.source}\` |`
+    ),
+    "",
+    "None of these is machine-verified and none may read `PASS` on the strength of an",
+    "automated run. The three that are declared gates are counted once — as external — in",
+    "the gate totals below; `independentClosureAudit` is a standing process condition rather",
+    "than a gate row, and binds the status without being counted as a gate.",
+    "",
+    "The two conditions the contract asks to be named explicitly, in their required wording,",
+    "each rendered from the row above rather than typed here:",
     "",
     "```",
-    S.processWaiver,
-    S.ipadTest,
+    `PROCESS WAIVER: ${external.stageAOrder?.status === "VIOLATED — principal decision required" ? "PENDING PRINCIPAL DECISION" : external.stageAOrder?.status ?? "UNVERIFIED"}`,
+    `IPAD TEST: ${external.ipadGate?.status ?? "UNVERIFIED"}`,
     "```",
+    "",
+    "Neither is the only blocker. Revision 2 claimed the waiver was, while ten defects were",
+    "open; that claim is withdrawn and the full blocker list is printed above.",
     "",
     "Revision 2 stated that the Stage A process waiver was the only remaining blocker.",
     "That was false while implementation and evidence defects were open, and it is",
@@ -375,7 +425,6 @@ export function renderFinalReport() {
   // Revision-5 repair (BUG 7 / R5-7). Every row is DERIVED from the run's per-test
   // results through `tools/gateRegistry.mjs`. Revision 4 hardcoded `**PASS**` for
   // every feature row, so a failing suite still produced a table of passes.
-  const derived = deriveGateStatuses(tap);
   const gateMark = (status) =>
     status === "PASS" ? "**PASS**" : status === "FAIL" ? "**FAIL**" : `**${status}**`;
 
@@ -391,8 +440,8 @@ export function renderFinalReport() {
     "`PASS`. Revision 4 hardcoded a literal `PASS` on every feature row, so injecting a single",
     "failure produced `Full test suite: FAIL — 1 of 249` beside `Birth immutability: PASS`.",
     "",
-    "| # | Gate | Contract § | Result |",
-    "|---|---|---|---|"
+    "| # | Gate | Contract § | Evidence | Result |",
+    "|---|---|---|---|---|"
   );
   derived.gates.forEach((g, i) => {
     const detail = g.detail ? ` — ${g.detail}` : "";
@@ -404,13 +453,31 @@ export function renderFinalReport() {
           : g.evidence === "suite" && g.detail
             ? ` — ${g.detail}`
             : detail;
-    w(`| ${i + 1} | ${g.label} | ${g.section} | ${gateMark(g.status)}${g.evidence === "suite" ? extra : extra} |`);
+    // Every row names where its status came from (revision-6, R6-K): the named
+    // tests for a machine-verified gate, the named input file for an external one.
+    const source =
+      g.evidence === "external"
+        ? `external — \`${g.evidenceSource}\``
+        : g.evidence === "suite"
+          ? "`audit/test-results.txt` (TAP summary)"
+          : `${(g.mappedTests ?? []).length} named test(s)`;
+    w(`| ${i + 1} | ${g.label} | ${g.section} | ${source} | ${gateMark(g.status)}${extra} |`);
   });
   w(
     "",
-    `**Gate totals:** ${derived.summary.pass} PASS · ${derived.summary.fail} FAIL · ` +
-    `${derived.summary.unverified} UNVERIFIED · ${derived.summary.external} externally determined ` +
-    `(of ${derived.summary.total}).`,
+    // REVISION-6 REPAIR (MM-2 / R6-K). The categories PARTITION the gates: an
+    // externally determined gate is counted once, as external. Revision 5 printed
+    // "35 PASS · 0 FAIL · 1 UNVERIFIED · 3 externally determined (of 38)", whose
+    // categories sum to 39 because the Canvas-memory gate was counted twice.
+    `**Gate totals:** of ${derived.summary.total} gates, ${derived.summary.external} are externally ` +
+    `determined and ${derived.summary.total - derived.summary.external} are machine-verified from named ` +
+    `tests. Machine-verified: ${derived.summary.pass} PASS · ${derived.summary.fail} FAIL · ` +
+    `${derived.summary.unverified} UNVERIFIED. Externally determined: ` +
+    `${derived.summary.externalByStatus.map((e) => `\`${e.id}\` ${e.status}`).join(" · ")}.`,
+    "",
+    `The four numbers ${derived.summary.pass} + ${derived.summary.fail} + ${derived.summary.unverified} + ` +
+    `${derived.summary.external} sum to ${derived.summary.pass + derived.summary.fail + derived.summary.unverified + derived.summary.external}, ` +
+    `which is the denominator ${derived.summary.total}. No gate is counted in two categories.`,
     "",
     derived.unattributedFailures.length > 0
       ? "**Unattributed failures present.** The run contains failing tests that no gate claims, so every " +
@@ -1101,10 +1168,16 @@ export function renderFinalReport() {
       `${derived.summary.unverified} UNVERIFIED |`,
     "| remaining uncertainty named rather than hidden | met — §6, §11, and the audit response in the repair record |",
     "",
-    `**Completion is NOT declared** (\`mayDeclareCompletion: ${S.mayDeclareCompletion}\`). §24 Stage A ordering was`,
-    "violated and cannot be repaired retrospectively (D-000, D-024). That is a principal",
-    "decision, not an implementer decision. The physical iPad gate is unperformed. The",
-    "status stays as printed at the top of this report.",
+    `**Completion is ${milestone.mayDeclareCompletion ? "declared" : "NOT declared"}** ` +
+      `(\`mayDeclareCompletion: ${milestone.mayDeclareCompletion}\`). This flag is DERIVED from the`,
+    "same evidence as the status: it is true only when every machine-verified gate passes",
+    "AND every externally determined gate is satisfied. Revision 5 kept it as a literal in",
+    "`src/config/milestoneStatus.js`, where no execution result could reach it.",
+    "",
+    "The blockers behind the current value are listed under Status above. They include the",
+    "§24 Stage A ordering violation, which cannot be repaired retrospectively (D-000, D-024)",
+    "and is a principal decision rather than an implementer one, and the unperformed physical",
+    "iPad gate.",
     "",
     "---",
     "",
@@ -1145,7 +1218,9 @@ if (isMain) {
 
   // The machine-readable form of exactly what the report's gate table says.
   const tapForSummary = parseTap(readFileSync(join(ROOT, "audit", "test-results.txt"), "utf8"));
-  const derivedSummary = deriveGateStatuses(tapForSummary);
+  const externalForSummary = readExternalStatuses((rel) => readFileSync(join(ROOT, rel), "utf8"));
+  const derivedSummary = deriveGateStatuses(tapForSummary, externalForSummary);
+  const milestoneForSummary = deriveMilestoneStatus(derivedSummary, externalForSummary);
   writeFileSync(
     join(ROOT, "audit", "gate-summary.json"),
     JSON.stringify(
@@ -1153,10 +1228,16 @@ if (isMain) {
         schema: "lineage-m1-gate-summary-1",
         contractSection: "20 / 26 / 28",
         note:
-          "Derived from audit/test-results.txt through tools/gateRegistry.mjs. Every gate maps to named " +
-          "tests; a gate whose evidencing test did not run is UNVERIFIED, never PASS. This file and the " +
-          "report's gate table are generated from the same call.",
+          "Derived from audit/test-results.txt and audit/external-gate-status.json through " +
+          "tools/gateRegistry.mjs. Every machine-verified gate maps to named tests; a gate whose " +
+          "evidencing test did not run is UNVERIFIED, never PASS. Externally determined gates are READ " +
+          "from their named inputs, are never machine-verified, and are counted once — as external — so " +
+          "the categories partition the gate set. The milestone status and completion flag below are " +
+          "derived from the same inputs, not written in source (revision-6, R6-J / R6-K). This file and " +
+          "the report's gate table are generated from the same call.",
         suite: { tests: tapForSummary.tests, pass: tapForSummary.pass, fail: tapForSummary.fail },
+        externalStatuses: externalForSummary,
+        milestone: milestoneForSummary,
         summary: derivedSummary.summary,
         unattributedFailures: derivedSummary.unattributedFailures,
         gates: derivedSummary.gates,
