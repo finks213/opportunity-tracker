@@ -85,7 +85,7 @@ failure produced `Full test suite: FAIL — 1 of 249` beside `Birth immutability
 
 | # | Gate | Contract § | Result |
 |---|---|---|---|
-| 1 | Full test suite | §20 | **PASS** — 299/299, 0 failing |
+| 1 | Full test suite | §20 | **PASS** — 300/300, 0 failing |
 | 2 | Fixture raw SHA-256 integrity | §19 A | **PASS** |
 | 3 | Fixture-envelope canonical round trip | §19 B | **PASS** |
 | 4 | Deterministic hydration | §19 C | **PASS** |
@@ -118,13 +118,13 @@ failure produced `Full test suite: FAIL — 1 of 249` beside `Birth immutability
 | 31 | Generation result is deeply immutable | §4 | **PASS** |
 | 32 | Focal lineage resolved, never reseeded, never falsely terminated | §16 | **PASS** |
 | 33 | Quarantined Python references unchanged | §27 | **PASS** |
-| 34 | Report agrees with the raw evidence | §26 / §27 | **UNVERIFIED** — no result observed for: §27 — every published command is documented in the manifest's clean-run section |
+| 34 | Report agrees with the raw evidence | §26 / §27 | **PASS** |
 | 35 | Tests never mutate the production source tree | §20 | **PASS** |
 | 36 | Report bytes are runtime-independent across supported Node majors | §26 | **PASS** |
 | 37 | **Physical iPad acceptance** | §22 | **PENDING_HUMAN_DEVICE_TEST** — no measurement supplied; not performed |
 | 38 | **§24 Stage A pre-code planning order** | §24 | **VIOLATED — principal decision required** — unrepairable retrospectively; DECISIONS.md D-000 and D-024 |
 
-**Gate totals:** 34 PASS · 0 FAIL · 2 UNVERIFIED · 3 externally determined (of 38).
+**Gate totals:** 35 PASS · 0 FAIL · 1 UNVERIFIED · 3 externally determined (of 38).
 
 No unattributed failures: every failing test in this run, if any, maps to a declared gate.
 
@@ -139,8 +139,8 @@ and in `CHARACTERIZATION.md`.
 
 | Field | Value |
 |---|---|
-| tests | 299 |
-| pass | 299 |
+| tests | 300 |
+| pass | 300 |
 | fail | 0 |
 | cancelled | 0 |
 | skipped | 0 |
@@ -563,7 +563,7 @@ file. The result column is the scan's actual output, not a remembered claim.
 | observer/debug imports in `src/core`, `src/config`, `src/fixtures` | clean |
 | observer modules referencing the simulation RNG | none |
 | bare-specifier imports in `src/` (runtime dependencies) | none; `dependencies` is empty |
-| full test suite from clean | 299/299, 0 failures |
+| full test suite from clean | 300/300, 0 failures |
 | observer strategies compared after every generation | byte-identical: true |
 | quarantined Python references unchanged | true (3 files) |
 | fixture, both characterization batches, edge-only, desktop | regenerated for this revision |
@@ -652,7 +652,7 @@ provenance — make it addable later without rewriting the biological kernel.
 | genealogy and mating cores remain coherent | met |
 | neutral traits are exactly neutral | met |
 | the difference is visible in the diagnostic probe | met on desktop; **iPad legibility pending human test** |
-| every automated result reproducible from a clean run | NOT met — 299/299 from clean, 0 gate(s) FAIL, 2 UNVERIFIED |
+| every automated result reproducible from a clean run | met — 300/300 from clean, 0 gate(s) FAIL, 1 UNVERIFIED |
 | remaining uncertainty named rather than hidden | met — §6, §11, and the audit response in the repair record |
 
 **Completion is NOT declared** (`mayDeclareCompletion: false`). §24 Stage A ordering was

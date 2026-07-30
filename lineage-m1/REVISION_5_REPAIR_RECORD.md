@@ -631,11 +631,13 @@ tree-integrity claim, which is about file mutation.
 
 ## Runtime matrix (R5-6 proof)
 
-| Runtime | Major | Rendered report SHA-256 | Matches committed |
-|---|---:|---|---|
-| `v20.20.2` | 20 | `6183a23bc6ed51961b2c918f4e9d6799…` | True |
-| `v21.7.3` | 21 | `6183a23bc6ed51961b2c918f4e9d6799…` | True |
-| `v22.22.2` | 22 | `6183a23bc6ed51961b2c918f4e9d6799…` | True |
+Figures below are the final revision-5 run, `audit/runtime-matrix.json`.
+
+| Runtime | Major | Rendered report SHA-256 | Matches committed | Determinism tests |
+|---|---:|---|---|---|
+| `v20.20.2` | 20 | `14fc43dd9078671d3f29b45746c30e1d…` | True | 62 / 62, 0 failing |
+| `v21.7.3` | 21 | `14fc43dd9078671d3f29b45746c30e1d…` | True | 62 / 62, 0 failing |
+| `v22.22.2` | 22 | `14fc43dd9078671d3f29b45746c30e1d…` | True | 62 / 62, 0 failing |
 
 | Field | Value |
 |---|---|

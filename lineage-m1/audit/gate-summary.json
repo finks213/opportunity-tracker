@@ -3,18 +3,18 @@
   "contractSection": "20 / 26 / 28",
   "note": "Derived from audit/test-results.txt through tools/gateRegistry.mjs. Every gate maps to named tests; a gate whose evidencing test did not run is UNVERIFIED, never PASS. This file and the report's gate table are generated from the same call.",
   "suite": {
-    "tests": 299,
-    "pass": 299,
+    "tests": 300,
+    "pass": 300,
     "fail": 0
   },
   "summary": {
     "total": 38,
-    "pass": 34,
+    "pass": 35,
     "fail": 0,
-    "unverified": 2,
+    "unverified": 1,
     "external": 3,
     "suiteHasFailures": false,
-    "everyAutomatedResultReproducible": "NOT met"
+    "everyAutomatedResultReproducible": "met"
   },
   "unattributedFailures": [],
   "gates": [
@@ -24,7 +24,7 @@
       "section": "§20",
       "status": "PASS",
       "evidence": "suite",
-      "detail": "299/299, 0 failing",
+      "detail": "300/300, 0 failing",
       "mappedTests": []
     },
     {
@@ -560,7 +560,7 @@
       "id": "reportIntegrity",
       "label": "Report agrees with the raw evidence",
       "section": "§26 / §27",
-      "status": "UNVERIFIED",
+      "status": "PASS",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -572,12 +572,11 @@
       "observedTests": [
         "§26 — the committed report is exactly what the generator produces",
         "§20 — the report's suite counts equal the raw TAP summary",
-        "§27 — the manifest's path inventory is current"
+        "§27 — the manifest's path inventory is current",
+        "§27 — every published command is documented in the manifest's clean-run section"
       ],
       "failedTests": [],
-      "missingTests": [
-        "§27 — every published command is documented in the manifest's clean-run section"
-      ]
+      "missingTests": []
     },
     {
       "id": "testTreeIntegrity",
