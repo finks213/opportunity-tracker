@@ -607,14 +607,17 @@ summary to 248/249 and regenerating:
 while continuously sampling every file under `src/`. The invariant is checked **at
 every instant**, not before and after.
 
+Figures below are the final revision-5 run, `audit/tree-integrity.json`.
+
 | Field | Value |
 |---|---:|
-| full-suite rounds | 2 |
+| full-suite rounds | 3 |
 | test-file concurrency | 4 |
 | files watched | 31 |
-| samples taken | 712,760 |
+| samples taken | 1,087,683 |
 | **deviations observed** | **0** |
 | tree unchanged throughout | **True** |
+| every round green | **True** — 300/300, 0 failing, exit 0, three times |
 | baseline digest | `304ef686f17b37eec59ebd8d71f28cdd…` |
 | final digest | `304ef686f17b37eec59ebd8d71f28cdd…` |
 
@@ -622,10 +625,11 @@ Revision 4 would fail this. A watcher during its suite observed `src/core/math.j
 cycling through three planted variants, one of them importing a package that does not
 exist.
 
-The rounds themselves reported failures — the report/gate-consistency tests, because
-the report and the results file were mid-convergence during those rounds. That is
-recorded in `audit/tree-integrity.json` under `runs`, and it does not affect the
-tree-integrity claim, which is about file mutation.
+An earlier revision-5 run of this same proof reported failures inside its rounds — the
+report/gate-consistency tests, because the report and the results file were
+mid-convergence at the time. Those runs still showed zero deviations, since the claim
+here is about file mutation rather than test outcome; the three rounds recorded above
+were run after convergence and are green as well.
 
 ---
 
