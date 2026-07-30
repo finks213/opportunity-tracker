@@ -18,6 +18,7 @@ import {
   livingFounderContribution,
 } from "../src/observer/tracerChannels.js";
 import { zoneBinCounts } from "../src/observer/currentZoneBins.js";
+import { stripCommentsAndStrings } from "../tools/writeFinalReport.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SRC = join(HERE, "..", "src");
@@ -34,13 +35,40 @@ function listSources(dir) {
   return out;
 }
 
-test("§20.13 — no production source file contains Math.random", () => {
+test("§20.13 — no production source file USES unseeded randomness", () => {
+  // Revision-5 change (R5-8 principle, applied consistently). This scanned raw text,
+  // so a doc comment or string that merely NAMED the forbidden call counted as a
+  // violation. That is why earlier revisions had to reword comments to appease the
+  // scanner, and it left the codebase unable to document the very token it forbids —
+  // `tools/proveTreeIntegrity.mjs` and the revision-5 repair notes must be able to
+  // quote what was found in the audit.
+  //
+  // The bar is UNCHANGED: zero uses in production source or tooling. Only the
+  // pre-filter changed, so mentions are mentions and uses are uses.
+  const forbidden = ["Math", "random"].join(".");
   const offenders = [];
   for (const file of [...listSources(SRC), ...listSources(TOOLS)]) {
-    const text = readFileSync(file, "utf8");
-    if (text.includes("Math.random")) offenders.push(relative(join(HERE, ".."), file));
+    const code = stripCommentsAndStrings(readFileSync(file, "utf8"));
+    if (code.includes(forbidden)) offenders.push(relative(join(HERE, ".."), file));
   }
-  assert.deepEqual(offenders, [], `Math.random found in: ${offenders.join(", ")}`);
+  assert.deepEqual(offenders, [], `unseeded randomness used in: ${offenders.join(", ")}`);
+});
+
+test("§20.13 — the unseeded-randomness scan still detects a real use", () => {
+  // A scan that cannot fail is worthless, and the pre-filter above could in
+  // principle hide a real call. Prove it does not, on synthetic source.
+  const forbidden = ["Math", "random"].join(".");
+  const realUse = `const r = ${forbidden}();`;
+  assert.ok(
+    stripCommentsAndStrings(realUse).includes(forbidden),
+    "a genuine call must survive the pre-filter"
+  );
+  for (const mention of [`// ${forbidden}()`, `/* ${forbidden}() */`, `const s = "${forbidden}()";`]) {
+    assert.ok(
+      !stripCommentsAndStrings(mention).includes(forbidden),
+      `a mention must not survive: ${mention}`
+    );
+  }
 });
 
 test("§17 — the PRNG is serializable with explicit state and reproduces exactly", () => {

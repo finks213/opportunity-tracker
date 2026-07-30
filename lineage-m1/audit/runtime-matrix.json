@@ -1,0 +1,101 @@
+{
+  "schema": "lineage-m1-runtime-matrix-1",
+  "contractSection": "27 (audit evidence)",
+  "claim": "Rendering FINAL_REPORT.md produces identical bytes on every Node major tested here, given unchanged committed evidence. This is what makes the byte-equality gate satisfiable on any `node >=18` install rather than only on the patch release that generated the report.",
+  "notClaimed": "That the full 200-seed suite was executed on every major. Only the determinism-critical test files listed below were run per runtime; the full suite's runtime is in audit/build-environment.json.",
+  "determinismTestFiles": [
+    "test/report-integrity.test.js",
+    "test/manifest-inventory.test.js",
+    "test/status-consistency.test.js",
+    "test/model-identity.test.js",
+    "test/model-hash-provenance.test.js"
+  ],
+  "committedReportSha256": "6183a23bc6ed51961b2c918f4e9d67990cdc607cc1e4721ba4b143737ee558c0",
+  "runtimes": [
+    {
+      "nodeVersion": "v20.20.2",
+      "major": 20,
+      "binary": "/opt/node20/bin/node",
+      "renderedReportSha256": "6183a23bc6ed51961b2c918f4e9d67990cdc607cc1e4721ba4b143737ee558c0",
+      "renderedReportBytes": 35289,
+      "matchesCommittedReport": true,
+      "determinismTests": {
+        "tests": 61,
+        "pass": 57,
+        "fail": 4,
+        "failing": [
+          "§27 — the manifest's path inventory is current",
+          "§27 — every shipped file is listed, and every listed file is shipped",
+          "§22 — desktop figures in the report match the desktop JSON exactly",
+          "§27 — the manifest's evidence-file list matches what actually exists"
+        ],
+        "exitCode": 1,
+        "files": [
+          "test/report-integrity.test.js",
+          "test/manifest-inventory.test.js",
+          "test/status-consistency.test.js",
+          "test/model-identity.test.js",
+          "test/model-hash-provenance.test.js"
+        ]
+      }
+    },
+    {
+      "nodeVersion": "v21.7.3",
+      "major": 21,
+      "binary": "/opt/node21/bin/node",
+      "renderedReportSha256": "6183a23bc6ed51961b2c918f4e9d67990cdc607cc1e4721ba4b143737ee558c0",
+      "renderedReportBytes": 35289,
+      "matchesCommittedReport": true,
+      "determinismTests": {
+        "tests": 61,
+        "pass": 57,
+        "fail": 4,
+        "failing": [
+          "§27 — the manifest's path inventory is current",
+          "§27 — every shipped file is listed, and every listed file is shipped",
+          "§22 — desktop figures in the report match the desktop JSON exactly",
+          "§27 — the manifest's evidence-file list matches what actually exists"
+        ],
+        "exitCode": 1,
+        "files": [
+          "test/report-integrity.test.js",
+          "test/manifest-inventory.test.js",
+          "test/status-consistency.test.js",
+          "test/model-identity.test.js",
+          "test/model-hash-provenance.test.js"
+        ]
+      }
+    },
+    {
+      "nodeVersion": "v22.22.2",
+      "major": 22,
+      "binary": "/opt/node22/bin/node",
+      "renderedReportSha256": "6183a23bc6ed51961b2c918f4e9d67990cdc607cc1e4721ba4b143737ee558c0",
+      "renderedReportBytes": 35289,
+      "matchesCommittedReport": true,
+      "determinismTests": {
+        "tests": 61,
+        "pass": 57,
+        "fail": 4,
+        "failing": [
+          "§27 — the manifest's path inventory is current",
+          "§27 — every shipped file is listed, and every listed file is shipped",
+          "§22 — desktop figures in the report match the desktop JSON exactly",
+          "§27 — the manifest's evidence-file list matches what actually exists"
+        ],
+        "exitCode": 1,
+        "files": [
+          "test/report-integrity.test.js",
+          "test/manifest-inventory.test.js",
+          "test/status-consistency.test.js",
+          "test/model-identity.test.js",
+          "test/model-hash-provenance.test.js"
+        ]
+      }
+    }
+  ],
+  "distinctRenderedHashes": 1,
+  "reportBytesAreRuntimeIndependent": true,
+  "allRuntimesMatchCommittedReport": true,
+  "allDeterminismTestsPass": false
+}

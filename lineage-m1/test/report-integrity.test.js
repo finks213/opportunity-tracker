@@ -299,20 +299,37 @@ test("§22 — desktop figures in the report match the desktop JSON exactly", ()
     );
   }
 
-  // Memory: the report must not publish an unverified browser delta as evidence.
-  const mem = d.memoryAcrossAdvance;
-  assert.ok(REPORT.includes("`node:process.memoryUsage()`"), "the authoritative channel must be named");
-  if (!mem.browser.usable) {
+  // Memory: revision-5 shape (R5-5). Two separately named results, and the report
+  // must never present the Node figure as the §22 Canvas measure.
+  const cm = d.desktopCanvasMemory;
+  const nh = d.nodeSimulationHeap;
+  assert.ok(cm && nh, "both memory results must be present");
+  assert.ok(
+    REPORT.includes(`#### \`DESKTOP_CANVAS_MEMORY\` — the §22 subject: **${cm.status}**`),
+    "the report must state the Canvas measure's status under its own heading"
+  );
+  assert.ok(
+    REPORT.includes("`NODE_SIMULATION_HEAP` — a separate diagnostic, NOT the §22 subject"),
+    "the Node heap must be marked as a separate diagnostic"
+  );
+  assert.ok(
+    !/authoritative channel.*process\.memoryUsage/i.test(REPORT),
+    "the report must not call a Node channel authoritative for the Canvas measure"
+  );
+  if (cm.status === "UNVERIFIED") {
     assert.ok(
-      REPORT.includes("**The browser heap figure is withdrawn as evidence.**"),
-      "an unusable browser memory channel must be withdrawn in the report, not quietly printed"
+      REPORT.includes(`DESKTOP_CANVAS_MEMORY: ${cm.status}`),
+      "an unverified Canvas measure must be printed as UNVERIFIED"
     );
-    // The old style of claim must be gone.
+    assert.equal(cm.deltaBytes, null);
+    // No numeric growth figure may be offered for the unmeasured subject.
     assert.ok(
-      !/Memory across a 180-generation run: [\d,]+ → [\d,]+ bytes/.test(REPORT),
-      "the report must not present a browser heap delta as the memory-growth result"
+      !/DESKTOP_CANVAS_MEMORY[\s\S]{0,400}?delta [\d,]+ bytes/.test(REPORT),
+      "no numeric delta may accompany an UNVERIFIED Canvas result"
     );
   }
+  // The revision-4 merged field must be gone from the raw evidence.
+  assert.equal(d.memoryAcrossAdvance, undefined, "the merged revision-4 memory field must not exist");
   // The desktop run must not be presented as satisfying the iPad gate.
   assert.equal(d.windowComparison.satisfiesIpadGateWindows, false);
   assert.ok(REPORT.includes("Satisfies the iPad gate's windows: false"));

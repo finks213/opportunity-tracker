@@ -31,6 +31,7 @@ import { loadValidatedFixture } from "../src/fixtures/nodeFixtureIO.js";
 import { currentModelConfig as C } from "../src/config/modelConfig.js";
 import { TRAIT_INDEX } from "../src/config/traits.js";
 import { livingFounderContribution } from "../src/observer/tracerChannels.js";
+import { stripCommentsAndStrings } from "../tools/writeFinalReport.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const FIXTURE_TEXT = readFileSync(join(HERE, "..", "fixtures", "defining_fixture_v1.json"), "utf8");
@@ -367,22 +368,36 @@ test("§22 — every control the contract requires exists in the probe markup", 
 });
 
 test("§22 — the mode-switch and run controls are instrumented for input latency", () => {
-  // §22 requires pause, single-step, continuous-run, fixture reset and
-  // mode-switch to be instrumented so input-to-next-paint can be recorded.
+  // §22 requires pause, single-step, continuous-run, fixture reset and mode-switch
+  // to be instrumented so input-to-next-paint can be recorded.
+  //
+  // Revision-5 change: locate each method's DEFINITION, not its first textual
+  // mention. The previous version searched for the first occurrence of the name,
+  // which after revision 5 lands inside a doc comment describing the world-load race
+  // — so it inspected prose instead of the method body. Same use-versus-mention
+  // distinction applied elsewhere in this pass. The bar is unchanged.
   const main = readFileSync(join(HERE, "..", "src", "main.js"), "utf8");
-  const instrumented = (methodName) => {
-    const i = main.indexOf(methodName);
-    assert.ok(i >= 0, `${methodName} must exist`);
-    // markInput must appear inside the method body, before the next method.
-    const body = main.slice(i, i + 900);
-    return body.includes("markInput");
+  const code = stripCommentsAndStrings(main);
+
+  /** Find `name(...) {` at method-definition position and return its body slice. */
+  const bodyOf = (name) => {
+    const re = new RegExp(`(?:^|\\n)\\s{2}(?:async\\s+)?${name}\\s*\\(`, "m");
+    const m = re.exec(code);
+    if (!m) return null;
+    return code.slice(m.index, m.index + 1200);
   };
-  for (const m of ["setRunning(", "stepOnce(", "loadFixture", "resetRandom", "setManualTestMode"]) {
-    const i = main.indexOf(m);
-    if (i < 0) continue; // name variations are tolerated; presence is asserted below
-    assert.ok(instrumented(m), `${m} must call meter.markInput() so its latency is sampled`);
+
+  const required = ["setRunning", "stepOnce", "loadDefiningFixture", "resetRandomWorld", "setManualTestMode"];
+  for (const name of required) {
+    const body = bodyOf(name);
+    assert.ok(body, `${name} must exist as a method`);
+    assert.ok(
+      body.includes("markInput"),
+      `${name} must call meter.markInput() so its input-to-next-paint latency is sampled`
+    );
   }
-  // At least the five §22 control paths must be instrumented somewhere.
-  const marks = [...main.matchAll(/markInput\(\)/g)].length;
+
+  // At least the five §22 control paths must be instrumented.
+  const marks = [...code.matchAll(/markInput\(\)/g)].length;
   assert.ok(marks >= 5, `expected at least 5 instrumented control paths, found ${marks}`);
 });

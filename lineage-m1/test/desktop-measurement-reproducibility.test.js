@@ -130,33 +130,86 @@ test("§22 — the stress glyph count is measured, not merely declared", () => {
   assert.equal(m.renderStressMode.glyphCountMatchesDeclaration, true);
 });
 
-test("§22 — memory growth rests on a channel whose resolution was verified", () => {
+test("§22 — the Canvas memory measure is never satisfied by a different process", () => {
+  // Revision-5 repair (BUG 5 / R5-5). The revision-4 version of THIS test asserted
+  //
+  //   assert.equal(mem.authoritativeChannel, "node:process.memoryUsage()");
+  //
+  // which validated the substitution instead of constraining §22's subject. The
+  // auditor named that as a test-oracle defect, and it was: the oracle agreed with
+  // the implementation about the wrong thing.
   const m = JSON.parse(read("audit/desktop-measurements.json"));
-  const mem = m.memoryAcrossAdvance;
 
-  // The authoritative channel must be named, and it must not be the browser's
-  // unverified one.
-  assert.equal(mem.authoritativeChannel, "node:process.memoryUsage()");
-  assert.equal(mem.node.authoritative, true);
-  assert.equal(typeof mem.node.heapUsedDeltaBytes, "number");
-  assert.ok(mem.node.retainedRecordCounts.retainedGenealogy > 0, "retained-record counts must be recorded");
-
-  // The browser channel must be PROBED, and its figures withdrawn if it fails.
-  assert.ok(mem.browser.probe, "the browser channel must be probed, not assumed");
-  assert.equal(typeof mem.browser.probe.responsive, "boolean");
-  assert.equal(
-    mem.browser.usable,
-    mem.browser.probe.exposed && mem.browser.probe.responsive,
-    "usability must follow the probe result"
+  // 1. The §22 subject is reported under its own name, with a status, never merged
+  //    with a Node measurement.
+  const cm = m.desktopCanvasMemory;
+  assert.ok(cm, "desktopCanvasMemory must be reported as its own result");
+  assert.equal(cm.classification, "DESKTOP_CANVAS_MEMORY");
+  assert.ok(
+    cm.status === "MEASURED" || cm.status === "UNVERIFIED",
+    `status must be MEASURED or UNVERIFIED, got ${cm.status}`
   );
-  if (!mem.browser.usable) {
-    assert.equal(
-      mem.browser.deltaBytes,
-      null,
-      "an unverified channel must report null, never a number that reads as measured growth"
-    );
-    assert.match(mem.browser.note, /WITHDRAWN AS EVIDENCE/);
+
+  // 2. The Node figure is reported separately and self-identifies as NOT the subject.
+  const nh = m.nodeSimulationHeap;
+  assert.ok(nh, "nodeSimulationHeap must be reported separately");
+  assert.equal(nh.classification, "NODE_SIMULATION_HEAP");
+  assert.equal(
+    nh.measuresCanvasOrBrowserMemory,
+    false,
+    "the Node heap must declare that it does not measure Canvas or browser memory"
+  );
+  assert.equal(nh.authoritativeForCanvasMemory, false);
+  assert.equal(typeof nh.heapUsedDeltaBytes, "number");
+  assert.ok(nh.retainedRecordCounts.retainedGenealogy > 0, "retained-record counts must be recorded");
+
+  // 3. The revision-4 shape must be gone entirely.
+  assert.equal(m.memoryAcrossAdvance, undefined, "the merged revision-4 field must not exist");
+  const raw = read("audit/desktop-measurements.json");
+  assert.ok(
+    !/"authoritativeChannel"\s*:\s*"node:process\.memoryUsage\(\)"/.test(raw),
+    "a Node channel must never be declared authoritative for the Canvas measure"
+  );
+
+  // 4. When UNVERIFIED, no number may be offered and no substitute named.
+  if (cm.status === "UNVERIFIED") {
+    assert.equal(cm.reason, "no reliable supported measurement channel");
+    assert.equal(cm.deltaBytes, null, "an unmeasured subject must not carry a number");
+    assert.equal(cm.substituteOffered, null, "no substitute may be offered");
+    assert.ok(cm.resolutionProbe, "the probe that established this must be recorded");
+    assert.equal(cm.resolutionProbe.responsive, false);
+    assert.match(cm.note, /NOT a substitute/);
+  } else {
+    // When MEASURED, the order's documentation requirements must all be present.
+    for (const field of [
+      "channel", "browser", "measurementApi", "includedMemoryDomains",
+      "generationInterval", "samplingProcedure", "limitations",
+    ]) {
+      assert.ok(cm[field], `a MEASURED result must document ${field}`);
+    }
+    assert.equal(typeof cm.deltaBytes, "number");
+    assert.equal(cm.resolutionProbe.responsive, true, "a MEASURED result requires a responsive probe");
   }
+});
+
+test("§22 — the report classifies the two memory results, and grants no PASS to the unmeasured one", () => {
+  const m = JSON.parse(read("audit/desktop-measurements.json"));
+  const report = read("FINAL_REPORT.md");
+  const gates = JSON.parse(read("audit/gate-summary.json"));
+
+  // The report must name both classifications explicitly.
+  assert.ok(report.includes("`DESKTOP_CANVAS_MEMORY`"), "the report must name the §22 subject");
+  assert.ok(
+    report.includes("`NODE_SIMULATION_HEAP` — a separate diagnostic, NOT the §22 subject"),
+    "the report must mark the Node heap as a separate diagnostic"
+  );
+
+  // The gate for Canvas memory must carry the raw status and must never be PASS.
+  const gate = gates.gates.find((g) => g.id === "desktopCanvasMemory");
+  assert.ok(gate, "a Canvas-memory gate must exist");
+  assert.notEqual(gate.status, "PASS", "an unmeasured subject may never read PASS");
+  assert.equal(gate.status, m.desktopCanvasMemory.status);
+  assert.equal(gate.evidence, "external", "it is not test-evidenced and must not pretend to be");
 });
 
 test("§22 — readMemory does not claim a verified resolution", () => {

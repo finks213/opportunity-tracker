@@ -11,7 +11,7 @@
 M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED
 ```
 
-**This report is revision 4** (generated 2026-07-30). Revisions 1, 2 and 3 were each
+**This report is revision 5** (generated 2026-07-30). Revisions 1, 2 and 3 were each
 audited and each returned `BREAKS-FOUND`. The status stays at the value above and
 **must not** advance until revision 4 survives independent re-audit by both the
 structural code audit and the AFE-Δ evidence and claim audit.

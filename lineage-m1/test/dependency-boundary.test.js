@@ -12,6 +12,7 @@ import assert from "node:assert/strict";
 import { readdirSync, readFileSync, statSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, relative } from "node:path";
+import { stripCommentsAndStrings } from "../tools/writeFinalReport.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..");
@@ -69,8 +70,17 @@ test("§20.3 — observer modules never import debug modules and never receive s
     for (const spec of importSpecifiers(text)) {
       if (/(^|\/)debug\//.test(spec)) violations.push(`${relative(ROOT, file)} imports ${spec}`);
     }
-    // No observer function may take or use simRng.
-    assert.ok(!/simRng/.test(text), `${relative(ROOT, file)} must not reference simRng`);
+    // No observer function may take or use the simulation RNG.
+    //
+    // Revision-5 change (R5-8 principle): scan CODE, not prose. A raw-text scan made
+    // it impossible for an observer module to DOCUMENT that it never touches the
+    // simulation RNG, which is exactly what `tracerChannels.js` now explains about
+    // its maintained focal channels. The bar is unchanged — zero uses.
+    const code = stripCommentsAndStrings(text);
+    assert.ok(
+      !/\bsimRng\b/.test(code),
+      `${relative(ROOT, file)} must not reference the simulation RNG in code`
+    );
     assert.ok(!/createSimRng/.test(text), `${relative(ROOT, file)} must not construct a simulation RNG`);
   }
   assert.deepEqual(violations, []);

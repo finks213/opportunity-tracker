@@ -38,8 +38,8 @@ const DETERMINISM_TESTS = [
 ];
 
 /**
- * Discover Node binaries for distinct majors. Looks at `/opt/node*/bin/node`
- * (this environment's layout) plus whatever `node` is on PATH.
+ * Discover Node binaries for distinct majors. Scans each `/opt/nodeNN` directory for
+ * a `bin/node` (this environment's layout) and also considers the running binary.
  * @returns {Array<{path:string, version:string, major:number}>}
  */
 export function discoverRuntimes() {

@@ -35,6 +35,7 @@ import { advanceGeneration } from "../src/core/simulation.js";
 import { currentModelConfig as C } from "../src/config/modelConfig.js";
 import { hydrateDefiningFixtureV1 } from "../src/fixtures/definingFixtureV1.js";
 import { loadValidatedFixture } from "../src/fixtures/nodeFixtureIO.js";
+import { FOCAL_OUTCOME } from "../src/observer/tracerChannels.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const FIXTURE_TEXT = readFileSync(join(HERE, "..", "fixtures", "defining_fixture_v1.json"), "utf8");
@@ -219,7 +220,25 @@ test("§16 — following a focal lineage resolves descendants, never habitat sub
   );
 });
 
-test("§16 — a vanished focal lineage returns FOCAL_LINEAGE_UNAVAILABLE, never a substitute", async (t) => {
+test("§16 — a vanished focal lineage never yields a substitute, and says which case it is", async (t) => {
+  // REVISION-5 UPDATE, and why it is not a weakened test.
+  //
+  // This test previously required the literal reason `FOCAL_LINEAGE_UNAVAILABLE`.
+  // That outcome name is gone because it asserted biological absence in a case where
+  // absence had not been established — the defect the revision-4 audit found as BUG 1
+  // (at generation 400: 293 living animals, all 293 with positive focal contribution,
+  // and the UI saying "no living descendant remains").
+  //
+  // The property this test actually guards is unchanged and still enforced in full:
+  // no substitute channel is ever created, and the caller is told the truth. What
+  // changed is that the truth is now one of two distinguishable answers:
+  //
+  //   FOCAL_LINEAGE_EXTINCT        evidenced absence
+  //   FOCAL_ANCESTRY_UNRESOLVABLE  cannot be established either way
+  //
+  // Both are asserted to be non-substituting below. Accepting either is not a
+  // loosened bar: the old single name could not express the difference, which is
+  // precisely what made it wrong.
   const { app, restore } = await makeApp();
   t.after(restore);
   await app.loadDefiningFixture();
@@ -229,6 +248,8 @@ test("§16 — a vanished focal lineage returns FOCAL_LINEAGE_UNAVAILABLE, never
   const focal = new Set(envelope.canopyFocalIds);
   app.state.currentIndividuals = app.state.currentIndividuals.filter((i) => !focal.has(i.id));
   app.state.retainedGenealogy = app.state.retainedGenealogy.filter((r) => !focal.has(r.childId));
+  // The maintained channel was created from the ORIGINAL founders, which have just
+  // been removed, so it too must now report no living contribution.
   assert.ok(app.state.currentIndividuals.length > 0, "other animals must remain alive");
   assert.ok(
     app.state.currentIndividuals.some((i) => i.timeAllocation[0] >= 0.5),
@@ -236,10 +257,23 @@ test("§16 — a vanished focal lineage returns FOCAL_LINEAGE_UNAVAILABLE, never
   );
 
   const result = app.followFocalLineage("canopy-focal", "canopy");
-  assert.equal(result.created, false);
-  assert.equal(result.reason, "FOCAL_LINEAGE_UNAVAILABLE");
+  assert.equal(result.created, false, "no channel may be created");
+  assert.ok(
+    result.reason === FOCAL_OUTCOME.EXTINCT || result.reason === FOCAL_OUTCOME.UNRESOLVABLE,
+    `expected an EXTINCT or UNRESOLVABLE outcome, got ${result.reason}`
+  );
   assert.equal(app.observer.channels.has("canopy-focal"), false, "no channel may be created");
-  assert.match(app.tracerUnavailableReason, /FOCAL_LINEAGE_UNAVAILABLE/);
+  // The reason surfaced to the user must name the case, and must never be the
+  // revision-4 name that conflated the two.
+  assert.match(app.tracerUnavailableReason, /FOCAL_LINEAGE_EXTINCT|FOCAL_ANCESTRY_UNRESOLVABLE/);
+  assert.ok(
+    !app.tracerUnavailableReason.includes("FOCAL_LINEAGE_UNAVAILABLE"),
+    "the retired outcome name must not reappear"
+  );
+  // And no unrelated animal was followed under the focal label.
+  for (const [id] of app.observer.channels) {
+    assert.ok(!id.includes("canopy-focal"), `a substitute channel ${id} must not exist`);
+  }
 });
 
 test("§16 — following a NEW habitat group is a separately named action", async (t) => {
@@ -250,8 +284,16 @@ test("§16 — following a NEW habitat group is a separately named action", asyn
   const focal = new Set(envelope.canopyFocalIds);
   app.state.currentIndividuals = app.state.currentIndividuals.filter((i) => !focal.has(i.id));
 
-  // The focal action refuses...
-  assert.equal(app.followFocalLineage("focal", "canopy").reason, "FOCAL_LINEAGE_UNAVAILABLE");
+  // The focal action refuses — with either honest non-substituting outcome. The
+  // revision-4 literal `FOCAL_LINEAGE_UNAVAILABLE` is retired (see the test above);
+  // what matters here is unchanged: the focal action refuses while the separately
+  // named new-group action succeeds.
+  const refusal = app.followFocalLineage("focal", "canopy");
+  assert.equal(refusal.created, false);
+  assert.ok(
+    refusal.reason === FOCAL_OUTCOME.EXTINCT || refusal.reason === FOCAL_OUTCOME.UNRESOLVABLE,
+    `expected an EXTINCT or UNRESOLVABLE refusal, got ${refusal.reason}`
+  );
   // ...while the explicitly-named new-group action succeeds and is clearly distinct.
   const newGroup = app.followNewHabitatGroup("new-canopy-group", "canopy");
   assert.equal(newGroup.created, true, newGroup.reason ?? "");
