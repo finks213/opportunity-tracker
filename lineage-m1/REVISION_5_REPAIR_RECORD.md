@@ -699,6 +699,47 @@ evidence reproduces exactly.
 
 ---
 
+## Required clean executions
+
+The repair order lists seventeen. Each row below is the command actually run for
+this revision and the result it printed. Nothing here is carried over from
+revision 4: every evidence file was regenerated after the last source change
+(the newest file under `src/` predates the oldest regenerated evidence file).
+
+| # | Required execution | Command | Result |
+|---|---|---|---|
+| 1 | syntax checks | `node --check` over every file in `src/`, `tools/`, `test/` | 84 files, **all parsed clean** (`"type": "module"`) |
+| 2 | dependency install from lockfile | `npm ci` from `package.json` + `package-lock.json` in an empty directory | **exit 0**, 2 packages added, 3 audited, 0 vulnerabilities, `playwright@1.56.1` installed. Run in a copy so the repository tree was untouched |
+| 3 | official suite under every declared supported Node major | `node --test --test-timeout=3600000 test/*.test.js` under each | `v20.20.2` **300/300, 0 failing** · `v21.7.3` **300/300, 0 failing** · `v22.22.2` **300/300, 0 failing**. **Node 18 and 19 are not installed in this environment and were NOT run** — the declared floor stays `>=18` because nothing in the code requires more, but that floor is not evidenced here below 20 |
+| 4 | long-retention focal-lineage tests through generation 1000 | `test/focal-lineage-retention.test.js` | 11 tests, all passing; asserted at generations 12, 360, 361, 400, 800 and **1000** — i.e. past the 360-generation retention window that produced BUG 1 |
+| 5 | concurrent world-load race tests | `test/world-load-race.test.js` | 7 tests, all passing, including all completion orders of three concurrent loads |
+| 6 | missing / malformed model-identity tests | `test/model-hash-provenance.test.js`, `test/rng-integrity.test.js` | missing, `undefined`, `null`, empty, malformed and mismatched identities all rejected before any state is accepted; canonical serialization of an `undefined` property throws rather than silently dropping it |
+| 7 | cross-evidence model-hash tests | `test/model-hash-provenance.test.js` | every evidence file carries one identity: `dc444865…` (SHA-256) and `69dee399…` (runtime), both over the same canonical text |
+| 8 | exact 200-seed fixture gate | `node tools/runFixture.mjs` | canopy **200/200**, shoreline **197/200** (threshold 130), both directional median gates hold, `allPass: true` |
+| 9 | current and legacy 500-seed characterization | `node tools/runCharacterization.mjs` and `--config v1` | config-2 median population **256 — PASS**; config-1 median **421 — FAIL** (the superseded model, retained as the §21.7 side-by-side) |
+| 10 | edge-only 500-seed experiments | `node tools/runEdgeOnlyTraversal.mjs` | canopy-only **500/500** seeds reach shoreline, shoreline-only **500/500** reach canopy, median first generation **3**, 0 extinct |
+| 11 | observer invariance | `node tools/writeAuditEvidence.mjs` | 5 strategies × 31 generations, **byte-identical**, 0 mismatches |
+| 12 | observer memory and genealogy bounds | suite + `npm run audit:desktop` | after 180 generations: 224 living, 22,470 retained genealogy records, 22,470 births, 22,246 deaths — all bounded by the 360-generation window, none unbounded |
+| 13 | browser probe | `npm run audit:desktop` (Playwright, headless Chromium) | 180 frames, median frame **16.70 ms**, p95 **17.50 ms**, 360/360 stress glyphs rendered and counted, 0 page errors, Node cross-check agrees on population and zone bins |
+| 14 | honest browser-memory classification | same run | `DESKTOP_CANVAS_MEMORY` = **UNVERIFIED**, no number, no substitute; `NODE_SIMULATION_HEAP` reported separately and self-declared as *not* the §22 subject |
+| 15 | report failure-injection tests | `test/report-integrity.test.js` | every test-evidenced gate falsified one at a time; each flips PASS → FAIL, names its failing test, forces the suite row to FAIL and the §28 claim to "NOT met" |
+| 16 | concurrent test-tree integrity checks | `npm run audit:tree-integrity` | 3 rounds at concurrency 4, **1,087,683 samples**, **0 deviations**, all rounds 300/300 |
+| 17 | fixture and reference hashes | suite + `node tools/writeAuditEvidence.mjs` | fixture `c80aaa52…` matches the value frozen in the contract; all 3 quarantined Python references unchanged |
+
+Report and evidence regeneration is a fixed point, not a single pass:
+`audit:tests` → `manifest:paths` → `report:final` → `audit:runtime-matrix` →
+`audit:tests`. The final state is **300/300 with 0 failures**, `FINAL_REPORT.md`
+byte-identical to a fresh render of the published results, and all three Node
+majors rendering the same report bytes
+(`14fc43dd9078671d3f29b45746c30e1d8b005fa30d1f1178d2cae4480144310e`).
+
+**Not run, and not claimed:** the physical iPad acceptance gate
+(`PENDING_HUMAN_DEVICE_TEST`) and the §24 Stage A process waiver, which is a
+principal decision. Both are held per the order's halt condition until revision 5
+survives an independent structural audit and an independent AFE-Δ evidence audit.
+
+---
+
 ## Files added or changed in revision 5
 
 **Production**
