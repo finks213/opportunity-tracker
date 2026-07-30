@@ -56,53 +56,79 @@ duplicate published the tuning-only subset hash as though it were the config has
 | **`modelDefinitionHash`** (authoritative) | `dc444865163deb32a7a9d80bd23f576d1ab5a936896298b5cd13faac6f513b3d` |
 | `tuningConfigHash` (**NONAUTHORITATIVE**) | `edb81695973b81ab8f87f7ef9dde9d8c5b3d4c7dfbeb45f385547edd86ee86de` |
 | Fixture SHA-256 | `c80aaa523d3b3eec2655502b4eaebdbbb4d12f71f8b3378d9d3be60797342b78` |
-| Node · platform | v22.22.2 · linux x64 |
+| Evidence-run runtime | v22.22.2 · linux x64 |
+| Declared runtime support | `node >=18` |
 
 - `modelDefinitionHash`: SHA-256 over the complete model definition — every biology-affecting value.
 - `tuningConfigHash`: NONAUTHORITATIVE. SHA-256 over the tuning-config subset only. Published as the config hash by revisions 1-2, which is why a trait-effect change could move survival without moving the hash. Retained solely so older evidence files remain traceable; it does not identify the model.
+
+The runtime row is read from `audit/build-environment.json`, recorded once by the official
+evidence run. Revision 4 embedded the LIVE `process.version` here, and because the suite
+requires this file to be byte-identical to a fresh render, the report could only match on the
+exact Node patch that generated it — Node 20 and Node 24 each failed byte equality while
+satisfying the declared `node >=18`. Support stays at `>=18`; the verifier's runtime is simply
+no longer part of the report bytes. See `audit/runtime-matrix.json` for the majors actually
+exercised.
 
 ---
 
 ## 1. Gate-by-gate results
 
 Nothing below is hidden behind a summary. Failures, pending items, and named
-uncertainties appear in the same table as the passes. Counts in this section are read
-from `audit/test-results.txt` and the JSON files under `audit/`, not retyped.
+uncertainties appear in the same table as the passes.
+
+**Every row is derived**, not written. Each gate declares the named tests that evidence it
+(`tools/gateRegistry.mjs`); the status comes from those tests' actual results in
+`audit/test-results.txt`. A gate whose evidencing test did not run reads `UNVERIFIED`, never
+`PASS`. Revision 4 hardcoded a literal `PASS` on every feature row, so injecting a single
+failure produced `Full test suite: FAIL — 1 of 249` beside `Birth immutability: PASS`.
 
 | # | Gate | Contract § | Result |
 |---|---|---|---|
-| 1 | Full test suite | §20 | **PASS** — 249/249, 0 failures |
+| 1 | Full test suite | §20 | **PASS** — 249/249, 0 failing |
 | 2 | Fixture raw SHA-256 integrity | §19 A | **PASS** |
 | 3 | Fixture-envelope canonical round trip | §19 B | **PASS** |
 | 4 | Deterministic hydration | §19 C | **PASS** |
-| 5 | Paired-world construction | §19 D | **PASS** — exactly 12 `toe_webbing` values differ, one hydration cloned four ways |
+| 5 | Paired-world construction | §19 D | **PASS** |
 | 6 | Exact probability gate | §19.3 | **PASS** |
-| 7 | Matched trajectory gate, seeds 1..200 | §19.4 | **PASS** — canopy 200/200, shoreline 197/200, threshold 130 |
-| 8 | Meaningful-trait contextual gate | §9 / §20.5 | **PASS** — all 7 traits |
+| 7 | Matched trajectory gate, seeds 1..200 | §19.4 | **PASS** |
+| 8 | Meaningful-trait contextual gate | §9 / §20.5 | **PASS** |
 | 9 | Birth immutability | §20.1 | **PASS** |
-| 10 | Observer-state invariance | §20.2 | **PASS** — byte-identical, 0 mismatches |
-| 11 | No observer dependencies in biology | §20.3 | **PASS** — static import scan |
-| 12 | Neutral-trait integrity | §20.4 | **PASS** — exactly zero |
+| 10 | Observer-state invariance | §20.2 | **PASS** |
+| 11 | No observer dependencies in biology | §20.3 | **PASS** |
+| 12 | Neutral-trait integrity | §20.4 | **PASS** |
 | 13 | Full-path body-mutation independence | §20.6 | **PASS** |
 | 14 | Mutation provenance and counter ownership | §20.7 | **PASS** |
-| 15 | Allocation-mutation opportunity contract | §20.8 | **PASS** — draw counts asserted directly |
-| 16 | Spatial integrity and adjacency | §20.9 | **PASS** — 0 zero-allocation fallbacks |
+| 15 | Allocation-mutation opportunity contract | §20.8 | **PASS** |
+| 16 | Spatial integrity and adjacency | §20.9 | **PASS** |
 | 17 | Lifecycle and mating contract | §20.10 | **PASS** |
-| 18 | Genealogy integrity + forced 360-boundary | §20.11 | **PASS** — crossed at generation 400 |
-| 18b | Genealogy boundary records bounded | §15 | **PASS** — stored set equals required set at generations 400/460/520/600 |
-| 19 | Exact survival composition | §20.12 | **PASS** — to 1e-12 |
-| 20 | RNG integrity | §20.13 | **PASS** |
-| 21 | Population guardrails, 500 seeds | §21.4 | **PASS** — all four |
-| 22 | Mutation-supply minimal functionality | §21.3 | **PASS** |
-| 23 | §21.6 adjacency traversal, isolated edge-only worlds | §21.6 | **MEASURED** — 500/500 and 500/500 reached the opposite edge zone; no contract threshold applies |
-| 24 | Desktop Canvas measurement, reproducible | §22 | **RECORDED** (headless Chromium 141.0.7390.37), regenerable by `npm run audit:desktop`; §22 states no desktop pass law — the numeric pass law belongs to the iPad gate at row 30 |
-| 25 | Canonical model identity binds state progression | §18 / §21.7 | **PASS** — version *and* complete model identity checked |
-| 26 | Legibility mode is self-contained | §22 | **PASS** — rehydrates the fixture rather than trusting a flag |
-| 27 | Generation advancement atomic against observer failure | §4 / §16 | **PASS** — observers dispatched post-commit |
-| 28 | Focal lineage resolved from genealogy, never reseeded | §16 | **PASS** |
-| 29 | Quarantined Python references unchanged | §27 | **PASS** — 3 files |
-| 30 | **Physical iPad acceptance** | §22 | **PENDING_HUMAN_DEVICE_TEST** |
-| 31 | **§24 Stage A pre-code planning order** | §24 | **VIOLATED — principal decision required** |
+| 18 | Genealogy integrity + forced 360-boundary | §20.11 | **PASS** |
+| 19 | Genealogy boundary records bounded | §15 | **PASS** |
+| 20 | Exact survival composition | §20.12 | **PASS** |
+| 21 | RNG integrity | §20.13 | **PASS** |
+| 22 | Population guardrails, 500 seeds | §21.4 | **PASS** |
+| 23 | §21.6 adjacency traversal, isolated edge-only worlds | §21.6 | **PASS** — no contract threshold applies; the measurement is reported, not scored |
+| 24 | Desktop Canvas measurement, reproducible | §22 | **PASS** — §22 states no desktop pass law; the numeric pass law belongs to the iPad gate |
+| 25 | Desktop **Canvas** memory growth across the 180-generation run | §22 | **UNVERIFIED** — read from `audit/desktop-measurements.json` → `desktopCanvasMemory.status`; no supported browser API exposes it on the measured build, and the Node simulation heap is NOT a substitute |
+| 26 | Canonical model identity binds state progression | §18 / §21.7 | **UNVERIFIED** — no result observed for: §18 — a state missing modelIdentityHash is rejected, not advanced; §18 — a malformed or unknown model identity is rejected; §18 — same version, different model is rejected with state untouched |
+| 27 | One authoritative model hash across all evidence | §9 / §18 | **UNVERIFIED** — no result observed for: §9/§18 — every evidence file publishes the same authoritative modelDefinitionHash; §9/§18 — no tool serializes or hashes the model independently |
+| 28 | Legibility mode is self-contained | §22 | **PASS** |
+| 29 | World loads are transactional against concurrent requests | §22 | **UNVERIFIED** — no result observed for: §22 — an older fixture load cannot overwrite a newer legibility world; §22 — a stale fixture response cannot replace a newer random world; §22 — the newest requested fixture variant wins regardless of resolution order; §22 — a failed or rejected stale request commits nothing |
+| 30 | Generation advancement atomic against observer failure | §4 / §16 | **PASS** |
+| 31 | Generation result is deeply immutable | §4 | **UNVERIFIED** — no result observed for: §4 — observerErrors and every error record are deeply frozen |
+| 32 | Focal lineage resolved, never reseeded, never falsely terminated | §16 | **UNVERIFIED** — no result observed for: §16 — a maintained focal channel matches an independent reference at every generation; §16 — an unresolvable ancestry reports FOCAL_ANCESTRY_UNRESOLVABLE, not extinction |
+| 33 | Quarantined Python references unchanged | §27 | **PASS** |
+| 34 | Report agrees with the raw evidence | §26 / §27 | **PASS** |
+| 35 | Tests never mutate the production source tree | §20 | **UNVERIFIED** — no result observed for: §20 — the self-audit scanner runs against an isolated tree, never src/; §20 — the production source tree is byte-identical before and after the scanner tests |
+| 36 | Report bytes are runtime-independent across supported Node majors | §26 | **UNVERIFIED** — no result observed for: §26 — the report renders identically on every recorded runtime |
+| 37 | **Physical iPad acceptance** | §22 | **PENDING_HUMAN_DEVICE_TEST** — no measurement supplied; not performed |
+| 38 | **§24 Stage A pre-code planning order** | §24 | **VIOLATED — principal decision required** — unrepairable retrospectively; DECISIONS.md D-000 and D-024 |
+
+**Gate totals:** 28 PASS · 0 FAIL · 8 UNVERIFIED · 3 externally determined (of 38).
+
+No unattributed failures: every failing test in this run, if any, maps to a declared gate.
+
+Machine-readable form: `audit/gate-summary.json`.
 
 **Named uncertainty (not a gate failure):** shoreline *dominant-bin* occupancy is
 zero in 438 of 500 seeds at generation 180,
@@ -396,11 +422,11 @@ it ran, which is why the memory channel is probed per run rather than assumed.
 | Measure | Normal mode | Render-stress |
 |---|---|---|
 | glyphs drawn | live world (224 animals) | 360 (declared 360, matches: true) |
-| frames sampled | 181 | 1469 |
+| frames sampled | 180 | 1462 |
 | median frame time | 16.70 ms | 16.70 ms |
-| 95th-percentile frame time | 17.00 ms | 17.80 ms |
-| maximum after warm-up | 17.40 ms | 40.10 ms |
-| p95 input-to-next-paint | not sampled | 12.00 ms (21 actions) |
+| 95th-percentile frame time | 17.50 ms | 17.40 ms |
+| maximum after warm-up | 23.30 ms | 51.00 ms |
+| p95 input-to-next-paint | not sampled | 13.20 ms (21 actions) |
 | page errors | 0 | 0 |
 
 ### Generation semantics (explicit, not inferred)
@@ -425,17 +451,37 @@ not measured against the iPad pass law and do not advance that gate.
 
 ### Memory across the 180-generation run
 
-Authoritative channel: `node:process.memoryUsage()`.
+Two separately named results. Neither stands in for the other.
 
-| Channel | Result |
+#### `DESKTOP_CANVAS_MEMORY` — the §22 subject: **UNVERIFIED**
+
+```
+DESKTOP_CANVAS_MEMORY: UNVERIFIED
+reason: no reliable supported measurement channel
+```
+
+The only browser-side channel available, performance.memory.usedJSHeapSize, was probed by allocating 320000000 bytes in the page; the reading did not move (10000000 before and after). This Chromium build quantizes the value, so no browser-side delta from it carries information. No other supported API exposes Canvas/renderer memory to page script.
+
+`deltaBytes` is `null`, deliberately. Revision 4 published a Node process-heap delta here
+and called it the authoritative Canvas measure; a numeric answer to a question the run did
+not ask is worse than an honest `UNVERIFIED`. The probe result is in the raw JSON under
+`desktopCanvasMemory.resolutionProbe`.
+
+#### `NODE_SIMULATION_HEAP` — a separate diagnostic, NOT the §22 subject
+
+| Field | Value |
 |---|---|
-| Node `process.memoryUsage().heapUsed` | 25,006,336 → 60,250,736 bytes (Δ 35,244,400) |
-| Node RSS | 93,941,760 → 156,196,864 bytes (Δ 62,255,104) |
+| channel | `node:process.memoryUsage()` |
+| measures Canvas or browser memory | **false** |
+| heapUsed before → after | 24,962,128 → 75,772,912 bytes (Δ 50,810,784) |
+| RSS before → after | 93,675,520 → 160,890,880 bytes (Δ 67,215,360) |
 | retained genealogy records | 22,470 |
 | living individuals | 224 |
-| browser `performance.memory` | usable: **false** |
 
-**The browser heap figure is withdrawn as evidence.** The in-page probe allocated 320,000,000 bytes and `usedJSHeapSize` did not move (10,000,000 before and after), so any browser-side delta — including zero — is a quantization artefact. Revision 3 published such a figure as memory-growth evidence without probing the channel. The Node figures above are used instead.
+This runs biological state forward in Node. It creates no browser, Canvas, DOM, renderer, frame
+meter, tracer UI or browser heap, so it measures a different process and object graph and cannot
+answer the Canvas requirement. Its useful part is the exact, quantization-free retained-record
+counts.
 
 Exact retained-record counts are the quantization-free growth measure. This
 180-generation window is **below** the 360-generation genealogy retention boundary,
@@ -606,7 +652,7 @@ provenance — make it addable later without rewriting the biological kernel.
 | genealogy and mating cores remain coherent | met |
 | neutral traits are exactly neutral | met |
 | the difference is visible in the diagnostic probe | met on desktop; **iPad legibility pending human test** |
-| every automated result reproducible from a clean run | met — 249/249 from clean; fixture, both batches, edge-only and desktop regenerated |
+| every automated result reproducible from a clean run | NOT met — 249/249 from clean, 0 gate(s) FAIL, 8 UNVERIFIED |
 | remaining uncertainty named rather than hidden | met — §6, §11, and the audit response in the repair record |
 
 **Completion is NOT declared** (`mayDeclareCompletion: false`). §24 Stage A ordering was

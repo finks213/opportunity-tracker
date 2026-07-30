@@ -1,6 +1,6 @@
 # LINEAGE Milestone 1 — Audit Package Manifest
 
-Bundle: `LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV4.zip`
+Bundle: `LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV5.zip`
 Contents: the complete `lineage-m1/` project directory required by contract §23.
 
 ---
@@ -9,7 +9,8 @@ Contents: the complete `lineage-m1/` project directory required by contract §23
 
 | Field | Value |
 |---|---|
-| Node version | v22.22.2 |
+| Node version (official evidence run) | v22.22.2, recorded in `audit/build-environment.json` |
+| Declared runtime support | `node >=18`, UNCHANGED. Report bytes are runtime-independent; see `audit/runtime-matrix.json` |
 | npm version | 10.9.7 |
 | Operating system (final run) | Linux 6.18.5 x86_64 |
 | Runtime dependencies | none (`dependencies` is empty) |
@@ -21,12 +22,14 @@ Contents: the complete `lineage-m1/` project directory required by contract §23
 | Runtime model identity (config-2, 128-bit FNV-1a, isomorphic to the SHA-256 above) | `69dee399ec8a50cc7e1231959d2e31af` |
 | Superseded config retained | `lineage-m1-config-1` as `legacyModelConfigV1` |
 | **Final reported status** | **`M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED`** |
-| Bundle revision | **4** — after the revision-3 AFE-Δ break-report and the revision-3 structural audit both returned `BREAKS-FOUND` (8 verified defects) |
-| Automated implementation gates | **NOT CLAIMED** — repaired and re-run, but no pass is self-certified until revision 4 survives independent re-audit |
+| Bundle revision | **5** — after the revision-4 AFE-Δ break-report and the revision-4 Solon structural audit both returned `BREAKS-FOUND` (9 verified defects) |
+| Automated implementation gates | **NOT CLAIMED** — repaired and re-run, but no pass is self-certified until revision 5 survives independent re-audit. Every gate row in `FINAL_REPORT.md` is now DERIVED from named test results (`audit/gate-summary.json`), so the report cannot assert a pass the run does not evidence |
 | Physical iPad gate | `PENDING_HUMAN_DEVICE_TEST` |
 | §24 Stage A planning order | VIOLATED — unrepairable, principal decision required (DECISIONS.md D-024). **Not** the only blocker. |
-| Revision-4 repair record | `REVISION_4_REPAIR_RECORD.md` — per-defect reproduction command, observed revision-3 result, repair, revision-4 result, regression test |
-| Revision-4 decisions | `DECISIONS.md` D-035 … D-043, plus the withdrawn revision-3 claims |
+| Revision-5 repair record | `REVISION_5_REPAIR_RECORD.md` — per-defect reproduction command, observed revision-4 result, repair, revision-5 result, and the COMMITTED regression test |
+| Revision-4 repair record | `REVISION_4_REPAIR_RECORD.md` — retained |
+| Revision-5 decisions | `DECISIONS.md` D-044 … D-052, plus the withdrawn revision-4 claims |
+| Revision-4 decisions | `DECISIONS.md` D-035 … D-043 — retained |
 
 ---
 
@@ -128,6 +131,10 @@ Machine-readable proof: `audit/reference-file-hashes.json`.
 | `audit/edge-only-traversal-results.json` | the **AUTHORITATIVE** §21.6 adjacency-traversal experiment: isolated 40-founder worlds, seeds 1..500 each direction, with the fully frozen initializer recorded under `frozenInitializer`. This file, and only this file, carries the traversal claim (see `CHARACTERIZATION_PLAN.md` Amendment 1) |
 | `audit/desktop-measurements.json` | desktop Canvas frame-time, input-latency and memory measurements (headless Chromium; **not** the iPad gate). Regenerable with `npm run audit:desktop`. Includes an in-page probe of `performance.memory` resolution, a Node cross-check of generation/population/zone bins, and explicit generation semantics |
 | `audit/meaningful-trait-gate.json` | the exact §9/§20.5 three-zone delta vectors and §20.4 neutral-trait maxima, emitted from the production survival path so `FINAL_REPORT.md` is generated rather than retyped |
+| `audit/build-environment.json` | the environment of the OFFICIAL evidence run (Node version, platform, arch, V8) plus the declared support range. `FINAL_REPORT.md` reads this instead of the live runtime, so report bytes do not depend on which supported Node re-renders them (revision-5 R5-6) |
+| `audit/runtime-matrix.json` | proof that rendering `FINAL_REPORT.md` produces identical bytes on every Node major available, and that the determinism-critical tests pass on each. States plainly what it does NOT claim: that the full 200-seed suite ran on every major |
+| `audit/gate-summary.json` | the machine-readable gate table: every gate mapped to the named tests that evidence it, with derived PASS / FAIL / UNVERIFIED. Generated from the same call that renders the report's table (revision-5 R5-7) |
+| `audit/tree-integrity.json` | continuous sampling of every file under `src/` while the full suite runs at high concurrency, recording any deviation. Proves tests cannot modify or race the production tree (revision-5 R5-8) |
 
 No failing test, unused module, superseded tuning result, or raw output was
 removed because it appeared unhelpful. `tools/calibrationSweep.mjs` and
@@ -277,7 +284,48 @@ Generated by `node tools/writeManifestPaths.mjs` from the bundle itself.
 
 ## 8. Revision history
 
-### Revision 4 (this bundle)
+### Revision 5 (this bundle)
+
+Revision 4 was audited twice — the AFE-Δ evidence and claim audit and the Solon
+Code Auditor structural integrity audit — and both returned `BREAKS-FOUND` with nine
+verified defects (3 MEDIUM-CRITICAL, 5 MEDIUM, 1 MEDIUM-MINOR; 0 CRITICAL, 0 HIGH).
+All nine are repaired, each independently reproduced first, and each with a
+**committed** regression test. Full detail: `REVISION_5_REPAIR_RECORD.md`.
+
+| # | Defect | Severity | Repair | Committed regression test |
+|---|---|---|---|---|
+| 1 | focal lineage reported extinct after the 360-generation window removed the reconstruction path | MEDIUM-CRITICAL | D-044 | `focal-lineage-retention.test.js` |
+| 2 | concurrent fixture loads left legibility mode on a non-baseline world | MEDIUM-CRITICAL | D-045 | `world-load-race.test.js` |
+| 3 | one evidence file published a different model hash under the same field name | MEDIUM-CRITICAL | D-047 | `model-hash-provenance.test.js` |
+| 4 | removing the identity field reopened same-version cross-model advancement | MEDIUM | D-046 | `model-hash-provenance.test.js` |
+| 5 | Node process heap published as the desktop Canvas memory measure | MEDIUM | D-048 | `desktop-measurement-reproducibility.test.js` |
+| 6 | report bytes depended on the verifier's Node patch version | MEDIUM | D-049 | `report-determinism.test.js` |
+| 7 | a failing suite still produced hardcoded feature passes and "reproducible: met" | MEDIUM | D-050 | `report-integrity.test.js` |
+| 8 | a test mutated shared production source under concurrent execution | MEDIUM | D-051 | `test-tree-integrity.test.js` |
+| 9 | the advertised immutable generation result was shallowly mutable | MEDIUM-MINOR | D-052 | `generation-result-immutable.test.js` |
+
+Every evidence file was **regenerated**, not copied forward.
+
+New in this revision: `src/config/modelIdentity.js`,
+`src/config/modelIdentityNode.js`, `tools/gateRegistry.mjs`,
+`tools/writeBuildEnvironment.mjs`, `tools/runRuntimeMatrix.mjs`,
+`tools/proveTreeIntegrity.mjs`, `audit/build-environment.json`,
+`audit/runtime-matrix.json`, `audit/gate-summary.json`, `audit/tree-integrity.json`,
+six regression test files, and `REVISION_5_REPAIR_RECORD.md`.
+
+Two structural changes worth an auditor's attention:
+
+- **Every gate row in `FINAL_REPORT.md` is derived**, not written. Each gate declares
+  the named tests that evidence it (`tools/gateRegistry.mjs`); a gate whose test did
+  not run reads `UNVERIFIED`, and gates that are not test-evidenced at all — the
+  physical iPad gate, the Stage A order, the unverified Canvas memory measure — are
+  declared external and can never read `PASS`. `audit/gate-summary.json` is the
+  machine-readable form.
+- **Declared Node support is unchanged at `>=18`.** The determinism defect was fixed
+  by removing the verifier's runtime from the report bytes, not by pinning a runtime
+  to preserve an embedded version line.
+
+### Revision 4
 
 Revision 3 was audited twice — the AFE-Δ evidence and claim audit and an
 independent structural code audit — and both returned `BREAKS-FOUND` with eight

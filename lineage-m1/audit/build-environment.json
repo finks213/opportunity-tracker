@@ -1,0 +1,19 @@
+{
+  "schema": "lineage-m1-build-environment-1",
+  "contractSection": "27 (audit evidence)",
+  "note": "The environment of the OFFICIAL evidence run, captured once by `npm run audit:environment`. FINAL_REPORT.md reads this file instead of the live runtime, so report bytes do not depend on which supported Node version re-renders them. Regenerate this only when regenerating the evidence it describes.",
+  "evidenceRun": {
+    "nodeVersion": "v22.22.2",
+    "platform": "linux",
+    "arch": "x64",
+    "v8": "12.4.254.21-node.39",
+    "endianness": "LE"
+  },
+  "declaredSupport": {
+    "engines": {
+      "node": ">=18"
+    },
+    "policy": "Node >=18, unchanged. The implementation uses only stable built-ins and node:test; nothing in it requires a narrower range. Report determinism is achieved by keeping the verifier's runtime out of the report bytes, not by pinning the runtime.",
+    "verifiedMajors": "recorded in audit/runtime-matrix.json by `npm run audit:runtime-matrix`"
+  }
+}

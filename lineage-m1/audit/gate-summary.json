@@ -1,0 +1,632 @@
+{
+  "schema": "lineage-m1-gate-summary-1",
+  "contractSection": "20 / 26 / 28",
+  "note": "Derived from audit/test-results.txt through tools/gateRegistry.mjs. Every gate maps to named tests; a gate whose evidencing test did not run is UNVERIFIED, never PASS. This file and the report's gate table are generated from the same call.",
+  "suite": {
+    "tests": 249,
+    "pass": 249,
+    "fail": 0
+  },
+  "summary": {
+    "total": 38,
+    "pass": 28,
+    "fail": 0,
+    "unverified": 8,
+    "external": 3,
+    "suiteHasFailures": false,
+    "everyAutomatedResultReproducible": "NOT met"
+  },
+  "unattributedFailures": [],
+  "gates": [
+    {
+      "id": "fullSuite",
+      "label": "Full test suite",
+      "section": "§20",
+      "status": "PASS",
+      "evidence": "suite",
+      "detail": "249/249, 0 failing",
+      "mappedTests": []
+    },
+    {
+      "id": "fixtureIntegrity",
+      "label": "Fixture raw SHA-256 integrity",
+      "section": "§19 A",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§19 A — raw fixture bytes hash to the frozen SHA-256"
+      ],
+      "observedTests": [
+        "§19 A — raw fixture bytes hash to the frozen SHA-256"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "fixtureRoundTrip",
+      "label": "Fixture-envelope canonical round trip",
+      "section": "§19 B",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§19 B — canonical fixture-envelope round trip is byte-identical"
+      ],
+      "observedTests": [
+        "§19 B — canonical fixture-envelope round trip is byte-identical"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "deterministicHydration",
+      "label": "Deterministic hydration",
+      "section": "§19 C",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§19 C — hydration copies biological counters and excludes fixture metadata"
+      ],
+      "observedTests": [
+        "§19 C — hydration copies biological counters and excludes fixture metadata"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "pairedWorlds",
+      "label": "Paired-world construction",
+      "section": "§19 D",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§19 D — construction is ONE hydration cloned into four worlds",
+        "§19 D — the four worlds differ only in the twelve specified toe_webbing values"
+      ],
+      "observedTests": [
+        "§19 D — construction is ONE hydration cloned into four worlds",
+        "§19 D — the four worlds differ only in the twelve specified toe_webbing values"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "exactProbability",
+      "label": "Exact probability gate",
+      "section": "§19.3",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§9 — toe_webbing is adverse in canopy and beneficial at the shoreline"
+      ],
+      "observedTests": [
+        "§9 — toe_webbing is adverse in canopy and beneficial at the shoreline"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "matchedTrajectory",
+      "label": "Matched trajectory gate, seeds 1..200",
+      "section": "§19.4",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§19.4 — EXACT matched trajectory gate: seeds 1..200, floor 130/200"
+      ],
+      "observedTests": [
+        "§19.4 — EXACT matched trajectory gate: seeds 1..200, floor 130/200"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "meaningfulTraits",
+      "label": "Meaningful-trait contextual gate",
+      "section": "§9 / §20.5",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§9/§20.5 — every meaningful trait has a positive context and a different adverse-or-inactive context"
+      ],
+      "observedTests": [
+        "§9/§20.5 — every meaningful trait has a positive context and a different adverse-or-inactive context"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "birthImmutability",
+      "label": "Birth immutability",
+      "section": "§20.1",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§20.1 — fixture-world individuals never change genome or allocation after birth",
+        "§20.1 — random-world individuals never change genome or allocation after birth"
+      ],
+      "observedTests": [
+        "§20.1 — fixture-world individuals never change genome or allocation after birth",
+        "§20.1 — random-world individuals never change genome or allocation after birth"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "observerInvariance",
+      "label": "Observer-state invariance",
+      "section": "§20.2",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§20.2/§19 — canonical biological bytes match after every generation across all observer strategies"
+      ],
+      "observedTests": [
+        "§20.2/§19 — canonical biological bytes match after every generation across all observer strategies"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "noObserverDeps",
+      "label": "No observer dependencies in biology",
+      "section": "§20.3",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§20.3 — biological modules never import observer or debug modules"
+      ],
+      "observedTests": [
+        "§20.3 — biological modules never import observer or debug modules"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "neutralTraits",
+      "label": "Neutral-trait integrity",
+      "section": "§20.4",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§20.4 — neutral traits do not affect mating weights"
+      ],
+      "observedTests": [
+        "§20.4 — neutral traits do not affect mating weights"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "mutationIndependence",
+      "label": "Full-path body-mutation independence",
+      "section": "§20.6",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§20.6 — identical parental genomes and RNG state give byte-identical body results under different allocations"
+      ],
+      "observedTests": [
+        "§20.6 — identical parental genomes and RNG state give byte-identical body results under different allocations"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "mutationProvenance",
+      "label": "Mutation provenance and counter ownership",
+      "section": "§20.7",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§20.7 — a failed opportunity increments neither counter"
+      ],
+      "observedTests": [
+        "§20.7 — a failed opportunity increments neither counter"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "allocationOpportunity",
+      "label": "Allocation-mutation opportunity contract",
+      "section": "§20.8",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§20.8.1 — failed occurrence: uOccurrence == probability fails, exactly one draw, nothing changes"
+      ],
+      "observedTests": [
+        "§20.8.1 — failed occurrence: uOccurrence == probability fails, exactly one draw, nothing changes"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "spatialIntegrity",
+      "label": "Spatial integrity and adjacency",
+      "section": "§20.9",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§6 — adjacency graph has no canopy-to-shoreline edge"
+      ],
+      "observedTests": [
+        "§6 — adjacency graph has no canopy-to-shoreline edge"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "lifecycle",
+      "label": "Lifecycle and mating contract",
+      "section": "§20.10",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§20.10/§11 — one transition from generation 0 produces the exact required lifecycle"
+      ],
+      "observedTests": [
+        "§20.10/§11 — one transition from generation 0 produces the exact required lifecycle"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "genealogyIntegrity",
+      "label": "Genealogy integrity + forced 360-boundary",
+      "section": "§20.11",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§20.11 — a second prune produces byte-identical state"
+      ],
+      "observedTests": [
+        "§20.11 — a second prune produces byte-identical state"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "genealogyBounded",
+      "label": "Genealogy boundary records bounded",
+      "section": "§15",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§15 — canonical state size stabilizes once the window is full"
+      ],
+      "observedTests": [
+        "§15 — canonical state size stabilizes once the window is full"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "survivalComposition",
+      "label": "Exact survival composition",
+      "section": "§20.12",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§20.12 — age multiplication occurs after allocation weighting"
+      ],
+      "observedTests": [
+        "§20.12 — age multiplication occurs after allocation weighting"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "rngIntegrity",
+      "label": "RNG integrity",
+      "section": "§20.13",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§20.13 — UI actions do not change simRngState"
+      ],
+      "observedTests": [
+        "§20.13 — UI actions do not change simRngState"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "populationGuardrails",
+      "label": "Population guardrails, 500 seeds",
+      "section": "§21.4",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "the generated limitation table agrees with the guardrail medians"
+      ],
+      "observedTests": [
+        "the generated limitation table agrees with the guardrail medians"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "traversal",
+      "label": "§21.6 adjacency traversal, isolated edge-only worlds",
+      "section": "§21.6",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": "no contract threshold applies; the measurement is reported, not scored",
+      "mappedTests": [
+        "§21.6 — the authoritative edge-only evidence exists and is genuinely isolated"
+      ],
+      "observedTests": [
+        "§21.6 — the authoritative edge-only evidence exists and is genuinely isolated"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "desktopMeasurement",
+      "label": "Desktop Canvas measurement, reproducible",
+      "section": "§22",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": "§22 states no desktop pass law; the numeric pass law belongs to the iPad gate",
+      "mappedTests": [
+        "§22 — one clean command regenerates the desktop evidence",
+        "§22 — the browser dependency is declared AND pinned by a lockfile",
+        "§22 — the committed evidence agrees with an independent Node run of the same world"
+      ],
+      "observedTests": [
+        "§22 — one clean command regenerates the desktop evidence",
+        "§22 — the browser dependency is declared AND pinned by a lockfile",
+        "§22 — the committed evidence agrees with an independent Node run of the same world"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "desktopCanvasMemory",
+      "label": "Desktop **Canvas** memory growth across the 180-generation run",
+      "section": "§22",
+      "status": "UNVERIFIED",
+      "evidence": "external",
+      "detail": "read from `audit/desktop-measurements.json` → `desktopCanvasMemory.status`; no supported browser API exposes it on the measured build, and the Node simulation heap is NOT a substitute",
+      "mappedTests": []
+    },
+    {
+      "id": "modelIdentity",
+      "label": "Canonical model identity binds state progression",
+      "section": "§18 / §21.7",
+      "status": "UNVERIFIED",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§18 — a state missing modelIdentityHash is rejected, not advanced",
+        "§18 — a malformed or unknown model identity is rejected",
+        "§18 — same version, different model is rejected with state untouched"
+      ],
+      "observedTests": [],
+      "failedTests": [],
+      "missingTests": [
+        "§18 — a state missing modelIdentityHash is rejected, not advanced",
+        "§18 — a malformed or unknown model identity is rejected",
+        "§18 — same version, different model is rejected with state untouched"
+      ]
+    },
+    {
+      "id": "modelHashProvenance",
+      "label": "One authoritative model hash across all evidence",
+      "section": "§9 / §18",
+      "status": "UNVERIFIED",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§9/§18 — every evidence file publishes the same authoritative modelDefinitionHash",
+        "§9/§18 — no tool serializes or hashes the model independently"
+      ],
+      "observedTests": [],
+      "failedTests": [],
+      "missingTests": [
+        "§9/§18 — every evidence file publishes the same authoritative modelDefinitionHash",
+        "§9/§18 — no tool serializes or hashes the model independently"
+      ]
+    },
+    {
+      "id": "legibilitySelfContained",
+      "label": "Legibility mode is self-contained",
+      "section": "§22",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§22 — load fixture, reset random, enter legibility: the fixture is active"
+      ],
+      "observedTests": [
+        "§22 — load fixture, reset random, enter legibility: the fixture is active"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "worldLoadRaceSafety",
+      "label": "World loads are transactional against concurrent requests",
+      "section": "§22",
+      "status": "UNVERIFIED",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§22 — an older fixture load cannot overwrite a newer legibility world",
+        "§22 — a stale fixture response cannot replace a newer random world",
+        "§22 — the newest requested fixture variant wins regardless of resolution order",
+        "§22 — a failed or rejected stale request commits nothing"
+      ],
+      "observedTests": [],
+      "failedTests": [],
+      "missingTests": [
+        "§22 — an older fixture load cannot overwrite a newer legibility world",
+        "§22 — a stale fixture response cannot replace a newer random world",
+        "§22 — the newest requested fixture variant wins regardless of resolution order",
+        "§22 — a failed or rejected stale request commits nothing"
+      ]
+    },
+    {
+      "id": "observerTransaction",
+      "label": "Generation advancement atomic against observer failure",
+      "section": "§4 / §16",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§4/§16 — an observer exception at ANY birth leaves canonical biology exactly as the clean generation",
+        "§4/§16 — an exception from afterGeneration is also isolated"
+      ],
+      "observedTests": [
+        "§4/§16 — an observer exception at ANY birth leaves canonical biology exactly as the clean generation",
+        "§4/§16 — an exception from afterGeneration is also isolated"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "generationResultImmutable",
+      "label": "Generation result is deeply immutable",
+      "section": "§4",
+      "status": "UNVERIFIED",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§4 — observerErrors and every error record are deeply frozen"
+      ],
+      "observedTests": [],
+      "failedTests": [],
+      "missingTests": [
+        "§4 — observerErrors and every error record are deeply frozen"
+      ]
+    },
+    {
+      "id": "focalLineage",
+      "label": "Focal lineage resolved, never reseeded, never falsely terminated",
+      "section": "§16",
+      "status": "UNVERIFIED",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§16 — a maintained focal channel matches an independent reference at every generation",
+        "§16 — an unresolvable ancestry reports FOCAL_ANCESTRY_UNRESOLVABLE, not extinction"
+      ],
+      "observedTests": [],
+      "failedTests": [],
+      "missingTests": [
+        "§16 — a maintained focal channel matches an independent reference at every generation",
+        "§16 — an unresolvable ancestry reports FOCAL_ANCESTRY_UNRESOLVABLE, not extinction"
+      ]
+    },
+    {
+      "id": "referencesUnchanged",
+      "label": "Quarantined Python references unchanged",
+      "section": "§27",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§27 — observer-invariance and reference-file claims match their evidence"
+      ],
+      "observedTests": [
+        "§27 — observer-invariance and reference-file claims match their evidence"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "reportIntegrity",
+      "label": "Report agrees with the raw evidence",
+      "section": "§26 / §27",
+      "status": "PASS",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§26 — the committed report is exactly what the generator produces",
+        "§20 — the report's suite counts equal the raw TAP summary",
+        "§27 — the manifest's path inventory is current"
+      ],
+      "observedTests": [
+        "§26 — the committed report is exactly what the generator produces",
+        "§20 — the report's suite counts equal the raw TAP summary",
+        "§27 — the manifest's path inventory is current"
+      ],
+      "failedTests": [],
+      "missingTests": []
+    },
+    {
+      "id": "testTreeIntegrity",
+      "label": "Tests never mutate the production source tree",
+      "section": "§20",
+      "status": "UNVERIFIED",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§20 — the self-audit scanner runs against an isolated tree, never src/",
+        "§20 — the production source tree is byte-identical before and after the scanner tests"
+      ],
+      "observedTests": [],
+      "failedTests": [],
+      "missingTests": [
+        "§20 — the self-audit scanner runs against an isolated tree, never src/",
+        "§20 — the production source tree is byte-identical before and after the scanner tests"
+      ]
+    },
+    {
+      "id": "reportDeterminism",
+      "label": "Report bytes are runtime-independent across supported Node majors",
+      "section": "§26",
+      "status": "UNVERIFIED",
+      "evidence": "tests",
+      "detail": null,
+      "mappedTests": [
+        "§26 — the report renders identically on every recorded runtime"
+      ],
+      "observedTests": [],
+      "failedTests": [],
+      "missingTests": [
+        "§26 — the report renders identically on every recorded runtime"
+      ]
+    },
+    {
+      "id": "ipadGate",
+      "label": "**Physical iPad acceptance**",
+      "section": "§22",
+      "status": "PENDING_HUMAN_DEVICE_TEST",
+      "evidence": "external",
+      "detail": "no measurement supplied; not performed",
+      "mappedTests": []
+    },
+    {
+      "id": "stageAOrder",
+      "label": "**§24 Stage A pre-code planning order**",
+      "section": "§24",
+      "status": "VIOLATED — principal decision required",
+      "evidence": "external",
+      "detail": "unrepairable retrospectively; DECISIONS.md D-000 and D-024",
+      "mappedTests": []
+    }
+  ]
+}

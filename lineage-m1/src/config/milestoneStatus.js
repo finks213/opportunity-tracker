@@ -28,7 +28,7 @@ export const MILESTONE_STATUS = Object.freeze({
   ipadTest: "IPAD TEST: PENDING_HUMAN_DEVICE_TEST",
 
   /** Revision of the implementation and of every generated report. */
-  revision: 4,
+  revision: 5,
   reportDate: "2026-07-30",
 
   /**

@@ -54,10 +54,10 @@
       "forest_floor": 106,
       "shoreline": 0
     },
-    "frameCount": 181,
-    "medianFrameTimeMs": 16.699999999953434,
-    "p95FrameTimeMs": 17,
-    "maxFrameTimeMs": 17.399999999906868,
+    "frameCount": 180,
+    "medianFrameTimeMs": 16.699999999982538,
+    "p95FrameTimeMs": 17.5,
+    "maxFrameTimeMs": 23.300000000017462,
     "inputActionCount": 0,
     "p95InputToNextPaintMs": null,
     "memory": {
@@ -71,12 +71,12 @@
     "declaredGlyphCount": 360,
     "renderedGlyphCount": 360,
     "glyphCountMatchesDeclaration": true,
-    "frameCount": 1469,
-    "medianFrameTimeMs": 16.699999999953434,
-    "p95FrameTimeMs": 17.800000000046566,
-    "maxFrameTimeMs": 40.10000000009313,
+    "frameCount": 1462,
+    "medianFrameTimeMs": 16.699999999982538,
+    "p95FrameTimeMs": 17.39999999999418,
+    "maxFrameTimeMs": 51,
     "inputActionCount": 21,
-    "p95InputToNextPaintMs": 12,
+    "p95InputToNextPaintMs": 13.200000000011642,
     "memory": {
       "usedJSHeapBytes": 10000000,
       "exposed": true,
@@ -100,47 +100,48 @@
     "browserAgreesWithHeadless": true,
     "disagreements": []
   },
-  "memoryAcrossAdvance": {
-    "authoritativeChannel": "node:process.memoryUsage()",
-    "node": {
-      "channel": "node:process.memoryUsage()",
-      "authoritative": true,
-      "gcExposed": false,
-      "heapUsedBeforeBytes": 25006336,
-      "heapUsedAfterBytes": 60250736,
-      "heapUsedAfterBeforeGcBytes": 60250472,
-      "heapUsedDeltaBytes": 35244400,
-      "rssBeforeBytes": 93941760,
-      "rssAfterBytes": 156196864,
-      "rssDeltaBytes": 62255104,
-      "retainedRecordCounts": {
-        "livingIndividuals": 224,
-        "retainedGenealogy": 22470,
-        "birthEvents": 22470,
-        "deathEvents": 22246,
-        "biologicalMatingEvents": 11175,
-        "bodyMutationEvents": 4566,
-        "allocationMutationEvents": 1785
-      },
-      "note": "Exact retained-record counts are the quantization-free growth measure; heap bytes are reported as observed and are sensitive to GC timing (run with --expose-gc for the deterministic figure). This 180-generation window is BELOW the 360-generation genealogy retention boundary, so pruning is not exercised here; the retention bound itself is tested through generation 1000 by test/long-run-memory.test.js."
-    },
-    "browser": {
-      "channel": "browser:performance.memory.usedJSHeapSize",
-      "usable": false,
-      "probe": {
-        "exposed": true,
-        "responsive": false,
-        "beforeBytes": 10000000,
-        "afterBytes": 10000000,
-        "allocatedBytes": 320000000,
-        "jsHeapSizeLimit": 3760000000,
-        "reason": "usedJSHeapSize did NOT move after allocating the probe buffer; the value is quantized (Chromium anonymizes performance.memory without cross-origin isolation), so browser-side heap deltas carry no information"
-      },
+  "desktopCanvasMemory": {
+    "classification": "DESKTOP_CANVAS_MEMORY",
+    "status": "UNVERIFIED",
+    "reason": "no reliable supported measurement channel",
+    "detail": "The only browser-side channel available, performance.memory.usedJSHeapSize, was probed by allocating 320000000 bytes in the page; the reading did not move (10000000 before and after). This Chromium build quantizes the value, so no browser-side delta from it carries information. No other supported API exposes Canvas/renderer memory to page script.",
+    "channelProbed": "browser:performance.memory.usedJSHeapSize",
+    "resolutionProbe": {
+      "exposed": true,
+      "responsive": false,
       "beforeBytes": 10000000,
       "afterBytes": 10000000,
-      "deltaBytes": null,
-      "note": "WITHDRAWN AS EVIDENCE. The in-page probe allocated 320000000 bytes and usedJSHeapSize did not move, so any browser-side delta here (including 0) is a quantization artefact and must not be read as memory growth. Use the node figures above. performance.memory is also absent on Safari, where it is reported as unavailable rather than guessed."
-    }
+      "allocatedBytes": 320000000,
+      "jsHeapSizeLimit": 3760000000,
+      "reason": "usedJSHeapSize did NOT move after allocating the probe buffer; the value is quantized (Chromium anonymizes performance.memory without cross-origin isolation), so browser-side heap deltas carry no information"
+    },
+    "deltaBytes": null,
+    "substituteOffered": null,
+    "note": "§22 requires desktop Canvas memory growth across the 180-generation run. This run did not establish it. The Node figures reported separately under NODE_SIMULATION_HEAP measure a different process and object graph and are NOT a substitute."
+  },
+  "nodeSimulationHeap": {
+    "classification": "NODE_SIMULATION_HEAP",
+    "channel": "node:process.memoryUsage()",
+    "measuresCanvasOrBrowserMemory": false,
+    "authoritativeForCanvasMemory": false,
+    "gcExposed": false,
+    "heapUsedBeforeBytes": 24962128,
+    "heapUsedAfterBytes": 75772912,
+    "heapUsedAfterBeforeGcBytes": 75772648,
+    "heapUsedDeltaBytes": 50810784,
+    "rssBeforeBytes": 93675520,
+    "rssAfterBytes": 160890880,
+    "rssDeltaBytes": 67215360,
+    "retainedRecordCounts": {
+      "livingIndividuals": 224,
+      "retainedGenealogy": 22470,
+      "birthEvents": 22470,
+      "deathEvents": 22246,
+      "biologicalMatingEvents": 11175,
+      "bodyMutationEvents": 4566,
+      "allocationMutationEvents": 1785
+    },
+    "note": "SEPARATELY NAMED DIAGNOSTIC (revision-5 R5-5). Node process heap over the same fixture, seed and transition count. It contains no browser, Canvas, DOM, renderer or UI state, so it does not and cannot answer the §22 Canvas memory requirement. Retained-record counts are the useful, quantization-free part."
   },
   "pageErrors": []
 }

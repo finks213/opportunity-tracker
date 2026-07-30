@@ -147,11 +147,11 @@ an acceptance target here.**
 M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED
 ```
 
-Revision 4. Revision 3 was audited twice — the AFE-Δ evidence and claim audit
+Revision 5. Revision 4 was audited twice — the AFE-Δ evidence and claim audit
 and an independent structural code audit — and both returned `BREAKS-FOUND` with
-eight verified defects. All eight are repaired here, each independently
+nine verified defects. All nine are repaired here, each independently
 reproduced first, but **no automated-gate pass is self-certified**: the status
-holds until revision 4 survives independent re-audit.
+holds until revision 5 survives independent re-audit.
 
 The revision-3 biological, fixture, security, traversal and long-run memory
 repairs are preserved unchanged; revision 4 adds transaction atomicity against

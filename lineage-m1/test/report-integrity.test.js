@@ -38,6 +38,7 @@ import { readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 import { renderFinalReport, parseTap, selfAuditScans } from "../tools/writeFinalReport.mjs";
+import { deriveGateStatuses } from "../tools/gateRegistry.mjs";
 import { MILESTONE_STATUS, HASH_LABELS } from "../src/config/milestoneStatus.js";
 import { exactProbabilityGate } from "../tools/runFixture.mjs";
 import { buildMeaningfulTraitGateEvidence } from "../tools/writeAuditEvidence.mjs";
@@ -393,43 +394,143 @@ test("§26 — the report is marked as generated so it is not hand-edited", () =
   assert.equal(pkg.scripts["report:final"], "node tools/writeFinalReport.mjs");
 });
 
-test("§24 Stage G — the self-audit scans are real: they detect a planted violation", () => {
-  // A scan that always reports "clean" is worthless. Revision 3 stated these
-  // results as prose; revision 4 executes them at report-generation time. This
-  // test proves the scanner has teeth, without leaving any violation behind.
+test("§24 Stage G — the self-audit scans report the live tree, and are clean", () => {
+  // The scans run at report-generation time and their output is printed verbatim,
+  // so this asserts the live tree is clean and the report says so.
+  //
+  // Proving the scanner has TEETH now lives in `test/test-tree-integrity.test.js`,
+  // which plants violations into an isolated temporary copy. Revision 4 planted them
+  // into `src/` while `node --test` ran files concurrently; a watcher caught the
+  // production tree holding an import of a package that does not exist (BUG 8 /
+  // R5-8). A test must not make the source tree transiently invalid for other
+  // workers.
   const scan = selfAuditScans();
   assert.deepEqual(scan.unseededRandom, [], "no unseeded randomness may ship");
   assert.deepEqual(scan.observerImports, [], "biology must not import observer or debug modules");
   assert.deepEqual(scan.observerRngRefs, [], "observer modules must not touch the simulation RNG");
   assert.deepEqual(scan.bareImports, [], "src/ must have no runtime dependencies");
 
-  // Plant each violation in turn, confirm the scan reports it, and restore.
-  const cases = [
-    { file: "src/core/math.js", inject: 'import { zoneBinCounts } from "../observer/currentZoneBins.js";\n', key: "observerImports" },
-    { file: "src/core/math.js", inject: 'import x from "some-npm-package";\n', key: "bareImports" },
-    { file: "src/observer/currentZoneBins.js", inject: "// touches simRng\n", key: "observerRngRefs" },
-    { file: "src/core/math.js", inject: `const r = ${["Math", "random"].join(".")}();\n`, key: "unseededRandom" },
-  ];
-  for (const c of cases) {
-    const path = join(ROOT, c.file);
-    const original = readFileSync(path, "utf8");
-    try {
-      writeFileSync(path, c.inject + original);
-      const planted = selfAuditScans();
-      assert.ok(
-        planted[c.key].length > 0,
-        `the ${c.key} scan failed to detect a planted violation in ${c.file}`
-      );
-      assert.ok(
-        planted[c.key].some((entry) => entry.includes(c.file)),
-        `the ${c.key} scan did not name ${c.file}`
-      );
-    } finally {
-      writeFileSync(path, original);
-    }
-  }
+  // The report must print these results, not a remembered claim.
+  assert.ok(REPORT.includes("Each scan below was executed by `tools/writeFinalReport.mjs`"));
+  assert.ok(REPORT.includes("| unseeded-random search across `src/` and `tools/` | no occurrences |"));
+});
 
-  // Everything is clean again — the test left no residue.
-  const after = selfAuditScans();
-  assert.deepEqual(after, scan, "the test must restore every file it modified");
+// ---------------------------------------------------------------------------
+// R5-7 / BUG 7 — failure injection: a failing test must turn ITS gate FAIL
+// ---------------------------------------------------------------------------
+
+test("§20/§26 — injecting a failure into any gate category turns that gate FAIL, never PASS", () => {
+  // Revision 4 derived only the full-suite row from tap.fail; every feature row was
+  // a literal `**PASS**`, so changing the summary from 249/249 to 248/249 produced:
+  //
+  //   Full test suite: FAIL — 1 of 249 failing
+  //   Birth immutability: PASS
+  //   Canonical model identity: PASS
+  //   every automated result reproducible from a clean run: met — 248/249 from clean
+  //
+  // Nothing is written to disk here: the derivation is a pure function of a parsed
+  // run, so the injection happens in memory.
+  const baseline = deriveGateStatuses(TAP);
+
+  // Only gates that are actually evidenced by this run can be falsified by it.
+  const testGates = baseline.gates.filter((g) => g.evidence === "tests" && g.status === "PASS");
+  assert.ok(testGates.length >= 8, `expected many evidenced gates, found ${testGates.length}`);
+
+  for (const gate of testGates) {
+    const victim = gate.mappedTests[0];
+    assert.ok(victim, `${gate.id} must declare at least one evidencing test`);
+
+    // Flip exactly that one test to failing.
+    const injected = {
+      ...TAP,
+      pass: (TAP.pass ?? 0) - 1,
+      fail: (TAP.fail ?? 0) + 1,
+      perTest: new Map([...TAP.perTest, [victim, false]]),
+    };
+    const after = deriveGateStatuses(injected);
+    const row = after.gates.find((g) => g.id === gate.id);
+
+    assert.equal(row.status, "FAIL", `${gate.id} must become FAIL when "${victim}" fails`);
+    assert.ok(row.failedTests.includes(victim), `${gate.id} must name the failing test`);
+    // The suite row must also fail.
+    assert.equal(after.gates.find((g) => g.id === "fullSuite").status, "FAIL");
+    // And the §28 completion claim must not remain met.
+    assert.equal(
+      after.summary.everyAutomatedResultReproducible,
+      "NOT met",
+      `${gate.id}: completion must not read met while a gate fails`
+    );
+    // No gate may be reported PASS on the strength of a run that failed
+    // unattributably; here the failure IS attributed, so other gates keep their
+    // evidenced status — but the failing one must never be PASS.
+    assert.notEqual(row.status, "PASS");
+  }
+});
+
+test("§20/§26 — an UNATTRIBUTABLE failure degrades every other gate to UNVERIFIED", () => {
+  // A failing test that no gate claims means the run does not evidence the other
+  // gates either. Revision 4 would have kept every hardcoded PASS.
+  const injected = {
+    ...TAP,
+    pass: (TAP.pass ?? 0) - 1,
+    fail: (TAP.fail ?? 0) + 1,
+    perTest: new Map([...TAP.perTest, ["some test no gate declares", false]]),
+  };
+  const after = deriveGateStatuses(injected);
+  assert.deepEqual(after.unattributedFailures, ["some test no gate declares"]);
+  const derivedGates = after.gates.filter((g) => g.evidence === "tests");
+  assert.ok(derivedGates.length > 0);
+  for (const g of derivedGates) {
+    assert.notEqual(g.status, "PASS", `${g.id} must not read PASS while a failure is unattributed`);
+  }
+  assert.equal(after.summary.everyAutomatedResultReproducible, "NOT met");
+});
+
+test("§20/§26 — a gate whose evidencing test did not run reads UNVERIFIED, never PASS", () => {
+  const baseline = deriveGateStatuses(TAP);
+  const gate = baseline.gates.find((g) => g.evidence === "tests" && g.status === "PASS");
+  const missing = gate.mappedTests[0];
+  const perTest = new Map(TAP.perTest);
+  perTest.delete(missing);
+  const after = deriveGateStatuses({ ...TAP, perTest });
+  const row = after.gates.find((g) => g.id === gate.id);
+  assert.equal(row.status, "UNVERIFIED", `${gate.id} must be UNVERIFIED when its test did not run`);
+  assert.ok(row.missingTests.includes(missing));
+  assert.equal(after.summary.everyAutomatedResultReproducible, "NOT met");
+});
+
+test("§20/§26 — externally determined gates can never read PASS", () => {
+  const d = deriveGateStatuses(TAP);
+  const external = d.gates.filter((g) => g.evidence === "external");
+  assert.ok(external.length >= 3, "the iPad gate, Stage A order and Canvas memory are external");
+  for (const g of external) {
+    assert.notEqual(g.status, "PASS", `${g.id} must never read PASS`);
+  }
+  const byId = Object.fromEntries(external.map((g) => [g.id, g.status]));
+  assert.equal(byId.ipadGate, "PENDING_HUMAN_DEVICE_TEST");
+  assert.equal(byId.desktopCanvasMemory, "UNVERIFIED");
+  assert.match(byId.stageAOrder, /VIOLATED/);
+});
+
+test("§20/§26 — the committed gate summary matches the report's table", () => {
+  const summary = readJson("audit/gate-summary.json");
+  const derived = deriveGateStatuses(TAP);
+  assert.equal(summary.gates.length, derived.gates.length);
+  for (let i = 0; i < derived.gates.length; i++) {
+    assert.equal(summary.gates[i].id, derived.gates[i].id);
+    assert.equal(
+      summary.gates[i].status,
+      derived.gates[i].status,
+      `${derived.gates[i].id}: committed summary disagrees with a fresh derivation`
+    );
+    // ...and the report row must carry that same status.
+    const marker = derived.gates[i].status === "PASS" ? "**PASS**" : `**${derived.gates[i].status}**`;
+    const row = REPORT.split("\n").find((l) => l.includes(`| ${derived.gates[i].label} |`));
+    assert.ok(row, `the report must contain a row for ${derived.gates[i].id}`);
+    assert.ok(
+      row.includes(marker),
+      `${derived.gates[i].id}: report row does not carry ${marker}\n  ${row.trim()}`
+    );
+  }
+  assert.deepEqual(summary.summary, derived.summary);
 });

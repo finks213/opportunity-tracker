@@ -884,6 +884,149 @@ the structural code audit and the AFE-Δ evidence and claim audit.
 
 ---
 
+# Revision-5 decisions (D-044 … D-052)
+
+Inputs: the AFE-Δ revision-4 BREAK-REPORT and `LINEAGE_M1_REV4_STRUCTURAL_AUDIT.md`
+(artifact SHA-256 `0f502303…`), both `BREAKS-FOUND`, nine verified defects. Full
+reproduction commands and outputs are in `REVISION_5_REPAIR_RECORD.md`.
+
+Every repair carries a **committed** regression test. Ad hoc verification is not
+closure, and none of these is presented as closed on the strength of a one-off check.
+
+## D-044 — Focal lineage is maintained, not reconstructed (MEDIUM-CRITICAL)
+
+Rolling genealogy is bounded to 360 generations (§15), so it cannot answer an
+arbitrary late question about a generation-zero focal set. At generation 400 all 293
+living animals carried positive focal contribution while reconstruction found 0, and
+the UI said "no living descendant remains".
+
+**Decision:** bounded observer-side channels for the contract-required focal sets are
+created at world creation and propagated continuously. Late activation exposes the
+maintained channel. Where neither a channel nor an intact window exists, the answer
+is `FOCAL_ANCESTRY_UNRESOLVABLE`.
+
+**Rejected alternative:** widening the retention window. That trades a false
+extinction claim for unbounded growth, breaking the §15 bound the earlier revisions
+were repaired to satisfy. The observer is the right place to keep observer knowledge.
+
+**Why a new outcome name:** `FOCAL_LINEAGE_UNAVAILABLE` asserted biological absence.
+Three states must be distinguishable — resolved, evidenced extinction, and
+unknowable — and conflating the last two is what made the UI lie.
+
+## D-045 — World changes are transactional (MEDIUM-CRITICAL)
+
+**Decision:** monotonic tokens plus an explicit commit gate. A superseded request
+commits nothing at all, including error messages. A synchronous reset claims a token
+so it invalidates in-flight loads.
+
+**Rejected alternative:** disabling controls during a load. That hides the race
+behind UI state rather than removing it, and any programmatic caller — including the
+measurement driver — could still reach it.
+
+## D-046 — Model identity is mandatory, and serialization is total (MEDIUM)
+
+**Decision:** the guard is unconditional and rejects missing, null, empty, malformed
+and unknown digests before any state change. `canonicalStringify` now throws on an
+undefined property rather than omitting it, and deserialization refuses an older
+schema. The biological schema is bumped to `lineage-biological-state-2`.
+
+**Why the schema bump:** revision 4 added a mandatory field while keeping the schema
+label that predated it, so a `-1` state with the field deleted looked current. Making
+"carries a complete model identity" part of the schema means such a state is rejected
+by version, not by luck.
+
+## D-047 — One authoritative model hash (MEDIUM-CRITICAL)
+
+**Decision:** `src/config/modelIdentity.js` and `modelIdentityNode.js` are the only
+places the model is serialized or hashed for identity. Every tool calls them.
+
+**The value did not change,** and that was deliberate. My first version of the moved
+digest added a diffusion pass, which altered the runtime identity — and since that
+value lives in canonical biological state, it would have moved the fixture and
+observer-invariance hashes for no contract reason. The algorithm is preserved
+byte-for-byte; only its location changed.
+
+## D-048 — Canvas memory is UNVERIFIED, not substituted (MEDIUM)
+
+**Decision:** `desktopCanvasMemory` and `nodeSimulationHeap` are separately named and
+neither may stand in for the other. The browser channel is probed each run; when it
+does not respond the result is `UNVERIFIED` with `deltaBytes: null`.
+
+**Rejected alternative:** keeping the Node figure as the answer with a caveat. A
+number in the field a reader checks *is* the claim, whatever the surrounding prose
+says. An honest UNVERIFIED is worth more than a confident measurement of the wrong
+subject.
+
+## D-049 — Node support stays `>=18`; the runtime leaves the report (MEDIUM)
+
+**Decision:** support is unchanged. The report reads the official evidence run's
+environment from `audit/build-environment.json` instead of the live runtime, and
+`audit/runtime-matrix.json` records that rendering is byte-identical across the Node
+majors available.
+
+**Rejected alternative:** pinning an exact runtime. The code requires nothing
+narrower than `>=18`; pinning would have been fixing the artifact to suit the bug,
+and would have narrowed the project's declared support to protect one embedded line.
+
+## D-050 — Every gate row is derived from named test results (MEDIUM)
+
+**Decision:** `tools/gateRegistry.mjs` maps each gate to the tests that evidence it.
+Status is derived: PASS only when every mapped test ran and passed; FAIL when one
+failed; UNVERIFIED when no result was observed, or when the suite has a failure that
+cannot be attributed to any gate. The §28 completion claim requires a green suite
+**and** every derived gate passing. Gates that are not test-evidenced are declared
+external and can never read PASS.
+
+**Why UNVERIFIED and not PASS on an unattributed failure:** a run containing a
+failure nobody claims does not evidence the other gates either. Keeping a prior PASS
+would be asserting something this run cannot support.
+
+## D-051 — Tests never touch the production tree, and the scanner reads code (MEDIUM)
+
+**Decision:** `selfAuditScans(root)` is root-parameterised and the teeth test plants
+into a temporary copy. `tools/proveTreeIntegrity.mjs` samples every file under `src/`
+continuously while the suite runs at high concurrency, so the invariant is checked at
+every instant rather than before and after.
+
+**Secondary decision, and a real improvement:** the scanner now strips comments
+before matching, and strips strings only for token scans. Revision 4 matched raw
+text, so a doc comment that merely *named* a forbidden token counted as a violation —
+which is why earlier revisions reworded comments to appease it and why the codebase
+could not document the tokens it forbids. Use is a violation; mention is the record.
+
+## D-052 — The generation result is deeply frozen (MEDIUM-MINOR)
+
+**Decision:** errors are collected locally and the result is assembled frozen, every
+record included. Twelve mutation attempts now throw under strict mode.
+
+## Withdrawn revision-4 claims
+
+Recorded explicitly rather than quietly corrected:
+
+1. **"Focal lineage resolved from genealogy, never reseeded | PASS"** — the gate was
+   true of reseeding but false over a long-running world, where it reported
+   extinction for a living lineage. Withdrawn; see D-044.
+2. **The desktop "authoritative" memory channel** — `process.memoryUsage()` from a
+   Node-only simulation is not the desktop Canvas memory measure §22 requires.
+   Withdrawn; see D-048.
+3. **`audit/meaningful-trait-gate.json`'s `modelDefinitionHash`** (`432391e5…`) — a
+   different serialization from every other evidence file's. Withdrawn; the
+   authoritative value is `dc444865…`. See D-047.
+4. **Every hardcoded feature-gate `PASS`** in the revision-4 report, and its
+   unconditional `every automated result reproducible … met`. Those rows were not
+   evidenced by the run they appeared in. Withdrawn; see D-050.
+5. **The revision-4 report's byte-equality gate as runnable on any supported Node** —
+   it was satisfiable only on the patch release that generated the report.
+   Withdrawn; see D-049.
+
+## Process order — still not decided here
+
+The §24 Stage A pre-code planning-order violation (D-000, D-024) is principal-held.
+It is not decided or waived in this pass. No process waiver is requested and no
+physical iPad test is performed until revision 5 survives both audits.
+
+---
+
 ## Open uncertainty (not hidden)
 
 - The performance matrix, zone weights, `selectionSlope`, `fitnessZero`, and

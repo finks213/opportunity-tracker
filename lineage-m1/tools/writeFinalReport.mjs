@@ -32,6 +32,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, join, resolve } from "node:path";
 import { ZONES } from "../src/config/zones.js";
 import { MILESTONE_STATUS, HASH_LABELS } from "../src/config/milestoneStatus.js";
+import { deriveGateStatuses } from "./gateRegistry.mjs";
 
 const ROOT = resolve(join(dirname(fileURLToPath(import.meta.url)), ".."));
 const read = (rel) => readFileSync(join(ROOT, rel), "utf8");
@@ -58,6 +59,17 @@ export function parseTap(text) {
     const m = text.match(new RegExp(`^# ${key} (\\d+)$`, "m"));
     return m ? Number(m[1]) : null;
   };
+  // Per-test outcomes, so a gate's status can be ATTRIBUTED to named tests rather
+  // than hardcoded (revision-5 repair, BUG 7 / R5-7). Only top-level `ok N - name`
+  // / `not ok N - name` lines are read; nested subtest echoes are ignored.
+  /** @type {Map<string, boolean>} */
+  const perTest = new Map();
+  for (const m of text.matchAll(/^(not )?ok \d+ - (.+?)(?: # .*)?$/gm)) {
+    const name = m[2].trim();
+    const ok = m[1] === undefined;
+    // A name appearing twice must not be silently upgraded to pass.
+    perTest.set(name, perTest.has(name) ? perTest.get(name) && ok : ok);
+  }
   return {
     tests: grab("tests"),
     pass: grab("pass"),
@@ -65,6 +77,7 @@ export function parseTap(text) {
     cancelled: grab("cancelled"),
     skipped: grab("skipped"),
     todo: grab("todo"),
+    perTest,
     durationMs: (() => {
       const m = text.match(/^# duration_ms ([\d.]+)$/m);
       return m ? Number(m[1]) : null;
@@ -73,17 +86,124 @@ export function parseTap(text) {
 }
 
 /**
- * Perform the §24 Stage G self-audit scans HERE, at report-generation time, so the
+ * Remove comments and string/template literals from JavaScript source, preserving
+ * newlines so reported positions stay meaningful.
+ *
+ * Deliberately simple: this is a scanner pre-filter, not a parser. It errs toward
+ * removing too much (a false negative is caught by the planted-violation teeth
+ * test) rather than too little (a false positive would force comments to be
+ * reworded to satisfy a scanner, which is how revision 4 ended up unable to
+ * document the tokens it forbids).
+ * @param {string} src
+ * @returns {string}
+ */
+export function stripComments(src) {
+  return stripJs(src, { strings: false });
+}
+
+
+/**
+ * Remove comments AND string/template literals. Use this for TOKEN scans, where a
+ * token inside a string literal is a mention rather than a use.
+ *
+ * Do NOT use it for import-specifier scans: erasing string contents also erases the
+ * module path, so `from "../observer/x.js"` becomes `from ""` and no import can be
+ * detected. That mistake made the planted-violation test silently pass nothing.
+ * @param {string} src
+ * @returns {string}
+ */
+export function stripCommentsAndStrings(src) {
+  return stripJs(src, { strings: true });
+}
+
+/**
+ * @param {string} src
+ * @param {{strings:boolean}} opts
+ * @returns {string}
+ */
+function stripJs(src, opts) {
+  let out = "";
+  let i = 0;
+  const n = src.length;
+  while (i < n) {
+    const c = src[i];
+    const d = src[i + 1];
+    // line comment
+    if (c === "/" && d === "/") {
+      while (i < n && src[i] !== "\n") i++;
+      continue;
+    }
+    // block comment
+    if (c === "/" && d === "*") {
+      i += 2;
+      while (i < n && !(src[i] === "*" && src[i + 1] === "/")) {
+        if (src[i] === "\n") out += "\n";
+        i++;
+      }
+      i += 2;
+      continue;
+    }
+    // string or template literal
+    if (opts.strings && (c === '"' || c === "'" || c === "`")) {
+      const quote = c;
+      i++;
+      while (i < n) {
+        if (src[i] === "\\") { i += 2; continue; }
+        if (src[i] === quote) { i++; break; }
+        if (src[i] === "\n") out += "\n";
+        i++;
+      }
+      // Keep an empty literal so `from ""` still parses as an import shape.
+      out += quote + quote;
+      continue;
+    }
+    out += c;
+    i++;
+  }
+  return out;
+}
+
+/**
+ * Perform the §24 Stage G self-audit scans at report-generation time, so the
  * report states what was measured rather than what was believed (revision-4
  * repair). Revision 3 asserted "no occurrences" and "clean" as prose.
+ *
+ * ROOT-PARAMETERISED (revision-5 repair, BUG 8 / R5-8). Revision 4's scanner read
+ * only the live production tree, so the test proving it had teeth had to plant
+ * violations INTO `src/` while `node --test` ran files in concurrent worker
+ * processes. A filesystem watcher observed `src/core/math.js` transiently
+ * beginning with each of:
+ *
+ *   import { zoneBinCounts } from "../observer/currentZoneBins.js";
+ *   import x from "some-npm-package";
+ *   const r = Math.random();
+ *
+ * Another worker importing that file mid-plant would fail on an unresolvable
+ * package. The scanner now takes the root it scans, so the teeth test copies the
+ * tree to a temporary directory and plants there. Nothing writes to `src/`.
+ *
+ * @param {string} [root] directory to scan; defaults to the project root
  * @returns {{unseededRandom:string[], observerImports:string[], observerRngRefs:string[], bareImports:string[]}}
  */
-export function selfAuditScans() {
+export function selfAuditScans(root = ROOT) {
+  // Scan CODE, not prose. Revision 4's scanner matched raw file text, so a doc
+  // comment that merely NAMED a forbidden token was reported as a violation —
+  // which forced earlier revisions to reword comments to appease the scanner
+  // rather than fixing anything. Worse, it meant the scanner could not be used to
+  // document the very defects it guards against. Comments and string literals are
+  // stripped first, so a mention is a mention and a use is a use.
+  // Two readers, because the two scan kinds need different pre-filters:
+  //   readTokens  comments AND strings removed — a token inside a string is a mention
+  //   readImports comments removed, strings KEPT — erasing strings would erase the
+  //               module specifier itself, so no import could ever be detected
+  const readTokens = (rel) => stripCommentsAndStrings(readFileSync(join(root, rel), "utf8"));
+  const readImports = (rel) => stripComments(readFileSync(join(root, rel), "utf8"));
   /** @param {string} dir @param {string[]} out */
   const walk = (dir, out = []) => {
-    for (const name of readdirSync(join(ROOT, dir)).sort()) {
+    if (!existsSync(join(root, dir))) return out;
+    for (const name of readdirSync(join(root, dir)).sort()) {
       const rel = `${dir}/${name}`;
-      if (statSync(join(ROOT, rel)).isDirectory()) walk(rel, out);
+      if (statSync(join(root, rel)).isDirectory()) walk(rel, out);
       else if (name.endsWith(".js") || name.endsWith(".mjs")) out.push(rel);
     }
     return out;
@@ -94,7 +214,7 @@ export function selfAuditScans() {
   /** Unseeded randomness anywhere in shipped source or tooling. */
   const unseededRandom = [];
   for (const rel of [...srcFiles, ...toolFiles]) {
-    const text = read(rel);
+    const text = readTokens(rel);
     // Built by concatenation so this scanner does not itself contain the token
     // it forbids, which would make the scan trivially self-reporting.
     const forbidden = ["Math", "random"].join(".") + "(";
@@ -108,7 +228,7 @@ export function selfAuditScans() {
   );
   const observerImports = [];
   for (const rel of biological) {
-    for (const m of read(rel).matchAll(/\bfrom\s+["']([^"'\s]+)["']/g)) {
+    for (const m of readImports(rel).matchAll(/\bfrom\s+["']([^"'\s]+)["']/g)) {
       if (/\/(observer|debug)\//.test(m[1]) || /^\.\.?\/(observer|debug)\//.test(m[1])) {
         observerImports.push(`${rel} -> ${m[1]}`);
       }
@@ -118,7 +238,7 @@ export function selfAuditScans() {
   /** Observer modules must not touch the simulation RNG. */
   const observerRngRefs = [];
   for (const rel of srcFiles.filter((f) => f.startsWith("src/observer/"))) {
-    const text = read(rel);
+    const text = readTokens(rel);
     for (const token of ["simRng", "createSimRng"]) {
       if (text.includes(token)) observerRngRefs.push(`${rel} (${token})`);
     }
@@ -127,7 +247,7 @@ export function selfAuditScans() {
   /** Bare specifiers in src/ = runtime dependencies. `node:` builtins excluded. */
   const bareImports = [];
   for (const rel of srcFiles) {
-    for (const m of read(rel).matchAll(/\bfrom\s+["']([^"'\s]+)["']/g)) {
+    for (const m of readImports(rel).matchAll(/\bfrom\s+["']([^"'\s]+)["']/g)) {
       const spec = m[1];
       if (spec.startsWith(".") || spec.startsWith("/") || spec.startsWith("node:")) continue;
       bareImports.push(`${rel} -> ${spec}`);
@@ -159,6 +279,11 @@ export function renderFinalReport() {
     : null;
   const gate9 = has("audit/meaningful-trait-gate.json")
     ? readJson("audit/meaningful-trait-gate.json")
+    : null;
+  // Revision-5 repair (BUG 6 / R5-6): the environment comes from committed
+  // evidence, never from the live runtime, so report bytes are runtime-independent.
+  const envRec = has("audit/build-environment.json")
+    ? readJson("audit/build-environment.json")
     : null;
 
   const scan = selfAuditScans();
@@ -228,68 +353,72 @@ export function renderFinalReport() {
     `| **\`${HASH_LABELS.authoritative}\`** (authoritative) | \`${char.modelDefinitionHash}\` |`,
     `| \`${HASH_LABELS.nonauthoritative}\` (**NONAUTHORITATIVE**) | \`${char.tuningConfigHash}\` |`,
     `| Fixture SHA-256 | \`${fixture.fixtureRawSha256}\` |`,
-    `| Node · platform | ${process.version} · ${process.platform} ${process.arch} |`,
+    `| Evidence-run runtime | ${envRec ? `${envRec.evidenceRun.nodeVersion} · ${envRec.evidenceRun.platform} ${envRec.evidenceRun.arch}` : "**INCONCLUSIVE — audit/build-environment.json missing**"} |`,
+    `| Declared runtime support | \`node ${envRec ? envRec.declaredSupport.engines.node : "?"}\` |`,
     "",
     `- \`${HASH_LABELS.authoritative}\`: ${HASH_LABELS.authoritativeDescription}.`,
     `- \`${HASH_LABELS.nonauthoritative}\`: ${HASH_LABELS.nonauthoritativeDescription}`,
+    "",
+    "The runtime row is read from `audit/build-environment.json`, recorded once by the official",
+    "evidence run. Revision 4 embedded the LIVE `process.version` here, and because the suite",
+    "requires this file to be byte-identical to a fresh render, the report could only match on the",
+    "exact Node patch that generated it — Node 20 and Node 24 each failed byte equality while",
+    "satisfying the declared `node >=18`. Support stays at `>=18`; the verifier's runtime is simply",
+    "no longer part of the report bytes. See `audit/runtime-matrix.json` for the majors actually",
+    "exercised.",
     "",
     "---",
     ""
   );
 
   // ================= 1. gates =================
-  const suiteResult =
-    tap.fail === null || tap.tests === null
-      ? "**INCONCLUSIVE — the raw TAP summary could not be parsed**"
-      : tap.fail === 0
-        ? `**PASS** — ${tap.pass}/${tap.tests}, 0 failures`
-        : `**FAIL** — ${tap.fail} of ${tap.tests} failing`;
+  // Revision-5 repair (BUG 7 / R5-7). Every row is DERIVED from the run's per-test
+  // results through `tools/gateRegistry.mjs`. Revision 4 hardcoded `**PASS**` for
+  // every feature row, so a failing suite still produced a table of passes.
+  const derived = deriveGateStatuses(tap);
+  const gateMark = (status) =>
+    status === "PASS" ? "**PASS**" : status === "FAIL" ? "**FAIL**" : `**${status}**`;
 
   w(
     "## 1. Gate-by-gate results",
     "",
     "Nothing below is hidden behind a summary. Failures, pending items, and named",
-    "uncertainties appear in the same table as the passes. Counts in this section are read",
-    "from `audit/test-results.txt` and the JSON files under `audit/`, not retyped.",
+    "uncertainties appear in the same table as the passes.",
+    "",
+    "**Every row is derived**, not written. Each gate declares the named tests that evidence it",
+    "(`tools/gateRegistry.mjs`); the status comes from those tests' actual results in",
+    "`audit/test-results.txt`. A gate whose evidencing test did not run reads `UNVERIFIED`, never",
+    "`PASS`. Revision 4 hardcoded a literal `PASS` on every feature row, so injecting a single",
+    "failure produced `Full test suite: FAIL — 1 of 249` beside `Birth immutability: PASS`.",
     "",
     "| # | Gate | Contract § | Result |",
-    "|---|---|---|---|",
-    `| 1 | Full test suite | §20 | ${suiteResult} |`,
-    "| 2 | Fixture raw SHA-256 integrity | §19 A | **PASS** |",
-    "| 3 | Fixture-envelope canonical round trip | §19 B | **PASS** |",
-    "| 4 | Deterministic hydration | §19 C | **PASS** |",
-    "| 5 | Paired-world construction | §19 D | **PASS** — exactly 12 `toe_webbing` values differ, one hydration cloned four ways |",
-    `| 6 | Exact probability gate | §19.3 | ${pass(fixture.gates.medianCanopyHighLessThanLow && fixture.gates.medianShorelineHighGreaterThanLow)} |`,
-    `| 7 | Matched trajectory gate, seeds ${fixture.seedRange.start}..${fixture.seedRange.endInclusive} | §19.4 | ${pass(fixture.gates.allPass)} — canopy ${fixture.successCounts.canopy}/${fixture.gates.seedCount}, shoreline ${fixture.successCounts.shoreline}/${fixture.gates.seedCount}, threshold ${fixture.gates.successThreshold} |`,
-    `| 8 | Meaningful-trait contextual gate | §9 / §20.5 | ${gate9 ? pass(gate9.allMeaningfulPass) + ` — all ${gate9.meaningful.length} traits` : "**INCONCLUSIVE — evidence file missing**"} |`,
-    "| 9 | Birth immutability | §20.1 | **PASS** |",
-    `| 10 | Observer-state invariance | §20.2 | ${pass(obs.allStrategiesByteIdentical)} — byte-identical, ${obs.mismatches.length} mismatches |`,
-    "| 11 | No observer dependencies in biology | §20.3 | **PASS** — static import scan |",
-    `| 12 | Neutral-trait integrity | §20.4 | ${gate9 ? pass(gate9.allNeutralExactlyZero) + " — exactly zero" : "**INCONCLUSIVE**"} |`,
-    "| 13 | Full-path body-mutation independence | §20.6 | **PASS** |",
-    "| 14 | Mutation provenance and counter ownership | §20.7 | **PASS** |",
-    "| 15 | Allocation-mutation opportunity contract | §20.8 | **PASS** — draw counts asserted directly |",
-    `| 16 | Spatial integrity and adjacency | §20.9 | **PASS** — ${L.totalZeroAllocationFallbacks} zero-allocation fallbacks |`,
-    "| 17 | Lifecycle and mating contract | §20.10 | **PASS** |",
-    "| 18 | Genealogy integrity + forced 360-boundary | §20.11 | **PASS** — crossed at generation 400 |",
-    "| 18b | Genealogy boundary records bounded | §15 | **PASS** — stored set equals required set at generations 400/460/520/600 |",
-    "| 19 | Exact survival composition | §20.12 | **PASS** — to 1e-12 |",
-    "| 20 | RNG integrity | §20.13 | **PASS** |",
-    `| 21 | Population guardrails, ${char.declaredSeedRange.endInclusive} seeds | §21.4 | ${pass(g.allPass)} — all four |`,
-    `| 22 | Mutation-supply minimal functionality | §21.3 | ${pass(char.minimalFunctionality.canopyPositiveWebbingEvent && char.minimalFunctionality.shorelinePositiveWebbingEvent)} |`,
-    // §21.6 and §22 desktop are CHARACTERIZATION requirements: the contract asks
-    // for the measurement to be recorded, and sets no numeric pass law for either.
-    // Labelling them "MEASURED"/"RECORDED" rather than PASS avoids inventing a
-    // threshold the contract does not state (revision-4 wording repair).
-    `| 23 | §21.6 adjacency traversal, isolated edge-only worlds | §21.6 | ${edge ? `**MEASURED** — ${edge.canopyOnly.seedsReaching}/${edge.canopyOnly.ofSeeds} and ${edge.shorelineOnly.seedsReaching}/${edge.shorelineOnly.ofSeeds} reached the opposite edge zone; no contract threshold applies` : "**INCONCLUSIVE — evidence file missing**"} |`,
-    `| 24 | Desktop Canvas measurement, reproducible | §22 | ${desk ? `**RECORDED** (headless Chromium ${desk.browser.version}), regenerable by \`npm run audit:desktop\`; §22 states no desktop pass law — the numeric pass law belongs to the iPad gate at row 30` : "**INCONCLUSIVE — evidence file missing**"} |`,
-    "| 25 | Canonical model identity binds state progression | §18 / §21.7 | **PASS** — version *and* complete model identity checked |",
-    "| 26 | Legibility mode is self-contained | §22 | **PASS** — rehydrates the fixture rather than trusting a flag |",
-    "| 27 | Generation advancement atomic against observer failure | §4 / §16 | **PASS** — observers dispatched post-commit |",
-    "| 28 | Focal lineage resolved from genealogy, never reseeded | §16 | **PASS** |",
-    `| 29 | Quarantined Python references unchanged | §27 | ${pass(refs.allUnchanged)} — ${refs.files.length} files |`,
-    "| 30 | **Physical iPad acceptance** | §22 | **PENDING_HUMAN_DEVICE_TEST** |",
-    "| 31 | **§24 Stage A pre-code planning order** | §24 | **VIOLATED — principal decision required** |",
+    "|---|---|---|---|"
+  );
+  derived.gates.forEach((g, i) => {
+    const detail = g.detail ? ` — ${g.detail}` : "";
+    const extra =
+      g.status === "FAIL" && g.failedTests?.length
+        ? ` — failing: ${g.failedTests.join("; ")}`
+        : g.status === "UNVERIFIED" && g.missingTests?.length
+          ? ` — no result observed for: ${g.missingTests.join("; ")}`
+          : g.evidence === "suite" && g.detail
+            ? ` — ${g.detail}`
+            : detail;
+    w(`| ${i + 1} | ${g.label} | ${g.section} | ${gateMark(g.status)}${g.evidence === "suite" ? extra : extra} |`);
+  });
+  w(
+    "",
+    `**Gate totals:** ${derived.summary.pass} PASS · ${derived.summary.fail} FAIL · ` +
+    `${derived.summary.unverified} UNVERIFIED · ${derived.summary.external} externally determined ` +
+    `(of ${derived.summary.total}).`,
+    "",
+    derived.unattributedFailures.length > 0
+      ? "**Unattributed failures present.** The run contains failing tests that no gate claims, so every " +
+        "gate not directly evidenced by a passing test is reported `UNVERIFIED` rather than keeping a " +
+        `prior PASS: ${derived.unattributedFailures.join("; ")}`
+      : "No unattributed failures: every failing test in this run, if any, maps to a declared gate.",
+    "",
+    "Machine-readable form: `audit/gate-summary.json`.",
     ""
   );
 
@@ -668,7 +797,8 @@ export function renderFinalReport() {
   } else {
     const n = desk.normalMode;
     const s = desk.renderStressMode;
-    const mem = desk.memoryAcrossAdvance;
+    const cm = desk.desktopCanvasMemory;
+    const nh = desk.nodeSimulationHeap;
     w(
       `Headless Chromium ${desk.browser.version}, viewport ${desk.frozenParameters.viewport.width}×${desk.frozenParameters.viewport.height},`,
       `device-pixel ratio ${desk.environment.devicePixelRatio}. **This is not a substitute for the iPad gate.**`,
@@ -724,23 +854,53 @@ export function renderFinalReport() {
       "",
       "### Memory across the 180-generation run",
       "",
-      `Authoritative channel: \`${mem.authoritativeChannel}\`.`,
+      "Two separately named results. Neither stands in for the other.",
       "",
-      "| Channel | Result |",
+      `#### \`DESKTOP_CANVAS_MEMORY\` — the §22 subject: **${cm.status}**`,
+      "",
+      ...(cm.status === "MEASURED"
+        ? [
+            `| Field | Value |`,
+            `|---|---|`,
+            `| channel | \`${cm.channel}\` |`,
+            `| browser | ${cm.browser} |`,
+            `| measurement API | \`${cm.measurementApi}\` |`,
+            `| included memory domains | ${cm.includedMemoryDomains} |`,
+            `| generation interval | ${cm.generationInterval} |`,
+            `| sampling procedure | ${cm.samplingProcedure} |`,
+            `| before → after | ${int(cm.beforeBytes)} → ${int(cm.afterBytes)} bytes |`,
+            `| **delta** | **${int(cm.deltaBytes)} bytes** |`,
+            `| limitations | ${cm.limitations} |`,
+          ]
+        : [
+            "```",
+            `DESKTOP_CANVAS_MEMORY: ${cm.status}`,
+            `reason: ${cm.reason}`,
+            "```",
+            "",
+            cm.detail,
+            "",
+            "`deltaBytes` is `null`, deliberately. Revision 4 published a Node process-heap delta here",
+            "and called it the authoritative Canvas measure; a numeric answer to a question the run did",
+            "not ask is worse than an honest `UNVERIFIED`. The probe result is in the raw JSON under",
+            "`desktopCanvasMemory.resolutionProbe`.",
+          ]),
+      "",
+      "#### `NODE_SIMULATION_HEAP` — a separate diagnostic, NOT the §22 subject",
+      "",
+      "| Field | Value |",
       "|---|---|",
-      `| Node \`process.memoryUsage().heapUsed\` | ${int(mem.node.heapUsedBeforeBytes)} → ${int(mem.node.heapUsedAfterBytes)} bytes (Δ ${int(mem.node.heapUsedDeltaBytes)}) |`,
-      `| Node RSS | ${int(mem.node.rssBeforeBytes)} → ${int(mem.node.rssAfterBytes)} bytes (Δ ${int(mem.node.rssDeltaBytes)}) |`,
-      `| retained genealogy records | ${int(mem.node.retainedRecordCounts.retainedGenealogy)} |`,
-      `| living individuals | ${int(mem.node.retainedRecordCounts.livingIndividuals)} |`,
-      `| browser \`performance.memory\` | usable: **${mem.browser.usable}** |`,
+      `| channel | \`${nh.channel}\` |`,
+      `| measures Canvas or browser memory | **${nh.measuresCanvasOrBrowserMemory}** |`,
+      `| heapUsed before → after | ${int(nh.heapUsedBeforeBytes)} → ${int(nh.heapUsedAfterBytes)} bytes (Δ ${int(nh.heapUsedDeltaBytes)}) |`,
+      `| RSS before → after | ${int(nh.rssBeforeBytes)} → ${int(nh.rssAfterBytes)} bytes (Δ ${int(nh.rssDeltaBytes)}) |`,
+      `| retained genealogy records | ${int(nh.retainedRecordCounts.retainedGenealogy)} |`,
+      `| living individuals | ${int(nh.retainedRecordCounts.livingIndividuals)} |`,
       "",
-      mem.browser.usable
-        ? `The in-page probe confirmed \`usedJSHeapSize\` responds to allocation, so the browser delta of ${int(mem.browser.deltaBytes)} bytes is meaningful.`
-        : "**The browser heap figure is withdrawn as evidence.** The in-page probe allocated " +
-          `${int(mem.browser.probe.allocatedBytes)} bytes and \`usedJSHeapSize\` did not move ` +
-          `(${int(mem.browser.probe.beforeBytes)} before and after), so any browser-side delta — including ` +
-          "zero — is a quantization artefact. Revision 3 published such a figure as memory-growth " +
-          "evidence without probing the channel. The Node figures above are used instead.",
+      "This runs biological state forward in Node. It creates no browser, Canvas, DOM, renderer, frame",
+      "meter, tracer UI or browser heap, so it measures a different process and object graph and cannot",
+      "answer the Canvas requirement. Its useful part is the exact, quantization-free retained-record",
+      "counts.",
       "",
       "Exact retained-record counts are the quantization-free growth measure. This",
       "180-generation window is **below** the 360-generation genealogy retention boundary,",
@@ -936,7 +1096,9 @@ export function renderFinalReport() {
     "| genealogy and mating cores remain coherent | met |",
     "| neutral traits are exactly neutral | met |",
     "| the difference is visible in the diagnostic probe | met on desktop; **iPad legibility pending human test** |",
-    `| every automated result reproducible from a clean run | met — ${tap.pass ?? "—"}/${tap.tests ?? "—"} from clean; fixture, both batches, edge-only and desktop regenerated |`,
+    `| every automated result reproducible from a clean run | ${derived.summary.everyAutomatedResultReproducible} — ` +
+      `${tap.pass ?? "—"}/${tap.tests ?? "—"} from clean, ${derived.summary.fail} gate(s) FAIL, ` +
+      `${derived.summary.unverified} UNVERIFIED |`,
     "| remaining uncertainty named rather than hidden | met — §6, §11, and the audit response in the repair record |",
     "",
     `**Completion is NOT declared** (\`mayDeclareCompletion: ${S.mayDeclareCompletion}\`). §24 Stage A ordering was`,
@@ -976,5 +1138,28 @@ if (isMain) {
   const out = outIdx >= 0 ? args[outIdx + 1] : join(ROOT, "FINAL_REPORT.md");
   const text = renderFinalReport();
   writeFileSync(out, text);
+
+  // The machine-readable form of exactly what the report's gate table says.
+  const tapForSummary = parseTap(readFileSync(join(ROOT, "audit", "test-results.txt"), "utf8"));
+  const derivedSummary = deriveGateStatuses(tapForSummary);
+  writeFileSync(
+    join(ROOT, "audit", "gate-summary.json"),
+    JSON.stringify(
+      {
+        schema: "lineage-m1-gate-summary-1",
+        contractSection: "20 / 26 / 28",
+        note:
+          "Derived from audit/test-results.txt through tools/gateRegistry.mjs. Every gate maps to named " +
+          "tests; a gate whose evidencing test did not run is UNVERIFIED, never PASS. This file and the " +
+          "report's gate table are generated from the same call.",
+        suite: { tests: tapForSummary.tests, pass: tapForSummary.pass, fail: tapForSummary.fail },
+        summary: derivedSummary.summary,
+        unattributedFailures: derivedSummary.unattributedFailures,
+        gates: derivedSummary.gates,
+      },
+      null,
+      2
+    )
+  );
   console.log(`FINAL_REPORT.md generated -> ${out} (${text.split("\n").length} lines)`);
 }

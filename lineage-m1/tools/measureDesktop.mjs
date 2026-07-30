@@ -29,17 +29,25 @@
  *   - `populationAfterAdvance` is the living count at that final generation;
  *   - `finalStateGeneration` records it explicitly so no reader must infer it.
  *
- * MEMORY GROWTH (revision-4 honesty repair):
- *   The contract asks for "memory growth across a 180-generation run". This tool
- *   PROBES the browser channel rather than trusting it: it allocates a large
- *   buffer in the page and checks whether `performance.memory.usedJSHeapSize`
- *   responds. In headless Chromium without cross-origin isolation it does not —
- *   the value is quantized to a fixed constant — so a browser-side delta of 0 is
- *   NOT evidence of zero growth. When the probe shows the channel is unresponsive
- *   the browser figures are marked unusable and the AUTHORITATIVE memory-growth
- *   evidence is the Node-side measurement in this same file, which runs the same
- *   fixture, seed and generation count under `process.memoryUsage()` and also
- *   reports exact, quantization-free retained-record counts.
+ * MEMORY (revision-5 repair, BUG 5 / R5-5):
+ *   §22 asks for desktop CANVAS memory growth across the 180-generation run. Two
+ *   separately named results are emitted, and neither is allowed to stand in for
+ *   the other:
+ *
+ *     desktopCanvasMemory   the contract's subject. The only browser-side channel,
+ *                           `performance.memory.usedJSHeapSize`, is PROBED each run
+ *                           by allocating a large buffer in the page. If the reading
+ *                           does not move, the channel is quantized and carries no
+ *                           information, so the result is
+ *                           `status: "UNVERIFIED"` with `deltaBytes: null`.
+ *     nodeSimulationHeap    a separate DIAGNOSTIC. `process.memoryUsage()` over the
+ *                           same fixture, seed and transition count, in Node. It
+ *                           creates no browser, Canvas, DOM, renderer or UI state,
+ *                           so it measures a different process and object graph.
+ *
+ *   Revision 4 published the Node figure as the "authoritative" Canvas measure.
+ *   That was a numeric answer to a question it had not asked. An honest UNVERIFIED
+ *   is better than a confident measurement of the wrong subject.
  *
  * WINDOW SCOPE:
  *   These are DESKTOP windows. They are deliberately shorter than the physical
@@ -139,8 +147,16 @@ export function measureHeadlessReference() {
         "The browser figures below must agree with these; browserAgreesWithHeadless records the check.",
     },
     memory: {
+      // Revision-5 repair (BUG 5 / R5-5). Revision 4 called this the
+      // "authoritative" desktop Canvas memory measure. It is not: this function
+      // advances biological state in Node and creates no browser, Canvas, DOM,
+      // renderer, frame meter, tracer UI or browser heap. It measures a DIFFERENT
+      // process, heap and object graph. It is now named for what it is and is
+      // never presented as the contract's subject.
+      classification: "NODE_SIMULATION_HEAP",
       channel: "node:process.memoryUsage()",
-      authoritative: true,
+      measuresCanvasOrBrowserMemory: false,
+      authoritativeForCanvasMemory: false,
       gcExposed: Boolean(globalThis.gc),
       heapUsedBeforeBytes: before.heapUsed,
       heapUsedAfterBytes: after.heapUsed,
@@ -159,11 +175,11 @@ export function measureHeadlessReference() {
         allocationMutationEvents: state.allocationMutationEvents.length,
       },
       note:
-        "Exact retained-record counts are the quantization-free growth measure; heap bytes are reported " +
-        "as observed and are sensitive to GC timing (run with --expose-gc for the deterministic figure). " +
-        "This 180-generation window is BELOW the 360-generation genealogy retention boundary, so pruning " +
-        "is not exercised here; the retention bound itself is tested through generation 1000 by " +
-        "test/long-run-memory.test.js.",
+        "A SEPARATE DIAGNOSTIC, not the §22 Canvas measure. Exact retained-record counts are the " +
+        "quantization-free growth measure; heap bytes are reported as observed and are sensitive to GC " +
+        "timing (run with --expose-gc for the deterministic figure). This 180-generation window is BELOW " +
+        "the 360-generation genealogy retention boundary, so pruning is not exercised here; the " +
+        "retention bound itself is tested through generation 1000 by test/observer-memory-bounds.test.js.",
     },
   };
 }
@@ -367,27 +383,60 @@ export async function runDesktopMeasurement(opts = {}) {
         browserAgreesWithHeadless: disagreements.length === 0,
         disagreements,
       },
-      memoryAcrossAdvance: {
-        authoritativeChannel: "node:process.memoryUsage()",
-        node: headlessReference.memory,
-        browser: {
-          channel: "browser:performance.memory.usedJSHeapSize",
-          usable: browserMemoryUsable,
-          probe: memoryProbe,
-          beforeBytes: memoryBefore,
-          afterBytes: memoryAfter,
-          deltaBytes:
-            browserMemoryUsable && memoryBefore !== null && memoryAfter !== null
-              ? memoryAfter - memoryBefore
-              : null,
-          note: browserMemoryUsable
-            ? "The in-page probe showed usedJSHeapSize responds to allocation, so this delta is meaningful."
-            : "WITHDRAWN AS EVIDENCE. The in-page probe allocated " +
-              `${MEASUREMENT.memoryProbeBytes} bytes and usedJSHeapSize did not move, so any browser-side ` +
-              "delta here (including 0) is a quantization artefact and must not be read as memory growth. " +
-              "Use the node figures above. performance.memory is also absent on Safari, where it is " +
-              "reported as unavailable rather than guessed.",
-        },
+      desktopCanvasMemory: (() => {
+        const usable = memoryProbe.exposed && memoryProbe.responsive;
+        if (usable) {
+          return {
+            classification: "DESKTOP_CANVAS_MEMORY",
+            status: "MEASURED",
+            channel: "browser:performance.memory.usedJSHeapSize",
+            browser: `chromium ${browserVersion}`,
+            measurementApi: "performance.memory.usedJSHeapSize",
+            includedMemoryDomains:
+              "the page's JavaScript heap, which includes the Canvas probe's own objects; it excludes " +
+              "GPU/renderer-side surface memory, which no web API exposes",
+            generationInterval: `0 to ${MEASUREMENT.advanceGenerations}`,
+            samplingProcedure:
+              "read immediately before the first transition and immediately after the last, in-page",
+            beforeBytes: memoryBefore,
+            afterBytes: memoryAfter,
+            deltaBytes: memoryAfter - memoryBefore,
+            resolutionProbe: memoryProbe,
+            limitations:
+              "Chromium-only; absent on Safari. Quantization is verified per run by the probe rather " +
+              "than assumed.",
+          };
+        }
+        return {
+          classification: "DESKTOP_CANVAS_MEMORY",
+          status: "UNVERIFIED",
+          reason: "no reliable supported measurement channel",
+          detail:
+            `The only browser-side channel available, performance.memory.usedJSHeapSize, was probed by ` +
+            `allocating ${MEASUREMENT.memoryProbeBytes} bytes in the page; the reading did not move ` +
+            `(${memoryProbe.beforeBytes} before and after). This Chromium build quantizes the value, so ` +
+            "no browser-side delta from it carries information. No other supported API exposes " +
+            "Canvas/renderer memory to page script.",
+          channelProbed: "browser:performance.memory.usedJSHeapSize",
+          resolutionProbe: memoryProbe,
+          // Deliberately NOT a number. Revision 4 published a Node heap delta here
+          // and called it authoritative; a numeric PASS for an unmeasured subject is
+          // worse than an honest UNVERIFIED.
+          deltaBytes: null,
+          substituteOffered: null,
+          note:
+            "§22 requires desktop Canvas memory growth across the 180-generation run. This run did not " +
+            "establish it. The Node figures reported separately under NODE_SIMULATION_HEAP measure a " +
+            "different process and object graph and are NOT a substitute.",
+        };
+      })(),
+      nodeSimulationHeap: {
+        ...headlessReference.memory,
+        note:
+          "SEPARATELY NAMED DIAGNOSTIC (revision-5 R5-5). Node process heap over the same fixture, seed " +
+          "and transition count. It contains no browser, Canvas, DOM, renderer or UI state, so it does " +
+          "not and cannot answer the §22 Canvas memory requirement. Retained-record counts are the " +
+          "useful, quantization-free part.",
       },
       pageErrors,
     };
@@ -427,9 +476,13 @@ if (isMain) {
       : "")
   );
   console.log(
-    `  memory: node heapUsed delta ${result.memoryAcrossAdvance.node.heapUsedDeltaBytes} bytes, ` +
-    `retainedGenealogy ${result.memoryAcrossAdvance.node.retainedRecordCounts.retainedGenealogy}; ` +
-    `browser channel usable: ${result.memoryAcrossAdvance.browser.usable}`
+    `  DESKTOP_CANVAS_MEMORY: ${result.desktopCanvasMemory.status}` +
+    (result.desktopCanvasMemory.status === "UNVERIFIED"
+      ? ` (${result.desktopCanvasMemory.reason})`
+      : ` delta ${result.desktopCanvasMemory.deltaBytes} bytes`) +
+    `\n  NODE_SIMULATION_HEAP (separate diagnostic): heapUsed delta ` +
+    `${result.nodeSimulationHeap.heapUsedDeltaBytes} bytes, retainedGenealogy ` +
+    `${result.nodeSimulationHeap.retainedRecordCounts.retainedGenealogy}`
   );
   console.log(`  page errors: ${result.pageErrors.length}`);
   if (result.pageErrors.length > 0) process.exitCode = 1;
