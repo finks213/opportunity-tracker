@@ -9,8 +9,8 @@ biological truth, is not an ecological claim, and is not frozen as a future
 regression target (contract §21).
 
 - configuration: `lineage-m1-config-2`
-- complete model-definition hash: `undefined`
-- tuning-config-only hash (subset, for reference): `undefined`
+- complete model-definition hash: `dc444865163deb32a7a9d80bd23f576d1ab5a936896298b5cd13faac6f513b3d`
+- tuning-config-only hash (subset, for reference): `edb81695973b81ab8f87f7ef9dde9d8c5b3d4c7dfbeb45f385547edd86ee86de`
 
 The model-definition hash covers **every** biology-affecting value, including
 the trait-effect matrix, upkeep costs, zone adjacency, and the trait/dimension

@@ -99,86 +99,123 @@ its guardrail comfortably. Detailed in §6 below and in `CHARACTERIZATION.md`.
 
 ---
 
-## 1b. Response to the pass-1 implementation audit
+## 1b. Response to the revision-2 audits (pass 2 + structural)
 
-The audit returned six confirmed implementation/evidence defects and one process
-finding. **Every confirmed defect was independently reproduced here before being
-repaired.** The reproductions matched the auditor's figures, which is itself
-evidence the findings were real rather than accepted on trust.
+Revision 2 was audited twice — the AFE-Δ break-report (pass 2) and an independent
+structural integrity audit — and both returned `BREAKS-FOUND`. Together they
+verified ten defects: 1 CRITICAL, 3 HIGH, 3 MEDIUM-CRITICAL, 2 MEDIUM, 1
+MEDIUM-MINOR.
 
-| # | Audit finding | § | Independently reproduced | Repair | Status |
-|---|---|---|---|---|---|
-| 1 | Genealogy boundary records grow without bound | §15 | yes — 2,386 stored vs 108 required at gen 400 (auditor: 2,386) | D-018 | **REPAIRED** |
-| 2 | Adjacency traversal measures the wrong event | §21.6 | yes — forest-floor descendants counted as traversal at gen 1 | D-019 | **REPAIRED** |
-| 3 | Unmatched eligible adults counted before survival | §21.6 | yes — 120.378 reported vs 0.509 actual (auditor: 0.509) | D-020 | **REPAIRED** |
-| 4 | Per-zone carrier survival absent | §21.3 | yes — `perBin` held only items 1–5 | D-021 | **REPAIRED** |
-| 5 | Legacy-config states carry the wrong config version | §18 / §21.7 | yes — config-1 world serialized as `lineage-m1-config-2` | D-022 | **REPAIRED** |
-| 6 | Legibility mode omits the fixture and zones | §22 | yes — `renderLegibility()` drew only the pairs | D-023 | **REPAIRED** |
-| 7 | Pre-code planning order violated | §24 | already self-disclosed in D-000 | — | **UNREPAIRABLE — principal decision required** |
+**Every defect was independently reproduced here before repair, and the
+reproductions matched the auditors' figures.** Full detail, including the exact
+reproduction commands, is in `DECISIONS.md` D-025 through D-034.
+
+| # | Defect | Severity | § | Reproduced | Repair | Regression test |
+|---|---|---|---|---|---|---|
+| 1 | Device-test server path traversal | **CRITICAL** | §3/§22 | yes — `/..%2flineage-m1-secret.txt` returned HTTP 200 + content | D-025 | `server-containment.test.js` |
+| 2 | Config identity does not identify the model | HIGH | §9 | yes — trait-effect change moved survival, hash unchanged | D-026 | `model-identity.test.js` |
+| 3 | State progression unbound from `configVersion` | HIGH | §18/§21.7 | yes — two worlds, one label, populations 132 vs 160 | D-027 | `model-identity.test.js` |
+| 4 | Observer/Canvas memory grows with births | HIGH | §16/§22 | yes — 107,760 entries for 246 living at gen 800 | D-028 | `observer-memory-bounds.test.js` |
+| 5 | Adjacency statistic ran the wrong experiment | MEDIUM-CRITICAL | §21.6 | yes — mixed world, not an edge-only world | D-029 | `edge-only-traversal.test.js` |
+| 6 | Cached fixture metadata used as world identity | MEDIUM-CRITICAL | §22/§16 | yes — legibility rendered the random world | D-030 | `probe-world-identity.test.js` |
+| 7 | Exact 200-seed gate outside the suite | MEDIUM-CRITICAL | §19 | yes — 12 seeds, proportional floor | D-031 | `defining-fixture.test.js` |
+| 8 | Four hydrations instead of one-hydration cloning | MEDIUM | §19 D | yes — four `hydrateDefiningFixtureV1` calls | D-032 | `defining-fixture.test.js` |
+| 9 | Contradictory official status artifacts | MEDIUM | §26 | yes — report vs checklist disagreed | D-033 | `status-consistency.test.js` |
+| 10 | Limitation table used the lower middle value | MEDIUM-MINOR | §21.4 | yes — 117.202731 vs 117.223028 | D-034 | `median-consistency.test.js` |
 
 ### Repair evidence
 
-**Genealogy boundedness.** Stored boundary records, seed 71:
+**1. Server containment.** The live falsifier now returns `403 forbidden` with no
+body. Containment is decided by `path.relative()`, so a sibling sharing the root's
+name prefix is rejected: `"/tmp/lineage-m1-secret.txt".startsWith("/tmp/lineage-m1")`
+is `true` but `isInsideRoot()` is `false`. Encoded traversal, malformed percent
+encoding, control bytes, NULs, symlink escape, directory listing, and non-read
+methods are all refused.
 
-| Generation | Before repair | After repair | Exactly required |
-|---|---|---|---|
-| 400 | 2,386 | **108** | 108 |
-| 460 | 5,796 | **118** | 118 |
-| 520 | 9,770 | **117** | 117 |
-| 600 | 15,356 | **137** | 137 |
+**2. Complete model identity.** The published hash changed because its input
+changed:
 
-**Unmatched eligible adults.** 120.378 → **0.516** per generation over the
-re-run 500-seed batch, matching the auditor's independently computed 0.509 on
-their ten-seed diagnostic.
+| Hash | Value | Covers |
+|---|---|---|
+| `modelDefinitionHash` (new) | `dc444865163deb32a7a9d80bd23f576d1ab5a936896298b5cd13faac6f513b3d` | every biology-affecting value |
+| `tuningConfigHash` (what revision 2 published) | `edb81695973b81ab8f87f7ef9dde9d8c5b3d4c7dfbeb45f385547edd86ee86de` | the tuning config only |
 
-**Adjacency traversal**, now measured by explicit founder-band ancestry:
+Every cell of the trait-effect matrix, every upkeep value, adjacency, trait order,
+founder ages, and capacity now move the hash. Both configurations are deeply
+frozen and share no mutable nested references.
 
-| Traversal | Seeds reaching it | Earliest | Median first generation |
-|---|---|---|---|
-| canopy-**only** lineage → shoreline | 495 of 500 | 2 | 3 |
-| shoreline-**only** lineage → canopy | 499 of 500 | 2 | 3 |
+**3. Config binding.** A version mismatch throws before any RNG draw, counter,
+event, population change, or canonical byte, verified by comparing all of them
+across a rejected call.
 
-**Per-zone carrier survival**, now reported per birth dominant-zone bin. This
-repair *sharpens* rather than softens the central result — it exposes exactly
-the mutation-supply-versus-carrier-survival comparison §21.3 exists to protect:
+**4. Observer memory.** Seed 71, one channel:
 
-| Birth zone bin | Births | Positive webbing events | Living at gen 180 | Carriers | Carrier prevalence |
-|---|---|---|---|---|---|
-| canopy | 6,070,525 | 60,700 | 74,438 | 5,386 | **0.0724** |
-| forest_floor | 3,010,385 | 30,077 | 52,708 | 5,275 | **0.1001** |
-| shoreline | 1,974,834 | 19,750 | 919 | 490 | **0.5332** |
+| Generation | Living | Revision 2 | Revision 3 | Cumulative births |
+|---|---|---|---|---|
+| 180 | 254 | 21,510 | **254** | 21,390 |
+| 400 | 257 | 52,194 | **257** | 52,074 |
+| 600 | 238 | 80,016 | **238** | 79,896 |
+| 800 | 246 | 107,760 | **246** | 107,640 |
+| 1000 | 323 | — | **323** | 134,980 |
 
-Mutation supply per birth is essentially identical across zones (~0.0100
-positive webbing events per birth in every bin), yet where shoreline-dominant
-animals persist they are **53%** webbing carriers against **7%** in the canopy.
-Variation is not filtered by usefulness; the consequences differ by context.
+Five simultaneous channels at generation 200 hold 1,260 entries for 252 living
+animals — bounded by `channels x living`, not `channels x births`. Canvas jitter
+drops from 5,000 cached entries to the 250 rendered.
 
-**Config provenance.** A config-1 world now serializes with
-`configVersion: "lineage-m1-config-1"` and a config-2 world with
-`"lineage-m1-config-2"`; the top-level report label and the canonical states
-beneath it agree.
+**5. The declared edge-only experiment.** Isolated 40-founder worlds, seeds
+1..500, 180 generations:
 
-**Legibility mode.** One deterministic mode now shows the defining fixture, all
-three zone regions with per-zone occupancy counts, and the ten randomized
-webbing pairs simultaneously; entering the mode auto-loads the fixture.
+| Experiment | Retained founders | Target | Seeds reaching | Earliest | Median | Latest | Extinct |
+|---|---|---|---|---|---|---|---|
+| canopy-only | 1..40 | shoreline | **500 / 500** | 2 | 3 | 10 | 0 |
+| shoreline-only | 81..120 | canopy | **500 / 500** | 2 | 3 | 8 | 0 |
+
+These match the auditor's independent counterfactual exactly. The mixed-world
+ancestry statistic (495/500 and 499/500) is retained in `CHARACTERIZATION.md`
+under its own heading and is explicitly **not** presented as the edge-only
+experiment.
+
+**6. World identity.** Driven through the exact failing sequence in a real
+browser: after `load fixture -> reset random -> enter legibility`,
+`worldSource === "defining_fixture"` with 120 animals at generation 0 and the
+fixture's canonical bytes active. A tracer created at generation 10 now has 12
+living founders and a contribution of **12**, not a silent 0.
+
+**7. The exact gate inside the suite.** `audit/test-results.txt` shows, under the
+official `npm test` command:
+
+```
+§19.4 EXACT gate: canopy successes 200/200, shoreline 197/200, ties 0/0
+```
+
+with `successThreshold === 130` and `seedCount === 200` asserted.
+
+**8–10.** One hydration cloned four ways (`hydrationCount === 1`); all four status
+artifacts agreeing, enforced by a test; both median tables printing
+117.22 / 108.18 / 30.53.
+
+### Withdrawn revision-2 claims
+
+Stated plainly rather than quietly corrected:
+
+1. **"Adjacency traversal … implemented literally … the declared measure itself is
+   unchanged"** — false. It measured a mixed-world ancestry subset, not the
+   declared edge-only world. Withdrawn; see D-029.
+2. **"Automated implementation gates: PASS"** and **"the overall status is held at
+   `M1_BLOCKED` for one reason"** — false while the ten defects above were open.
+   Withdrawn; see D-033.
 
 ### Consistency check
 
-The repairs changed measurement and retention code, not biological trajectories.
-As expected, the re-run guardrails are numerically identical to revision 1
-(median population 256; zone loads 117.22 / 108.18 / 30.53; concentration
-0.4686), and the fixture gate reproduces exactly (canopy 200/200, shoreline
-197/200). That the biology did not move is the correct outcome and is itself a
-check that the repairs were confined to what they claimed.
+The repairs changed measurement, retention, security, and provenance code — not
+biological trajectories. The regenerated evidence confirms this: the fixture gate
+reproduces exactly (canopy 200/200, shoreline 197/200, medians 29.3652 / 0.3605
+and 18.2986 / 43.7529), and the config-2 guardrails are unchanged (median
+population 256; zone loads 117.22 / 108.18 / 30.53; concentration 0.468617).
+That the biology did not move is the intended outcome and is itself a check that
+the repairs stayed inside their stated scope.
 
-### Findings the audit retracted on self-verification
-
-Recorded so they are not mistaken for unaddressed defects: the missing lockfile
-(none exists — there are no dependencies); the governing contract not being
-inside the bundle (the handoff did not require duplicating it); shoreline
-dominant-bin collapse being a v3.3 gate failure (the frozen gate is load-based
-and passes); and the capacity change being a silent tune-away (the failing
-original, the new value, the rationale, and both full batches are all retained).
+Per instruction, all evidence was **regenerated**, not copied forward.
 
 ---
 

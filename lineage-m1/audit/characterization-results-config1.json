@@ -1,7 +1,259 @@
 {
   "contractSection": "21",
   "configVersion": "lineage-m1-config-1",
-  "configHash": "6834c8f3486b100b5cf8b5eb428f0c67b084e5b3dc35c23b5dcaf90dadf57c51",
+  "modelDefinitionHash": "4724f9b98be6457bcd962f5f8f0851493884b9e882a87d84e939a237fa878119",
+  "tuningConfigHash": "6834c8f3486b100b5cf8b5eb428f0c67b084e5b3dc35c23b5dcaf90dadf57c51",
+  "modelDefinition": {
+    "modelDefinitionSchema": "lineage-m1-model-definition-1",
+    "version": "lineage-m1-config-1",
+    "traitOrder": [
+      "toe_webbing",
+      "curved_claws",
+      "dense_fur",
+      "long_hindlimbs",
+      "strong_tail",
+      "large_eyes",
+      "streamlined_body",
+      "coat_shade",
+      "ear_tip_shape",
+      "tail_tip_marking"
+    ],
+    "performanceDimensionOrder": [
+      "canopy_grip",
+      "land_mobility",
+      "aquatic_propulsion",
+      "aquatic_drag_reduction",
+      "thermal_retention",
+      "visual_sensing",
+      "energy_efficiency"
+    ],
+    "zoneOrder": [
+      "canopy",
+      "forest_floor",
+      "shoreline"
+    ],
+    "traitEffectMatrix": [
+      [
+        -1.5,
+        0,
+        2,
+        0,
+        0,
+        0,
+        -0.15
+      ],
+      [
+        1.6,
+        0,
+        -0.6,
+        0,
+        0,
+        0,
+        -0.3
+      ],
+      [
+        0,
+        0,
+        0,
+        -1,
+        2,
+        0,
+        -0.3
+      ],
+      [
+        0,
+        1.6,
+        0,
+        -1,
+        0,
+        0,
+        -0.4
+      ],
+      [
+        0,
+        -0.5,
+        1.2,
+        0,
+        0,
+        0,
+        -0.25
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1.8,
+        -0.6
+      ],
+      [
+        -0.8,
+        0,
+        0,
+        1.6,
+        0,
+        0,
+        -0.1
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "upkeepCosts": [
+      0.05,
+      0.1,
+      0.15,
+      0.15,
+      0.1,
+      0.25,
+      0.05,
+      0,
+      0,
+      0
+    ],
+    "zoneAdjacency": [
+      [
+        1
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        1
+      ]
+    ],
+    "zoneCapacity": [
+      90,
+      90,
+      90
+    ],
+    "zoneWeights": [
+      [
+        1.6,
+        0.8,
+        0,
+        0,
+        0.3,
+        0.5,
+        0.5
+      ],
+      [
+        0.3,
+        1.4,
+        0.1,
+        0,
+        0.6,
+        1,
+        0.5
+      ],
+      [
+        0,
+        0.3,
+        1.5,
+        1.2,
+        0.4,
+        0,
+        0.5
+      ]
+    ],
+    "zoneScarcity": [
+      1,
+      1,
+      1
+    ],
+    "startingPopulation": 120,
+    "ancestorBodyGenome": [
+      0.15,
+      0.45,
+      0.4,
+      0.45,
+      0.4,
+      0.4,
+      0.35,
+      0.5,
+      0.5,
+      0.5
+    ],
+    "founderGenomeSpread": 0.05,
+    "founderAgeValues": [
+      0,
+      1,
+      2
+    ],
+    "canopyHeavy": [
+      0.985,
+      0.014,
+      0.001
+    ],
+    "forestFloorHeavy": [
+      0.01,
+      0.98,
+      0.01
+    ],
+    "shorelineHeavy": [
+      0.001,
+      0.014,
+      0.985
+    ],
+    "selectionSlope": 1.2,
+    "fitnessZero": [
+      0.60625,
+      1.28975,
+      0.13925
+    ],
+    "minZoneSurvival": 0.01,
+    "maxZoneSurvival": 0.95,
+    "minIndividualSurvival": 0,
+    "maxIndividualSurvival": 0.95,
+    "ageSurvivalMultiplier": [
+      1,
+      1,
+      1,
+      0.95,
+      0.8,
+      0.5,
+      0
+    ],
+    "matingOverlapExponent": 2,
+    "minimumMatingOverlap": 0.02,
+    "offspringPerPair": 2,
+    "bodyDriftScale": 0.08,
+    "bodyMutationProbabilityPerChild": 0.2,
+    "bodyMutationMagnitudeMin": 0.12,
+    "bodyMutationMagnitudeMax": 0.35,
+    "parentalUseEpsilon": 0.02,
+    "allocationDriftScale": 0.05,
+    "allocationMutationProbabilityPerChild": 0.08,
+    "allocationMutationTransferMin": 0.03,
+    "allocationMutationTransferMax": 0.12,
+    "genealogyRetentionWindow": 360
+  },
   "declaredSeedRange": {
     "start": 1,
     "endInclusive": 500
