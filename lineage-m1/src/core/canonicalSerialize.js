@@ -30,9 +30,17 @@ export function canonicalNumber(n) {
 
 /**
  * Deterministic canonical stringify with recursive key sorting. Numbers use the
- * canonical token above. Undefined is rejected (must not appear canonically).
+ * canonical token above.
+ *
+ * `undefined` is REJECTED, not skipped (revision-5 repair, BUG 4). Revision 4's
+ * doc comment said undefined was rejected while the object branch silently did
+ * `continue`, so a state whose mandatory `modelIdentityHash` was undefined
+ * serialized to bytes that simply lacked the field — and those bytes then
+ * deserialized into a state that bypassed the identity guard. Silence about a
+ * missing mandatory field is exactly the failure mode the guard exists to stop.
  * @param {*} value
  * @returns {string}
+ * @throws when any property value is `undefined`
  */
 export function canonicalStringify(value) {
   if (value === null) return "null";
@@ -64,7 +72,12 @@ export function canonicalStringify(value) {
     let first = true;
     for (const k of keys) {
       const v = value[k];
-      if (v === undefined) continue;
+      if (v === undefined) {
+        throw new Error(
+          `canonicalStringify: property "${k}" is undefined. Canonical serialization must be ` +
+          "total — a missing mandatory field may not be silently dropped from the bytes."
+        );
+      }
       if (!first) out += ",";
       first = false;
       out += JSON.stringify(k) + ":" + canonicalStringify(v);

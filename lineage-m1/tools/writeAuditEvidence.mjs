@@ -27,6 +27,7 @@ import { TRAITS, TRAIT_INDEX, MEANINGFUL_TRAIT_INDICES, NEUTRAL_TRAIT_INDICES } 
 import { survivalProbability } from "../src/core/survival.js";
 import { ZONES } from "../src/config/zones.js";
 import { modelDefinitionFor, modelIdentityFor } from "../src/config/modelConfig.js";
+import { modelDefinitionHash as authoritativeModelDefinitionHash } from "../src/config/modelIdentityNode.js";
 import { STANDARD_TRAIT_TEST_GENOME, STANDARD_ZONE_LOADS } from "../src/fixtures/definingFixtureV1.js";
 import {
   createObserverState,
@@ -250,9 +251,11 @@ export function buildMeaningfulTraitGateEvidence() {
   return {
     contractSection: "9 / 20.5 (meaningful-trait contextual gate) and 20.4 (neutral-trait integrity)",
     configVersion: currentModelConfig.version,
-    modelDefinitionHash: createHash("sha256")
-      .update(JSON.stringify(modelDefinitionFor(currentModelConfig)))
-      .digest("hex"),
+    // Revision-5 repair (BUG 3 / R5-4). This line used
+    // `JSON.stringify(modelDefinitionFor(...))`, a DIFFERENT 1,793-byte text
+    // hashing to 432391e5…, while every other evidence file published the
+    // canonical 2,995-byte text hashing to dc444865… under the same field name.
+    modelDefinitionHash: authoritativeModelDefinitionHash(currentModelConfig),
     modelIdentityHash: modelIdentityFor(currentModelConfig),
     probe: {
       genome,

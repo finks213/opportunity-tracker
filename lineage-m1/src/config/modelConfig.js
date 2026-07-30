@@ -13,9 +13,20 @@
  * and zone rows are in canonical zone order [canopy, forest_floor, shoreline].
  */
 
-import { deepFreeze, deepClonePlain, buildModelDefinition, modelIdentityDigest } from "./modelDefinition.js";
+import { deepFreeze, deepClonePlain, buildModelDefinition } from "./modelDefinition.js";
+import { canonicalModelDefinitionText, modelIdentityDigest } from "./modelIdentity.js";
 
-export const SCHEMA_VERSION = "lineage-biological-state-1";
+/**
+ * Canonical biological state schema.
+ *
+ * Bumped to `-2` in revision 5 (R5-3 / BUG 4). Revision 4 added the mandatory
+ * `modelIdentityHash` field but kept schema `-1`, the same label used before the
+ * field existed, and guarded it only when present. A `-1` state with the field
+ * deleted therefore advanced under an arbitrary same-version model. The bump
+ * makes "carries a complete model identity" part of the schema contract, so an
+ * older state is rejected by version rather than silently accepted.
+ */
+export const SCHEMA_VERSION = "lineage-biological-state-2";
 
 export const currentModelConfig = deepFreeze({
   // config-1 used the contract's provisional zoneCapacity [90,90,90]; that
@@ -149,30 +160,19 @@ export { deepFreeze, deepClonePlain };
  * @returns {string} 32-hex-character digest of the complete model definition
  */
 export function modelIdentityFor(config = currentModelConfig) {
-  return modelIdentityDigest(canonicalModelText(modelDefinitionFor(config)));
+  return modelIdentityDigest(canonicalModelDefinitionText(modelDefinitionFor(config)));
 }
 
 /**
- * Canonical text of a model definition, used as the digest input. Kept here so
- * the digest input is defined in exactly one place.
+ * Canonical text of a model definition — re-exported from `modelIdentity.js`,
+ * which is the single authoritative implementation (revision-5 R5-4). Revision 4
+ * defined this text here AND in `canonicalSerialize.js`, and a third
+ * `JSON.stringify` path leaked into the §9 trait evidence.
  * @param {Object} definition
  * @returns {string}
  */
 export function canonicalModelText(definition) {
-  // Deterministic, key-sorted, no dependency on the serializer module (which
-  // imports config, so importing it here would be circular).
-  const walk = (v) => {
-    if (v === null) return "null";
-    if (Array.isArray(v)) return "[" + v.map(walk).join(",") + "]";
-    if (typeof v === "object") {
-      return "{" + Object.keys(v).sort().map((k) => JSON.stringify(k) + ":" + walk(v[k])).join(",") + "}";
-    }
-    if (typeof v === "number") {
-      return Number.isInteger(v) ? String(v === 0 ? 0 : v) : v.toPrecision(17);
-    }
-    return JSON.stringify(v);
-  };
-  return walk(definition);
+  return canonicalModelDefinitionText(definition);
 }
 
 export { modelIdentityDigest };

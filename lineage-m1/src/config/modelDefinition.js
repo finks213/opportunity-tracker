@@ -130,27 +130,7 @@ export function buildModelDefinition(config) {
 }
 
 /**
- * Deterministic, isomorphic digest of a complete model definition.
- *
- * Used as the runtime binding identity in canonical biological state, so it must
- * work in the browser probe as well as Node. This is an integrity/identity digest
- * for detecting a changed model, not a cryptographic commitment; the SHA-256 in
- * the audit evidence remains the reported hash.
- *
- * 128-bit FNV-1a over the canonical serialization, emitted as 32 hex characters.
- * @param {string} canonicalText canonical serialization of the model definition
- * @returns {string}
+ * The runtime identity digest moved to `src/config/modelIdentity.js` in
+ * revision 5 (R5-4), which is now the single authoritative place the model
+ * definition is serialized and digested. Import it from there.
  */
-export function modelIdentityDigest(canonicalText) {
-  // Four interleaved 32-bit FNV-1a lanes give a 128-bit digest without BigInt.
-  let h0 = 0x811c9dc5, h1 = 0x01000193, h2 = 0x9e3779b9, h3 = 0x85ebca6b;
-  for (let i = 0; i < canonicalText.length; i++) {
-    const c = canonicalText.charCodeAt(i);
-    h0 = Math.imul(h0 ^ c, 0x01000193) >>> 0;
-    h1 = Math.imul(h1 ^ (c + i), 0x01000193) >>> 0;
-    h2 = Math.imul(h2 ^ (c ^ (i << 3)), 0x01000193) >>> 0;
-    h3 = Math.imul(h3 ^ (c + (i << 7)), 0x01000193) >>> 0;
-  }
-  const hex = (n) => (n >>> 0).toString(16).padStart(8, "0");
-  return hex(h0) + hex(h1) + hex(h2) + hex(h3);
-}

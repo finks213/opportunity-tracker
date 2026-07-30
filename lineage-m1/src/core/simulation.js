@@ -31,7 +31,8 @@ import { formMatingPairs } from "./mating.js";
 import { createChild, makeDeathEvent } from "./events.js";
 import { pruneGenealogy } from "./genealogy.js";
 import { ZONES } from "../config/zones.js";
-import { currentModelConfig, modelIdentityFor } from "../config/modelConfig.js";
+import { currentModelConfig, modelIdentityFor, SCHEMA_VERSION } from "../config/modelConfig.js";
+import { isWellFormedModelIdentity, MODEL_IDENTITY_DIGEST_LENGTH } from "../config/modelIdentity.js";
 
 /**
  * Advance one generation in place. Returns the same mutated state.
@@ -145,36 +146,48 @@ export function advanceGeneration(state, config = currentModelConfig, hooks = {}
   // observer-side and cannot alter canonical biological state.
 
   const livingIds = state.currentIndividuals.map((i) => i.id);
-  /** @type {GenerationResult} */
-  const result = {
-    generation: targetGeneration,
-    births: Object.freeze(birthRecords.map((r) => Object.freeze({ ...r }))),
-    livingIds: Object.freeze(livingIds.slice()),
-    observerErrors: [],
-  };
+  const births = Object.freeze(birthRecords.map((r) => Object.freeze({ ...r })));
+  const frozenLivingIds = Object.freeze(livingIds.slice());
+
+  // Observer errors are collected into a LOCAL array. Revision 4 froze the outer
+  // result but left `observerErrors` and its entries mutable, and attached that
+  // same object to `state.lastGenerationResult` — so an external `push()` forged
+  // the diagnostic record after the generation completed (revision-5 repair,
+  // BUG 9). Nothing mutable is ever exposed now.
+  /** @type {Array<{phase:string, childId?:number, error:unknown}>} */
+  const collectedErrors = [];
 
   // Post-commit, exception-isolated observer dispatch. An observer throwing here
   // cannot leave biology between generations: the transaction is already
-  // complete, and each callback is individually guarded. Errors are collected on
-  // the returned result, which is NOT part of canonical biological state.
+  // complete, and each callback is individually guarded. Errors are recorded
+  // outside canonical biological state.
   if (hooks.onBirth) {
-    for (const record of result.births) {
+    for (const record of births) {
       try {
         hooks.onBirth(record);
       } catch (err) {
-        result.observerErrors.push({ phase: "onBirth", childId: record.childId, error: err });
+        collectedErrors.push({ phase: "onBirth", childId: record.childId, error: err });
       }
     }
   }
   if (hooks.afterGeneration) {
     try {
-      hooks.afterGeneration(result.livingIds);
+      hooks.afterGeneration(frozenLivingIds);
     } catch (err) {
-      result.observerErrors.push({ phase: "afterGeneration", error: err });
+      collectedErrors.push({ phase: "afterGeneration", error: err });
     }
   }
 
-  state.lastGenerationResult = Object.freeze(result);
+  /** @type {GenerationResult} */
+  const result = Object.freeze({
+    generation: targetGeneration,
+    births,
+    livingIds: frozenLivingIds,
+    // Each record is frozen, and so is the array holding them.
+    observerErrors: Object.freeze(collectedErrors.map((e) => Object.freeze({ ...e }))),
+  });
+
+  state.lastGenerationResult = result;
   return state;
 }
 
@@ -220,10 +233,34 @@ export function assertConfigMatchesState(state, config) {
   // a modified model that kept `lineage-m1-config-2` — capacities [90,90,90]
   // under that version produced a different population while both worlds
   // retained the same canonical label. Bind to the COMPLETE model identity.
-  const suppliedIdentity = modelIdentityFor(config);
-  if (state.modelIdentityHash !== undefined && state.modelIdentityHash !== suppliedIdentity) {
+  //
+  // REVISION-5 REPAIR (BUG 4 / R5-3). The revision-4 check was conditional on
+  // `state.modelIdentityHash !== undefined`, so it protected only newly
+  // constructed states. Reproduced: one same-schema canonical state with the
+  // field deleted was deserialized twice and advanced under two different
+  // models, giving populations 141 and 165 with no rejection, both labelled
+  // `lineage-m1-config-2`. The field is now MANDATORY, and the biological schema
+  // version was bumped so a pre-identity state cannot masquerade as current.
+  const stored = state.modelIdentityHash;
+  if (stored === undefined || stored === null || stored === "") {
     throw new Error(
-      `model mismatch: state.modelIdentityHash="${state.modelIdentityHash}" but the supplied model hashes to ` +
+      "missing model identity: canonical biological state must carry `modelIdentityHash`. " +
+      `State schema "${state.schemaVersion}" was accepted, but no complete-model identity is ` +
+      "recorded, so the model that produced this state cannot be established. A state " +
+      `serialized before schema "${SCHEMA_VERSION}" must be rejected rather than advanced.`
+    );
+  }
+  if (!isWellFormedModelIdentity(stored)) {
+    throw new Error(
+      `malformed model identity: state.modelIdentityHash=${JSON.stringify(stored)} is not a ` +
+      `${MODEL_IDENTITY_DIGEST_LENGTH}-character lowercase hex digest. A canonical state may not ` +
+      "be advanced under an unverifiable identity."
+    );
+  }
+  const suppliedIdentity = modelIdentityFor(config);
+  if (stored !== suppliedIdentity) {
+    throw new Error(
+      `model mismatch: state.modelIdentityHash="${stored}" but the supplied model hashes to ` +
       `"${suppliedIdentity}" under the same version "${config.version}". ` +
       "Two materially different biological models may not share one canonical identity."
     );

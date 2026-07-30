@@ -110,7 +110,12 @@ test("§19 C — hydration copies biological counters and excludes fixture metad
   const { envelope } = loadValidatedFixture();
   const state = hydrateDefiningFixtureV1(envelope, 1);
   assert.equal(state.schemaVersion, SCHEMA_VERSION);
-  assert.equal(state.schemaVersion, "lineage-biological-state-1");
+  // Pinned literal so a schema bump is a deliberate edit, never incidental.
+  // Bumped to `-2` in revision 5 (R5-3): carrying a complete `modelIdentityHash`
+  // is now part of the schema contract, so a pre-identity `-1` state is rejected
+  // by version instead of being advanced under an arbitrary same-version model.
+  assert.equal(state.schemaVersion, "lineage-biological-state-2");
+  assert.ok(state.modelIdentityHash, "a schema-2 state must carry a complete model identity");
   assert.equal(state.configVersion, currentModelConfig.version);
   assert.equal(state.generation, envelope.generation);
   assert.equal(state.nextIndividualId, envelope.nextIndividualId);

@@ -16,6 +16,7 @@ import { createSimRng, Rng } from "../core/rng.js";
 import { serializeCanonicalBiology } from "../core/canonicalSerialize.js";
 import { computeZoneLoads } from "../core/survival.js";
 import { currentModelConfig, SCHEMA_VERSION, modelIdentityFor } from "../config/modelConfig.js";
+import { isWellFormedModelIdentity } from "../config/modelIdentity.js";
 import { ZONES } from "../config/zones.js";
 import { TRAIT_INDEX } from "../config/traits.js";
 
@@ -147,6 +148,27 @@ export function applyWebbingOverride(state, focalIds, webbingValue) {
  */
 export function deserializeCanonicalBiology(canonicalBytes) {
   const plain = JSON.parse(canonicalBytes);
+
+  // Revision-5 repair (BUG 4 / R5-3). Revision 4 assigned these three fields
+  // straight through, so bytes lacking `modelIdentityHash` produced a state whose
+  // identity was `undefined` — and the then-conditional guard let it advance under
+  // any same-version model. Deserialization now refuses to construct a state that
+  // could not be checked, and refuses an older schema outright.
+  if (plain.schemaVersion !== SCHEMA_VERSION) {
+    throw new Error(
+      `unsupported biological schema: bytes declare "${plain.schemaVersion}" but this build ` +
+      `requires "${SCHEMA_VERSION}". A state serialized before the complete model identity ` +
+      "became mandatory must be rejected, not advanced."
+    );
+  }
+  if (!isWellFormedModelIdentity(plain.modelIdentityHash)) {
+    throw new Error(
+      `canonical bytes carry no usable model identity (modelIdentityHash=` +
+      `${JSON.stringify(plain.modelIdentityHash)}). Refusing to construct a state whose ` +
+      "originating model cannot be established."
+    );
+  }
+
   const state = makeEmptyState(Rng.fromState(plain.simRngState));
   state.schemaVersion = plain.schemaVersion;
   state.configVersion = plain.configVersion;

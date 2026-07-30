@@ -20,6 +20,7 @@ import { createHash } from "node:crypto";
 import { pathToFileURL } from "node:url";
 import { createEdgeOnlyState, EDGE_ONLY_EXPERIMENTS, edgeOnlyDeclaration } from "../src/fixtures/edgeOnlyWorlds.js";
 import { advanceGeneration, isExtinct } from "../src/core/simulation.js";
+import { modelDefinitionHash as authoritativeModelDefinitionHash } from "../src/config/modelIdentityNode.js";
 import { currentModelConfig, modelDefinitionFor } from "../src/config/modelConfig.js";
 import { canonicalStringify } from "../src/core/canonicalSerialize.js";
 import { ordinaryMedian } from "../src/core/math.js";
@@ -102,9 +103,7 @@ export function runEdgeOnlyExperiments(opts = {}) {
   return {
     contractSection: "21.6 (declared edge-only adjacency traversal)",
     configVersion: config.version,
-    modelDefinitionHash: createHash("sha256")
-      .update(canonicalStringify(modelDefinitionFor(config)))
-      .digest("hex"),
+    modelDefinitionHash: authoritativeModelDefinitionHash(config),
     declaredSeedRange: { start: 1, endInclusive: seedCount },
     declaredGenerations: generations,
     frozenInitializer: edgeOnlyDeclaration(config),

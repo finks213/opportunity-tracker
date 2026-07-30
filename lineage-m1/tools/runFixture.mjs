@@ -12,13 +12,15 @@
  */
 
 import { writeFileSync } from "node:fs";
-import { createHash } from "node:crypto";
 import { pathToFileURL } from "node:url";
 import { loadValidatedFixture } from "../src/fixtures/nodeFixtureIO.js";
 import { buildFourWorlds } from "../src/fixtures/definingFixtureV1.js";
 import { advanceGeneration, isExtinct } from "../src/core/simulation.js";
 import { currentModelConfig, modelDefinitionFor } from "../src/config/modelConfig.js";
-import { canonicalStringify } from "../src/core/canonicalSerialize.js";
+import {
+  modelDefinitionHash as authoritativeModelDefinitionHash,
+  tuningConfigHash as authoritativeTuningConfigHash,
+} from "../src/config/modelIdentityNode.js";
 import { ordinaryMedian } from "../src/core/math.js";
 import { survivalProbability } from "../src/core/survival.js";
 import { STANDARD_TRAIT_TEST_GENOME, STANDARD_ZONE_LOADS } from "../src/fixtures/definingFixtureV1.js";
@@ -210,9 +212,11 @@ export function runFixtureExperiment(opts = {}) {
   // hashed `config` alone, which excluded EFFECT, UPKEEP, adjacency, and the
   // trait/dimension orders, so a mutated trait effect could change survival
   // while this hash stayed constant.
+  // Revision-5 (R5-4): identity comes from the single authoritative function.
+  // No tool serializes or hashes the model itself.
   const modelDefinition = modelDefinitionFor(config);
-  const modelDefinitionHash = createHash("sha256").update(canonicalStringify(modelDefinition)).digest("hex");
-  const tuningConfigHash = createHash("sha256").update(canonicalStringify(config)).digest("hex");
+  const modelDefinitionHash = authoritativeModelDefinitionHash(config);
+  const tuningConfigHash = authoritativeTuningConfigHash(config);
 
   return {
     contractSection: "19.4",
