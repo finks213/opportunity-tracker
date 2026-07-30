@@ -2,211 +2,211 @@ TAP version 13
 # Subtest: §20.8.1 — failed occurrence: uOccurrence == probability fails, exactly one draw, nothing changes
 ok 1 - §20.8.1 — failed occurrence: uOccurrence == probability fails, exactly one draw, nothing changes
   ---
-  duration_ms: 2.254864
+  duration_ms: 2.710118
   type: 'test'
   ...
 # Subtest: §20.8.2 — one low-share target: sole candidate still consumes the target draw; four draws total
 ok 2 - §20.8.2 — one low-share target: sole candidate still consumes the target draw; four draws total
   ---
-  duration_ms: 0.344282
+  duration_ms: 0.444753
   type: 'test'
   ...
 # Subtest: §20.8.3 — multiple low-share targets are canonically ordered and uniformly selected
 ok 3 - §20.8.3 — multiple low-share targets are canonically ordered and uniformly selected
   ---
-  duration_ms: 0.418171
+  duration_ms: 0.556273
   type: 'test'
   ...
 # Subtest: §20.8.4 — no low-share target: all eligible zones become the candidate array
 ok 4 - §20.8.4 — no low-share target: all eligible zones become the candidate array
   ---
-  duration_ms: 0.191962
+  duration_ms: 0.393819
   type: 'test'
   ...
 # Subtest: §20.8.5 — donor selection is share-weighted with canonical cumulative order and a strict boundary
 ok 5 - §20.8.5 — donor selection is share-weighted with canonical cumulative order and a strict boundary
   ---
-  duration_ms: 0.276125
+  duration_ms: 0.458927
   type: 'test'
   ...
 # Subtest: §20.8.6 — no valid donor: all four draws consumed, allocation unchanged, no event
 ok 6 - §20.8.6 — no valid donor: all four draws consumed, allocation unchanged, no event
   ---
-  duration_ms: 0.22033
+  duration_ms: 0.332685
   type: 'test'
   ...
 # Subtest: §20.8.7 — transfer follows the frozen formula; only positive realized transfers are recorded
 ok 7 - §20.8.7 — transfer follows the frozen formula; only positive realized transfers are recorded
   ---
-  duration_ms: 0.19277
+  duration_ms: 0.212958
   type: 'test'
   ...
 # Subtest: §20.8.7 — realized transfer is capped by the donor's current share
 ok 8 - §20.8.7 — realized transfer is capped by the donor's current share
   ---
-  duration_ms: 0.222109
+  duration_ms: 0.244571
   type: 'test'
   ...
 # Subtest: §20.8.8 — replay: restoring the exact serialized RNG state reproduces everything
 ok 9 - §20.8.8 — replay: restoring the exact serialized RNG state reproduces everything
   ---
-  duration_ms: 1.008535
+  duration_ms: 1.234715
   type: 'test'
   ...
 # Subtest: §13.1 — an empty target-candidate array is treated as a contract violation
 ok 10 - §13.1 — an empty target-candidate array is treated as a contract violation
   ---
-  duration_ms: 0.724079
+  duration_ms: 0.863077
   type: 'test'
   ...
 # Subtest: §13.1 — zone iteration and candidate arrays use canonical zone order
 ok 11 - §13.1 — zone iteration and candidate arrays use canonical zone order
   ---
-  duration_ms: 0.157511
+  duration_ms: 0.50067
   type: 'test'
   ...
 # Subtest: §20.1 — random-world individuals never change genome or allocation after birth
 ok 12 - §20.1 — random-world individuals never change genome or allocation after birth
   ---
-  duration_ms: 148.516315
+  duration_ms: 158.427558
   type: 'test'
   ...
 # Subtest: §20.1 — fixture-world individuals never change genome or allocation after birth
 ok 13 - §20.1 — fixture-world individuals never change genome or allocation after birth
   ---
-  duration_ms: 87.549352
+  duration_ms: 111.453839
   type: 'test'
   ...
 # Subtest: §20.1 — only ageGenerations changes for a surviving individual
 ok 14 - §20.1 — only ageGenerations changes for a surviving individual
   ---
-  duration_ms: 4.104387
+  duration_ms: 3.214301
   type: 'test'
   ...
 # Subtest: §12/§13 — genome and allocation arrays are copied at construction, not aliased
 ok 15 - §12/§13 — genome and allocation arrays are copied at construction, not aliased
   ---
-  duration_ms: 0.849122
+  duration_ms: 0.917485
   type: 'test'
   ...
 # Subtest: §20.1 — newborns are recorded with birthGeneration equal to the target generation
 ok 16 - §20.1 — newborns are recorded with birthGeneration equal to the target generation
   ---
-  duration_ms: 11.675186
+  duration_ms: 8.39208
   type: 'test'
   ...
 # Subtest: §22 — equal cached and rendered COUNTS with disjoint membership still prune
 ok 17 - §22 — equal cached and rendered COUNTS with disjoint membership still prune
   ---
-  duration_ms: 1.27236
+  duration_ms: 1.000389
   type: 'test'
   ...
 # Subtest: §22 — a cache SMALLER than the rendered set still prunes its stale ids
 ok 18 - §22 — a cache SMALLER than the rendered set still prunes its stale ids
   ---
-  duration_ms: 0.325104
+  duration_ms: 0.325812
   type: 'test'
   ...
 # Subtest: §22 — a cache LARGER than the rendered set prunes to exactly the rendered ids
 ok 19 - §22 — a cache LARGER than the rendered set prunes to exactly the rendered ids
   ---
-  duration_ms: 1.563459
+  duration_ms: 1.637528
   type: 'test'
   ...
 # Subtest: §22 — partial overlap keeps exactly the intersection and drops exactly the rest
 ok 20 - §22 — partial overlap keeps exactly the intersection and drops exactly the rest
   ---
-  duration_ms: 0.298987
+  duration_ms: 0.257849
   type: 'test'
   ...
 # Subtest: §22 — an EMPTY rendered set clears the whole cache
 ok 21 - §22 — an EMPTY rendered set clears the whole cache
   ---
-  duration_ms: 0.183859
+  duration_ms: 0.135642
   type: 'test'
   ...
 # Subtest: §22 — an empty cache with an empty rendered set is a no-op, not an error
 ok 22 - §22 — an empty cache with an empty rendered set is a no-op, not an error
   ---
-  duration_ms: 0.105119
+  duration_ms: 0.096
   type: 'test'
   ...
 # Subtest: §22 — repeated pruning is deterministic and idempotent
 ok 23 - §22 — repeated pruning is deterministic and idempotent
   ---
-  duration_ms: 0.296605
+  duration_ms: 0.287232
   type: 'test'
   ...
 # Subtest: §22 — duplicate rendered ids do not corrupt the kept set
 ok 24 - §22 — duplicate rendered ids do not corrupt the kept set
   ---
-  duration_ms: 1.437652
+  duration_ms: 1.032463
   type: 'test'
   ...
 # Subtest: §22 — steady population with complete turnover stays bounded over many frames
 ok 25 - §22 — steady population with complete turnover stays bounded over many frames
   ---
-  duration_ms: 23.456587
+  duration_ms: 37.682555
   type: 'test'
   ...
 # Subtest: §19 A — raw fixture bytes hash to the frozen SHA-256
 ok 26 - §19 A — raw fixture bytes hash to the frozen SHA-256
   ---
-  duration_ms: 5.692883
+  duration_ms: 1.352867
   type: 'test'
   ...
 # Subtest: §19 A — fixture declares its frozen load-bearing values
 ok 27 - §19 A — fixture declares its frozen load-bearing values
   ---
-  duration_ms: 2.04746
+  duration_ms: 2.077644
   type: 'test'
   ...
 # Subtest: §9/§19.1 — fixture baseline genome and standard loads equal the frozen §9 values
 ok 28 - §9/§19.1 — fixture baseline genome and standard loads equal the frozen §9 values
   ---
-  duration_ms: 0.645231
+  duration_ms: 0.738284
   type: 'test'
   ...
 # Subtest: §19 B — canonical fixture-envelope round trip is byte-identical
 ok 29 - §19 B — canonical fixture-envelope round trip is byte-identical
   ---
-  duration_ms: 9.039891
+  duration_ms: 11.85287
   type: 'test'
   ...
 # Subtest: §19 B — canonical envelope includes metadata and sorts keys recursively
 ok 30 - §19 B — canonical envelope includes metadata and sorts keys recursively
   ---
-  duration_ms: 3.566797
+  duration_ms: 2.769126
   type: 'test'
   ...
 # Subtest: §19 C — hydration is deterministic and byte-identical for the same envelope and seed
 ok 31 - §19 C — hydration is deterministic and byte-identical for the same envelope and seed
   ---
-  duration_ms: 21.274193
+  duration_ms: 19.341183
   type: 'test'
   ...
 # Subtest: §19 C — hydration copies biological counters and excludes fixture metadata
 ok 32 - §19 C — hydration copies biological counters and excludes fixture metadata
   ---
-  duration_ms: 2.87788
+  duration_ms: 4.594925
   type: 'test'
   ...
 # Subtest: §19 C — hydration initializes simRng only through createSimRng(trajectorySeed)
 ok 33 - §19 C — hydration initializes simRng only through createSimRng(trajectorySeed)
   ---
-  duration_ms: 1.729775
+  duration_ms: 1.32831
   type: 'test'
   ...
 # Subtest: §18/§21.7 — canonical state records the configuration that actually produced it
 ok 34 - §18/§21.7 — canonical state records the configuration that actually produced it
   ---
-  duration_ms: 22.660898
+  duration_ms: 25.423053
   type: 'test'
   ...
 # Subtest: §20.7 — canonical serialization changes when either mutation counter changes
 ok 35 - §20.7 — canonical serialization changes when either mutation counter changes
   ---
-  duration_ms: 12.174705
+  duration_ms: 11.134616
   type: 'test'
   ...
 #   §19.3 canopy   low=0.579632 high=0.195758 delta=-0.383874
@@ -217,578 +217,578 @@ ok 35 - §20.7 — canonical serialization changes when either mutation counter 
 # Subtest: §19.3 — exact probability gate: webbing hurts in the canopy probe and helps in the shoreline probe
 ok 36 - §19.3 — exact probability gate: webbing hurts in the canopy probe and helps in the shoreline probe
   ---
-  duration_ms: 3.499895
+  duration_ms: 3.107335
   type: 'test'
   ...
 # Subtest: §19 D — the four worlds differ only in the twelve specified toe_webbing values
 ok 37 - §19 D — the four worlds differ only in the twelve specified toe_webbing values
   ---
-  duration_ms: 32.230994
+  duration_ms: 27.897145
   type: 'test'
   ...
 # Subtest: §19 D — construction is ONE hydration cloned into four worlds
 ok 38 - §19 D — construction is ONE hydration cloned into four worlds
   ---
-  duration_ms: 8.170937
+  duration_ms: 9.355458
   type: 'test'
   ...
 # Subtest: §19.2 — the webbing override is a construction operation, not a mutation event
 ok 39 - §19.2 — the webbing override is a construction operation, not a mutation event
   ---
-  duration_ms: 2.701453
+  duration_ms: 0.663199
   type: 'test'
   ...
 # Subtest: §19.2 — the tracer is created in observer state and does not change biological bytes
 ok 40 - §19.2 — the tracer is created in observer state and does not change biological bytes
   ---
-  duration_ms: 136.39856
+  duration_ms: 99.294533
   type: 'test'
   ...
 # Subtest: §19.4 — EXACT matched trajectory gate: seeds 1..200, floor 130/200
 ok 41 - §19.4 — EXACT matched trajectory gate: seeds 1..200, floor 130/200
   ---
-  duration_ms: 208690.317155
+  duration_ms: 220689.531541
   type: 'test'
   ...
 # Subtest: §19 — observer independence within the fixture across all five required strategies
 ok 42 - §19 — observer independence within the fixture across all five required strategies
   ---
-  duration_ms: 249.323152
+  duration_ms: 239.794517
   type: 'test'
   ...
 # Subtest: §20.3 — biological modules never import observer or debug modules
 ok 43 - §20.3 — biological modules never import observer or debug modules
   ---
-  duration_ms: 7.115409
+  duration_ms: 5.741397
   type: 'test'
   ...
 # Subtest: §20.3 — observer modules never import debug modules and never receive simRng
 ok 44 - §20.3 — observer modules never import debug modules and never receive simRng
   ---
-  duration_ms: 1.84628
+  duration_ms: 5.935924
   type: 'test'
   ...
 # Subtest: §17 — no Canvas/debug function receives simRng
 ok 45 - §17 — no Canvas/debug function receives simRng
   ---
-  duration_ms: 0.524572
+  duration_ms: 1.61146
   type: 'test'
   ...
 # Subtest: §3 — no runtime dependencies and no forbidden frameworks
 ok 46 - §3 — no runtime dependencies and no forbidden frameworks
   ---
-  duration_ms: 6.468098
+  duration_ms: 14.523825
   type: 'test'
   ...
 # Subtest: §19/§3 — the isomorphic fixture loader does not import node builtins
 ok 47 - §19/§3 — the isomorphic fixture loader does not import node builtins
   ---
-  duration_ms: 0.307738
+  duration_ms: 0.268671
   type: 'test'
   ...
 # Subtest: §20.3 — core biological modules do not reference observer concepts
 ok 48 - §20.3 — core biological modules do not reference observer concepts
   ---
-  duration_ms: 1.043326
+  duration_ms: 0.897772
   type: 'test'
   ...
 # Subtest: §23 — every required file exists at its required path
 ok 49 - §23 — every required file exists at its required path
   ---
-  duration_ms: 0.336703
+  duration_ms: 0.397476
   type: 'test'
   ...
 # Subtest: §22 — one clean command regenerates the desktop evidence
 ok 50 - §22 — one clean command regenerates the desktop evidence
   ---
-  duration_ms: 1.090103
+  duration_ms: 1.182685
   type: 'test'
   ...
 # Subtest: §22 — the browser dependency is declared AND pinned by a lockfile
 ok 51 - §22 — the browser dependency is declared AND pinned by a lockfile
   ---
-  duration_ms: 0.485412
+  duration_ms: 0.527749
   type: 'test'
   ...
 # Subtest: §22 — every measurement parameter is frozen, not incidental
 ok 52 - §22 — every measurement parameter is frozen, not incidental
   ---
-  duration_ms: 0.190158
+  duration_ms: 0.158705
   type: 'test'
   ...
 # Subtest: §22 — generation semantics are stated explicitly, not left to inference
 ok 53 - §22 — generation semantics are stated explicitly, not left to inference
   ---
-  duration_ms: 0.390021
+  duration_ms: 0.471261
   type: 'test'
   ...
 # Subtest: §22 — the committed evidence agrees with an independent Node run of the same world
 ok 54 - §22 — the committed evidence agrees with an independent Node run of the same world
   ---
-  duration_ms: 885.056432
+  duration_ms: 970.793408
   type: 'test'
   ...
 # Subtest: §22 — the stress glyph count is measured, not merely declared
 ok 55 - §22 — the stress glyph count is measured, not merely declared
   ---
-  duration_ms: 0.352587
+  duration_ms: 0.29468
   type: 'test'
   ...
 # Subtest: §22 — the Canvas memory measure is never satisfied by a different process
 ok 56 - §22 — the Canvas memory measure is never satisfied by a different process
   ---
-  duration_ms: 0.40988
+  duration_ms: 0.36457
   type: 'test'
   ...
 # Subtest: §22 — the report classifies the two memory results, and grants no PASS to the unmeasured one
 ok 57 - §22 — the report classifies the two memory results, and grants no PASS to the unmeasured one
   ---
-  duration_ms: 0.523398
+  duration_ms: 0.69236
   type: 'test'
   ...
 # Subtest: §22 — readMemory does not claim a verified resolution
 ok 58 - §22 — readMemory does not claim a verified resolution
   ---
-  duration_ms: 0.464779
+  duration_ms: 0.672968
   type: 'test'
   ...
 # Subtest: §22 — the desktop run does not claim the iPad gate's windows or verdict
 ok 59 - §22 — the desktop run does not claim the iPad gate's windows or verdict
   ---
-  duration_ms: 0.710899
+  duration_ms: 1.04729
   type: 'test'
   ...
 # Subtest: §22 — the run recorded no page errors
 ok 60 - §22 — the run recorded no page errors
   ---
-  duration_ms: 0.281207
+  duration_ms: 0.517758
   type: 'test'
   ...
 # Subtest: the canopy experiment contains ONLY canopy-heavy founders
 ok 61 - the canopy experiment contains ONLY canopy-heavy founders
   ---
-  duration_ms: 9.866055
+  duration_ms: 9.50503
   type: 'test'
   ...
 # Subtest: the shoreline experiment contains ONLY shoreline-heavy founders
 ok 62 - the shoreline experiment contains ONLY shoreline-heavy founders
   ---
-  duration_ms: 5.23755
+  duration_ms: 17.151685
   type: 'test'
   ...
 # Subtest: the frozen initializer is fully declared and internally consistent
 ok 63 - the frozen initializer is fully declared and internally consistent
   ---
-  duration_ms: 1.96233
+  duration_ms: 5.949208
   type: 'test'
   ...
 # Subtest: post-initialization RNG state and founder genomes match the mixed world at the same seed
 ok 64 - post-initialization RNG state and founder genomes match the mixed world at the same seed
   ---
-  duration_ms: 8.295564
+  duration_ms: 10.206576
   type: 'test'
   ...
 # Subtest: the opposite-edge event is measured FROM the isolated world
 ok 65 - the opposite-edge event is measured FROM the isolated world
   ---
-  duration_ms: 175.82715
+  duration_ms: 159.019197
   type: 'test'
   ...
 # Subtest: the edge-only experiment is deterministic
 ok 66 - the edge-only experiment is deterministic
   ---
-  duration_ms: 123.446019
+  duration_ms: 106.996317
   type: 'test'
   ...
 # Subtest: the isolated world is genuinely a different system from the mixed world
 ok 67 - the isolated world is genuinely a different system from the mixed world
   ---
-  duration_ms: 8.470248
+  duration_ms: 11.793778
   type: 'test'
   ...
 # Subtest: §20.9 — the isolated worlds still respect the adjacency graph
 ok 68 - §20.9 — the isolated worlds still respect the adjacency graph
   ---
-  duration_ms: 5.592861
+  duration_ms: 10.269145
   type: 'test'
   ...
 # Subtest: §16 — dead founder ids produce an explicit rejection, not a zero channel
 ok 69 - §16 — dead founder ids produce an explicit rejection, not a zero channel
   ---
-  duration_ms: 2.363511
+  duration_ms: 2.723321
   type: 'test'
   ...
 # Subtest: §16 — absent, empty, and partially-invalid founder sets are all rejected
 ok 70 - §16 — absent, empty, and partially-invalid founder sets are all rejected
   ---
-  duration_ms: 0.320881
+  duration_ms: 0.294575
   type: 'test'
   ...
 # Subtest: §16 — no nonliving id is ever inserted into the tracer map
 ok 71 - §16 — no nonliving id is ever inserted into the tracer map
   ---
-  duration_ms: 0.299135
+  duration_ms: 0.210125
   type: 'test'
   ...
 # Subtest: §16 — the constructor source contains no dead-id insertion loop
 ok 72 - §16 — the constructor source contains no dead-id insertion loop
   ---
-  duration_ms: 0.229472
+  duration_ms: 0.196609
   type: 'test'
   ...
 # Subtest: §16 — living descendants are resolved from actual parentage
 ok 73 - §16 — living descendants are resolved from actual parentage
   ---
-  duration_ms: 69.174655
+  duration_ms: 65.775477
   type: 'test'
   ...
 # Subtest: §16 — unrelated habitat occupants are never returned as descendants
 ok 74 - §16 — unrelated habitat occupants are never returned as descendants
   ---
-  duration_ms: 17.696563
+  duration_ms: 17.039473
   type: 'test'
   ...
 # Subtest: §16 — following a focal lineage resolves descendants, never habitat substitutes
 ok 75 - §16 — following a focal lineage resolves descendants, never habitat substitutes
   ---
-  duration_ms: 32.686358
+  duration_ms: 30.965459
   type: 'test'
   ...
 # Subtest: §16 — a vanished focal lineage never yields a substitute, and says which case it is
 ok 76 - §16 — a vanished focal lineage never yields a substitute, and says which case it is
   ---
-  duration_ms: 2.73733
+  duration_ms: 9.021646
   type: 'test'
   ...
 # Subtest: §16 — following a NEW habitat group is a separately named action
 ok 77 - §16 — following a NEW habitat group is a separately named action
   ---
-  duration_ms: 5.143408
+  duration_ms: 3.600851
   type: 'test'
   ...
 # Subtest: §16 — a random world uses the new-group action, never a focal-lineage claim
 ok 78 - §16 — a random world uses the new-group action, never a focal-lineage claim
   ---
-  duration_ms: 4.828281
+  duration_ms: 2.49847
   type: 'test'
   ...
 # Subtest: §16 — no living candidates yields an explicit reason, not an empty channel
 ok 79 - §16 — no living candidates yields an explicit reason, not an empty channel
   ---
-  duration_ms: 1.589641
+  duration_ms: 0.934975
   type: 'test'
   ...
 # Subtest: §16 — maintained channels are created for every contract-required focal set
 ok 80 - §16 — maintained channels are created for every contract-required focal set
   ---
-  duration_ms: 2.563623
+  duration_ms: 3.110643
   type: 'test'
   ...
 # Subtest: §16 — a maintained focal channel matches an independent reference at every generation
 ok 81 - §16 — a maintained focal channel matches an independent reference at every generation
   ---
-  duration_ms: 0.627833
+  duration_ms: 0.869277
   type: 'test'
   ...
 # Subtest: §16 — the revision-4 genealogy-only resolver DOES lose the lineage after retention
 ok 82 - §16 — the revision-4 genealogy-only resolver DOES lose the lineage after retention
   ---
-  duration_ms: 0.297694
+  duration_ms: 0.241544
   type: 'test'
   ...
 # Subtest: §16 — storage stays bounded to the living population, never to cumulative births
 ok 83 - §16 — storage stays bounded to the living population, never to cumulative births
   ---
-  duration_ms: 0.261483
+  duration_ms: 0.310484
   type: 'test'
   ...
 # Subtest: §16 — no unrelated animal is ever added to a maintained channel
 ok 84 - §16 — no unrelated animal is ever added to a maintained channel
   ---
-  duration_ms: 1.033351
+  duration_ms: 1.221284
   type: 'test'
   ...
 # Subtest: §4/§16 — observer maintenance never alters canonical biological bytes
 ok 85 - §4/§16 — observer maintenance never alters canonical biological bytes
   ---
-  duration_ms: 5206.735313
+  duration_ms: 6027.389269
   type: 'test'
   ...
 # Subtest: §16 — an unresolvable ancestry reports FOCAL_ANCESTRY_UNRESOLVABLE, not extinction
 ok 86 - §16 — an unresolvable ancestry reports FOCAL_ANCESTRY_UNRESOLVABLE, not extinction
   ---
-  duration_ms: 23.234195
+  duration_ms: 20.875811
   type: 'test'
   ...
 # Subtest: §16 — a nonexistent founder set is UNRESOLVABLE, not extinct
 ok 87 - §16 — a nonexistent founder set is UNRESOLVABLE, not extinct
   ---
-  duration_ms: 0.986964
+  duration_ms: 4.34029
   type: 'test'
   ...
 # Subtest: §16 — a maintained channel with zero living contribution reports EXTINCT, not UNRESOLVABLE
 ok 88 - §16 — a maintained channel with zero living contribution reports EXTINCT, not UNRESOLVABLE
   ---
-  duration_ms: 1.04174
+  duration_ms: 1.019741
   type: 'test'
   ...
 # Subtest: §16 — genealogy reports EXTINCT only while the window still contains the founders
 ok 89 - §16 — genealogy reports EXTINCT only while the window still contains the founders
   ---
-  duration_ms: 12.863519
+  duration_ms: 11.371056
   type: 'test'
   ...
 # Subtest: §16 — a maintained channel refuses to start from dead or empty founder sets
 ok 90 - §16 — a maintained channel refuses to start from dead or empty founder sets
   ---
-  duration_ms: 0.475831
+  duration_ms: 0.448204
   type: 'test'
   ...
 # Subtest: §20.6 — the body-mutation function does not accept allocation or zone arguments
 ok 91 - §20.6 — the body-mutation function does not accept allocation or zone arguments
   ---
-  duration_ms: 1.245586
+  duration_ms: 1.181751
   type: 'test'
   ...
 # Subtest: §20.6 — identical parental genomes and RNG state give byte-identical body results under different allocations
 ok 92 - §20.6 — identical parental genomes and RNG state give byte-identical body results under different allocations
   ---
-  duration_ms: 6.708352
+  duration_ms: 4.765018
   type: 'test'
   ...
 # Subtest: §20.6 — childTimeAllocationAtBirth is the final immutable allocation and is attached after the fact
 ok 93 - §20.6 — childTimeAllocationAtBirth is the final immutable allocation and is attached after the fact
   ---
-  duration_ms: 3.160283
+  duration_ms: 3.204524
   type: 'test'
   ...
 # Subtest: §20.6 — opportunity counts equal non-founder birth count across a normal run
 ok 94 - §20.6 — opportunity counts equal non-founder birth count across a normal run
   ---
-  duration_ms: 226.611407
+  duration_ms: 220.313976
   type: 'test'
   ...
 # Subtest: §12 — the mutation function receives no environment, and no mutation targets a survivor
 ok 95 - §12 — the mutation function receives no environment, and no mutation targets a survivor
   ---
-  duration_ms: 38.517968
+  duration_ms: 58.485123
   type: 'test'
   ...
 # Subtest: §20.11 — every retained parent ID resolves to an individual or an explicit boundary record
 ok 96 - §20.11 — every retained parent ID resolves to an individual or an explicit boundary record
   ---
-  duration_ms: 250.407756
+  duration_ms: 227.527228
   type: 'test'
   ...
 # Subtest: §20.11 — individual IDs are never reused
 ok 97 - §20.11 — individual IDs are never reused
   ---
-  duration_ms: 71.279612
+  duration_ms: 89.798438
   type: 'test'
   ...
 # Subtest: §20.11 — birth generations precede child generations and no cycles exist
 ok 98 - §20.11 — birth generations precede child generations and no cycles exist
   ---
-  duration_ms: 94.227514
+  duration_ms: 107.860141
   type: 'test'
   ...
 # Subtest: §20.11 — pruning is deterministic: identical runs produce identical genealogy
 ok 99 - §20.11 — pruning is deterministic: identical runs produce identical genealogy
   ---
-  duration_ms: 119.424559
+  duration_ms: 100.539918
   type: 'test'
   ...
 # Subtest: §15 — genealogy and mating cores stay coherent in the fixture world
 ok 100 - §15 — genealogy and mating cores stay coherent in the fixture world
   ---
-  duration_ms: 71.856476
+  duration_ms: 63.997858
   type: 'test'
   ...
 # Subtest: §15 — founder records carry null parents and generation 0
 ok 101 - §15 — founder records carry null parents and generation 0
   ---
-  duration_ms: 2.165346
+  duration_ms: 1.191141
   type: 'test'
   ...
 #   boundary-record counts: gen 400=108, gen 460=118, gen 520=117, gen 600=137
 # Subtest: §15/§20.11 — retention window is exactly 360 generations
 ok 102 - §15/§20.11 — retention window is exactly 360 generations
   ---
-  duration_ms: 1.100075
+  duration_ms: 1.135625
   type: 'test'
   ...
 # Subtest: §20.11 — at generation 400, complete records remain only for generations 41..400
 ok 103 - §20.11 — at generation 400, complete records remain only for generations 41..400
   ---
-  duration_ms: 3486.151588
+  duration_ms: 3622.060228
   type: 'test'
   ...
 # Subtest: §20.11 — every retained reference to an older parent resolves through a PrunedAncestorBoundary
 ok 104 - §20.11 — every retained reference to an older parent resolves through a PrunedAncestorBoundary
   ---
-  duration_ms: 9186.465804
+  duration_ms: 9567.235848
   type: 'test'
   ...
 # Subtest: §20.11 — no unresolved original ID remains anywhere
 ok 105 - §20.11 — no unresolved original ID remains anywhere
   ---
-  duration_ms: 3353.824176
+  duration_ms: 3293.809863
   type: 'test'
   ...
 # Subtest: §20.11 — a second prune produces byte-identical state
 ok 106 - §20.11 — a second prune produces byte-identical state
   ---
-  duration_ms: 7426.639503
+  duration_ms: 7138.611445
   type: 'test'
   ...
 # Subtest: §20.11 — retained complete-event counts do not grow beyond the window when advancing farther
 ok 107 - §20.11 — retained complete-event counts do not grow beyond the window when advancing farther
   ---
-  duration_ms: 4405.778441
+  duration_ms: 4460.463511
   type: 'test'
   ...
 # Subtest: §15 — stored boundary records equal the EXACT set still required, at every depth
 ok 108 - §15 — stored boundary records equal the EXACT set still required, at every depth
   ---
-  duration_ms: 6895.141823
+  duration_ms: 7052.960666
   type: 'test'
   ...
 # Subtest: §15 — canonical state size stabilizes once the window is full
 ok 109 - §15 — canonical state size stabilizes once the window is full
   ---
-  duration_ms: 9201.425798
+  duration_ms: 8899.328209
   type: 'test'
   ...
 # Subtest: §20.11 — observer actions do not alter boundary creation or pruning bytes
 ok 110 - §20.11 — observer actions do not alter boundary creation or pruning bytes
   ---
-  duration_ms: 8493.066013
+  duration_ms: 9141.121318
   type: 'test'
   ...
 # Subtest: §4 — observerErrors and every error record are deeply frozen
 ok 111 - §4 — observerErrors and every error record are deeply frozen
   ---
-  duration_ms: 19.403754
+  duration_ms: 16.833359
   type: 'test'
   ...
 # Subtest: §4 — every mutation of the result throws and changes nothing
 ok 112 - §4 — every mutation of the result throws and changes nothing
   ---
-  duration_ms: 5.46363
+  duration_ms: 6.21813
   type: 'test'
   ...
 # Subtest: §4 — the state-attached record cannot be altered through the returned one
 ok 113 - §4 — the state-attached record cannot be altered through the returned one
   ---
-  duration_ms: 7.17734
+  duration_ms: 3.998882
   type: 'test'
   ...
 # Subtest: §4 — a clean generation's result is equally frozen, with an empty frozen error array
 ok 114 - §4 — a clean generation's result is equally frozen, with an empty frozen error array
   ---
-  duration_ms: 4.261487
+  duration_ms: 3.994421
   type: 'test'
   ...
 # Subtest: §4 — freezing does not put observer errors into canonical biology
 ok 115 - §4 — freezing does not put observer errors into canonical biology
   ---
-  duration_ms: 14.850466
+  duration_ms: 12.470502
   type: 'test'
   ...
 # Subtest: §20.10/§11 — one transition from generation 0 produces the exact required lifecycle
 ok 116 - §20.10/§11 — one transition from generation 0 produces the exact required lifecycle
   ---
-  duration_ms: 8.027893
+  duration_ms: 6.399954
   type: 'test'
   ...
 # Subtest: §20.10/§12.1 — neither mutation counter is consumed when its opportunity records no event
 ok 117 - §20.10/§12.1 — neither mutation counter is consumed when its opportunity records no event
   ---
-  duration_ms: 1.07157
+  duration_ms: 1.141075
   type: 'test'
   ...
 # Subtest: §20.10/§12.1 — body and allocation mutations use separate counters that may share numeric values
 ok 118 - §20.10/§12.1 — body and allocation mutations use separate counters that may share numeric values
   ---
-  duration_ms: 1.653954
+  duration_ms: 1.53841
   type: 'test'
   ...
 # Subtest: §11 extinction — no reseed path exists
 ok 119 - §11 extinction — no reseed path exists
   ---
-  duration_ms: 1.336094
+  duration_ms: 1.485428
   type: 'test'
   ...
 # Subtest: §11 step 5 — age-6 individuals cannot mate even if they somehow survive
 ok 120 - §11 step 5 — age-6 individuals cannot mate even if they somehow survive
   ---
-  duration_ms: 0.130701
+  duration_ms: 0.165375
   type: 'test'
   ...
 # Subtest: §27 — the manifest's path inventory is current
 ok 121 - §27 — the manifest's path inventory is current
   ---
-  duration_ms: 6.751707
+  duration_ms: 6.352504
   type: 'test'
   ...
 # Subtest: §27 — every shipped file is listed, and every listed file is shipped
 ok 122 - §27 — every shipped file is listed, and every listed file is shipped
   ---
-  duration_ms: 3.175034
+  duration_ms: 2.853131
   type: 'test'
   ...
 # Subtest: §27 — the revision-4 additions are actually in the bundle
 ok 123 - §27 — the revision-4 additions are actually in the bundle
   ---
-  duration_ms: 2.166226
+  duration_ms: 2.165058
   type: 'test'
   ...
 # Subtest: §27 — only the permitted categories are excluded
 ok 124 - §27 — only the permitted categories are excluded
   ---
-  duration_ms: 2.025335
+  duration_ms: 2.110694
   type: 'test'
   ...
 # Subtest: §20.10/§14.3 — every biological mating event is valid across a random world
 ok 125 - §20.10/§14.3 — every biological mating event is valid across a random world
   ---
-  duration_ms: 112.247199
+  duration_ms: 107.851018
   type: 'test'
   ...
 # Subtest: §20.10/§14.3 — every biological mating event is valid across the fixture world
 ok 126 - §20.10/§14.3 — every biological mating event is valid across the fixture world
   ---
-  duration_ms: 41.357488
+  duration_ms: 46.70133
   type: 'test'
   ...
 # Subtest: §11 step 5 — only survivors aged 1..5 are eligible; no self-mating
 ok 127 - §11 step 5 — only survivors aged 1..5 are eligible; no self-mating
   ---
-  duration_ms: 0.454615
+  duration_ms: 0.774151
   type: 'test'
   ...
 # Subtest: §11 step 7 — candidates below the minimum overlap are ineligible
 ok 128 - §11 step 7 — candidates below the minimum overlap are ineligible
   ---
-  duration_ms: 0.23313
+  duration_ms: 0.19956
   type: 'test'
   ...
 # Subtest: §11 step 6 — the Fisher-Yates shuffle is deterministic and a permutation
 ok 129 - §11 step 6 — the Fisher-Yates shuffle is deterministic and a permutation
   ---
-  duration_ms: 0.228205
+  duration_ms: 0.198451
   type: 'test'
   ...
 # Subtest: §11 step 7 — mate selection uses only allocation overlap, never trait values
 ok 130 - §11 step 7 — mate selection uses only allocation overlap, never trait values
   ---
-  duration_ms: 0.3171
+  duration_ms: 0.285742
   type: 'test'
   ...
 # Subtest: §14.3 — mating event ids are unique and strictly increasing
 ok 131 - §14.3 — mating event ids are unique and strictly increasing
   ---
-  duration_ms: 21.067939
+  duration_ms: 19.435629
   type: 'test'
   ...
 #   meaningful-trait deltas [canopy, forest_floor, shoreline]:
@@ -802,361 +802,361 @@ ok 131 - §14.3 — mating event ids are unique and strictly increasing
 # Subtest: §20.5 — fixture baseline genome and standard loads exactly match the frozen §9 values
 ok 132 - §20.5 — fixture baseline genome and standard loads exactly match the frozen §9 values
   ---
-  duration_ms: 2.677718
+  duration_ms: 2.754019
   type: 'test'
   ...
 # Subtest: §9 — the frozen probe uses age 1 with age multiplier 1.0
 ok 133 - §9 — the frozen probe uses age 1 with age multiplier 1.0
   ---
-  duration_ms: 0.143032
+  duration_ms: 0.149071
   type: 'test'
   ...
 # Subtest: §9/§20.5 — every meaningful trait has a positive context and a different adverse-or-inactive context
 ok 134 - §9/§20.5 — every meaningful trait has a positive context and a different adverse-or-inactive context
   ---
-  duration_ms: 1.645469
+  duration_ms: 1.749149
   type: 'test'
   ...
 # Subtest: §20.5 — deltas are computed from final production-path survival, not an isolated score
 ok 135 - §20.5 — deltas are computed from final production-path survival, not an isolated score
   ---
-  duration_ms: 0.225232
+  duration_ms: 0.2312
   type: 'test'
   ...
 # Subtest: §9 — toe_webbing is adverse in canopy and beneficial at the shoreline
 ok 136 - §9 — toe_webbing is adverse in canopy and beneficial at the shoreline
   ---
-  duration_ms: 0.448801
+  duration_ms: 0.245545
   type: 'test'
   ...
 # Subtest: §19.4/§21.4 — ordinaryMedian averages the two central values for even counts
 ok 137 - §19.4/§21.4 — ordinaryMedian averages the two central values for even counts
   ---
-  duration_ms: 1.036681
+  duration_ms: 0.884823
   type: 'test'
   ...
 # Subtest: ordinaryMedian returns the middle value for odd counts
 ok 138 - ordinaryMedian returns the middle value for odd counts
   ---
-  duration_ms: 0.202617
+  duration_ms: 0.136333
   type: 'test'
   ...
 # Subtest: ordinaryMedian does not mutate its input and rejects empty input
 ok 139 - ordinaryMedian does not mutate its input and rejects empty input
   ---
-  duration_ms: 1.453326
+  duration_ms: 1.515485
   type: 'test'
   ...
 # Subtest: ordinaryMedian handles negatives and non-integers
 ok 140 - ordinaryMedian handles negatives and non-integers
   ---
-  duration_ms: 0.140245
+  duration_ms: 0.19086
   type: 'test'
   ...
 # Subtest: the generated limitation table agrees with the guardrail medians
 ok 141 - the generated limitation table agrees with the guardrail medians
   ---
-  duration_ms: 1.621416
+  duration_ms: 1.792644
   type: 'test'
   ...
 # Subtest: §9/§18 — every evidence file publishes the same authoritative modelDefinitionHash
 ok 142 - §9/§18 — every evidence file publishes the same authoritative modelDefinitionHash
   ---
-  duration_ms: 9.836324
+  duration_ms: 10.2904
   type: 'test'
   ...
 # Subtest: §9/§18 — no tool serializes or hashes the model independently
 ok 143 - §9/§18 — no tool serializes or hashes the model independently
   ---
-  duration_ms: 26.835295
+  duration_ms: 32.598688
   type: 'test'
   ...
 # Subtest: §9/§18 — the two digest forms are computed over the SAME canonical text
 ok 144 - §9/§18 — the two digest forms are computed over the SAME canonical text
   ---
-  duration_ms: 4.059906
+  duration_ms: 6.900605
   type: 'test'
   ...
 # Subtest: §9/§18 — the subset hash is different, and is never the published identity
 ok 145 - §9/§18 — the subset hash is different, and is never the published identity
   ---
-  duration_ms: 10.496887
+  duration_ms: 9.535328
   type: 'test'
   ...
 # Subtest: §9 — changing any biology-affecting value changes the authoritative identity
 ok 146 - §9 — changing any biology-affecting value changes the authoritative identity
   ---
-  duration_ms: 3.475585
+  duration_ms: 6.717371
   type: 'test'
   ...
 # Subtest: §18 — a state missing modelIdentityHash is rejected, not advanced
 ok 147 - §18 — a state missing modelIdentityHash is rejected, not advanced
   ---
-  duration_ms: 21.831672
+  duration_ms: 21.425513
   type: 'test'
   ...
 # Subtest: §18 — a malformed or unknown model identity is rejected
 ok 148 - §18 — a malformed or unknown model identity is rejected
   ---
-  duration_ms: 20.308299
+  duration_ms: 25.4246
   type: 'test'
   ...
 # Subtest: §18 — same version, different model is rejected with state untouched
 ok 149 - §18 — same version, different model is rejected with state untouched
   ---
-  duration_ms: 7.856731
+  duration_ms: 7.917508
   type: 'test'
   ...
 # Subtest: §18 — canonical serialization is TOTAL: an undefined mandatory field throws
 ok 150 - §18 — canonical serialization is TOTAL: an undefined mandatory field throws
   ---
-  duration_ms: 1.539321
+  duration_ms: 2.123346
   type: 'test'
   ...
 # Subtest: §18 — deserialization refuses bytes with no usable identity or an older schema
 ok 151 - §18 — deserialization refuses bytes with no usable identity or an older schema
   ---
-  duration_ms: 8.496748
+  duration_ms: 8.932366
   type: 'test'
   ...
 # Subtest: §18 — the schema version marks the identity as part of the contract
 ok 152 - §18 — the schema version marks the identity as part of the contract
   ---
-  duration_ms: 2.791537
+  duration_ms: 1.690129
   type: 'test'
   ...
 # Subtest: §9 — the model definition contains every biology-affecting value
 ok 153 - §9 — the model definition contains every biology-affecting value
   ---
-  duration_ms: 2.596375
+  duration_ms: 3.233145
   type: 'test'
   ...
 # Subtest: §9 — changing any trait effect changes the model hash
 ok 154 - §9 — changing any trait effect changes the model hash
   ---
-  duration_ms: 3.147142
+  duration_ms: 3.240144
   type: 'test'
   ...
 # Subtest: §9 — changing upkeep, adjacency, or founder ages changes the model hash
 ok 155 - §9 — changing upkeep, adjacency, or founder ages changes the model hash
   ---
-  duration_ms: 1.13865
+  duration_ms: 0.908285
   type: 'test'
   ...
 # Subtest: §9 — the two configurations produce different model hashes
 ok 156 - §9 — the two configurations produce different model hashes
   ---
-  duration_ms: 0.407352
+  duration_ms: 0.663225
   type: 'test'
   ...
 # Subtest: every nested configuration object and array is deeply frozen
 ok 157 - every nested configuration object and array is deeply frozen
   ---
-  duration_ms: 0.274935
+  duration_ms: 0.29645
   type: 'test'
   ...
 # Subtest: config 1 and config 2 share no mutable nested references
 ok 158 - config 1 and config 2 share no mutable nested references
   ---
-  duration_ms: 0.306684
+  duration_ms: 0.160828
   type: 'test'
   ...
 # Subtest: deepFreeze freezes nested structures
 ok 159 - deepFreeze freezes nested structures
   ---
-  duration_ms: 0.674437
+  duration_ms: 0.156827
   type: 'test'
   ...
 # Subtest: §7 — a supplied founderAgeValues of [2] creates founders of age 2
 ok 160 - §7 — a supplied founderAgeValues of [2] creates founders of age 2
   ---
-  duration_ms: 10.342077
+  duration_ms: 6.853355
   type: 'test'
   ...
 # Subtest: a config-1 state cannot be advanced with config 2, and vice versa
 ok 161 - a config-1 state cannot be advanced with config 2, and vice versa
   ---
-  duration_ms: 4.966972
+  duration_ms: 5.416787
   type: 'test'
   ...
 # Subtest: rejection leaves canonical bytes and RNG state completely unchanged
 ok 162 - rejection leaves canonical bytes and RNG state completely unchanged
   ---
-  duration_ms: 9.103871
+  duration_ms: 6.20353
   type: 'test'
   ...
 # Subtest: matching configuration advances normally under both configs
 ok 163 - matching configuration advances normally under both configs
   ---
-  duration_ms: 16.884061
+  duration_ms: 17.716038
   type: 'test'
   ...
 # Subtest: the revision-2 falsifier no longer produces two worlds with one label
 ok 164 - the revision-2 falsifier no longer produces two worlds with one label
   ---
-  duration_ms: 4.099376
+  duration_ms: 3.550426
   type: 'test'
   ...
 # Subtest: fixture hydration also binds the state to the supplied configuration
 ok 165 - fixture hydration also binds the state to the supplied configuration
   ---
-  duration_ms: 2.714637
+  duration_ms: 5.089437
   type: 'test'
   ...
 # Subtest: assertConfigMatchesState is exported and usable directly
 ok 166 - assertConfigMatchesState is exported and usable directly
   ---
-  duration_ms: 1.554077
+  duration_ms: 0.887016
   type: 'test'
   ...
 # Subtest: §18 — a modified model reusing the same version string is REJECTED
 ok 167 - §18 — a modified model reusing the same version string is REJECTED
   ---
-  duration_ms: 1.070138
+  duration_ms: 1.233526
   type: 'test'
   ...
 # Subtest: §18 — same-version modifications are rejected for EVERY biology-affecting field
 ok 168 - §18 — same-version modifications are rejected for EVERY biology-affecting field
   ---
-  duration_ms: 10.429056
+  duration_ms: 13.463869
   type: 'test'
   ...
 # Subtest: §18 — model-mismatch rejection happens before ANY mutation or RNG consumption
 ok 169 - §18 — model-mismatch rejection happens before ANY mutation or RNG consumption
   ---
-  duration_ms: 2.687408
+  duration_ms: 5.000108
   type: 'test'
   ...
 # Subtest: §18 — two materially different models cannot serialize with one canonical identity
 ok 170 - §18 — two materially different models cannot serialize with one canonical identity
   ---
-  duration_ms: 13.89833
+  duration_ms: 13.816267
   type: 'test'
   ...
 # Subtest: §18 — fixture hydration and canonical cloning both carry the model identity
 ok 171 - §18 — fixture hydration and canonical cloning both carry the model identity
   ---
-  duration_ms: 13.429615
+  duration_ms: 23.932373
   type: 'test'
   ...
 # Subtest: §21.7 — the calibration sweep never reuses a production version identity
 ok 172 - §21.7 — the calibration sweep never reuses a production version identity
   ---
-  duration_ms: 5.96481
+  duration_ms: 4.881714
   type: 'test'
   ...
 # Subtest: §20.7 — every mutation event refers to a child born in the same generation and never a survivor
 ok 173 - §20.7 — every mutation event refers to a child born in the same generation and never a survivor
   ---
-  duration_ms: 132.4959
+  duration_ms: 120.180782
   type: 'test'
   ...
 # Subtest: §20.7/§12.1 — event IDs are unique and strictly increasing WITHIN each typed namespace
 ok 174 - §20.7/§12.1 — event IDs are unique and strictly increasing WITHIN each typed namespace
   ---
-  duration_ms: 45.971759
+  duration_ms: 56.760899
   type: 'test'
   ...
 # Subtest: §20.7/§12.1 — numeric overlap between the two namespaces is permitted, not a collision
 ok 175 - §20.7/§12.1 — numeric overlap between the two namespaces is permitted, not a collision
   ---
-  duration_ms: 37.899026
+  duration_ms: 46.955495
   type: 'test'
   ...
 # Subtest: §20.7/§12.1 — recording increments only the owning counter
 ok 176 - §20.7/§12.1 — recording increments only the owning counter
   ---
-  duration_ms: 29.144339
+  duration_ms: 26.802189
   type: 'test'
   ...
 # Subtest: §20.7 — a failed opportunity increments neither counter
 ok 177 - §20.7 — a failed opportunity increments neither counter
   ---
-  duration_ms: 24.23158
+  duration_ms: 20.680361
   type: 'test'
   ...
 # Subtest: §20.7 — fixture hydration preserves both counters exactly
 ok 178 - §20.7 — fixture hydration preserves both counters exactly
   ---
-  duration_ms: 2.574679
+  duration_ms: 2.456601
   type: 'test'
   ...
 # Subtest: §20.1 — mutation events reference only newborn child IDs created in the same generation
 ok 179 - §20.1 — mutation events reference only newborn child IDs created in the same generation
   ---
-  duration_ms: 51.411156
+  duration_ms: 49.799604
   type: 'test'
   ...
 # Subtest: §8 — exactly three neutral traits, contributing zero to every dimension and to upkeep
 ok 180 - §8 — exactly three neutral traits, contributing zero to every dimension and to upkeep
   ---
-  duration_ms: 1.894473
+  duration_ms: 1.991276
   type: 'test'
   ...
 # Subtest: §20.4 — neutral traits produce exactly identical performance dimensions and zone fitness
 ok 181 - §20.4 — neutral traits produce exactly identical performance dimensions and zone fitness
   ---
-  duration_ms: 1.708239
+  duration_ms: 1.955143
   type: 'test'
   ...
 # Subtest: §20.4 — neutral traits produce exactly identical survival probabilities
 ok 182 - §20.4 — neutral traits produce exactly identical survival probabilities
   ---
-  duration_ms: 5.188325
+  duration_ms: 5.365164
   type: 'test'
   ...
 # Subtest: §20.4 — neutral traits do not affect mating weights
 ok 183 - §20.4 — neutral traits do not affect mating weights
   ---
-  duration_ms: 0.36401
+  duration_ms: 0.471888
   type: 'test'
   ...
 # Subtest: §20.4 — neutral traits do not affect allocation inheritance
 ok 184 - §20.4 — neutral traits do not affect allocation inheritance
   ---
-  duration_ms: 1.113983
+  duration_ms: 1.3309
   type: 'test'
   ...
 # Subtest: §20.4 — neutral traits do not affect mutation probabilities or draws
 ok 185 - §20.4 — neutral traits do not affect mutation probabilities or draws
   ---
-  duration_ms: 0.621281
+  duration_ms: 0.740765
   type: 'test'
   ...
 # Subtest: §8/§10.2 — neutral traits are still inherited and can drift and mutate
 ok 186 - §8/§10.2 — neutral traits are still inherited and can drift and mutate
   ---
-  duration_ms: 0.226555
+  duration_ms: 0.303294
   type: 'test'
   ...
 # Subtest: §20.2/§19 — canonical biological bytes match after every generation across all observer strategies
 ok 187 - §20.2/§19 — canonical biological bytes match after every generation across all observer strategies
   ---
-  duration_ms: 3322.478543
+  duration_ms: 3299.935651
   type: 'test'
   ...
 # Subtest: §4/§17 — observer actions do not consume or alter simRng state
 ok 188 - §4/§17 — observer actions do not consume or alter simRng state
   ---
-  duration_ms: 2.286731
+  duration_ms: 2.805139
   type: 'test'
   ...
 # Subtest: §16 — tracer channels are independent, overlapping, in [0,1], and do not normalize against each other
 ok 189 - §16 — tracer channels are independent, overlapping, in [0,1], and do not normalize against each other
   ---
-  duration_ms: 15.80468
+  duration_ms: 16.976624
   type: 'test'
   ...
 # Subtest: §16 — child tracer value is the mean of its two parents' values
 ok 190 - §16 — child tracer value is the mean of its two parents' values
   ---
-  duration_ms: 1.837814
+  duration_ms: 2.773342
   type: 'test'
   ...
 # Subtest: §18 — canonical biological serialization excludes observer and debug material
 ok 191 - §18 — canonical biological serialization excludes observer and debug material
   ---
-  duration_ms: 3.92143
+  duration_ms: 3.976412
   type: 'test'
   ...
 #   tracer bound: gen 180: living=254 entries=254 (births=21390)
@@ -1168,655 +1168,655 @@ ok 191 - §18 — canonical biological serialization excludes observer and debug
 # Subtest: §16 — tracer entries track the living population, not cumulative births
 ok 192 - §16 — tracer entries track the living population, not cumulative births
   ---
-  duration_ms: 13675.746862
+  duration_ms: 14351.480548
   type: 'test'
   ...
 # Subtest: §16 — tracer values for living descendants remain correct after pruning
 ok 193 - §16 — tracer values for living descendants remain correct after pruning
   ---
-  duration_ms: 109.052201
+  duration_ms: 106.356432
   type: 'test'
   ...
 # Subtest: §4/§16 — observer pruning does not alter canonical biological bytes
 ok 194 - §4/§16 — observer pruning does not alter canonical biological bytes
   ---
-  duration_ms: 8419.691641
+  duration_ms: 8624.49741
   type: 'test'
   ...
 # Subtest: §16 — results remain deterministic with pruning enabled
 ok 195 - §16 — results remain deterministic with pruning enabled
   ---
-  duration_ms: 520.732382
+  duration_ms: 563.171367
   type: 'test'
   ...
 # Subtest: §16 — multiple channels stay bounded independently, not multiplicatively
 ok 196 - §16 — multiple channels stay bounded independently, not multiplicatively
   ---
-  duration_ms: 958.456292
+  duration_ms: 1010.779026
   type: 'test'
   ...
 # Subtest: §16 — pruneObserverToLiving drops dead ids and stale inspected ids
 ok 197 - §16 — pruneObserverToLiving drops dead ids and stale inspected ids
   ---
-  duration_ms: 2.025658
+  duration_ms: 1.61034
   type: 'test'
   ...
 # Subtest: §22 — Canvas jitter cache is bounded to rendered individuals
 ok 198 - §22 — Canvas jitter cache is bounded to rendered individuals
   ---
-  duration_ms: 7.030215
+  duration_ms: 7.067002
   type: 'test'
   ...
 # Subtest: §4/§16 — an observer exception at ANY birth leaves canonical biology exactly as the clean generation
 ok 199 - §4/§16 — an observer exception at ANY birth leaves canonical biology exactly as the clean generation
   ---
-  duration_ms: 48.200864
+  duration_ms: 54.896416
   type: 'test'
   ...
 # Subtest: §4/§16 — an exception from afterGeneration is also isolated
 ok 200 - §4/§16 — an exception from afterGeneration is also isolated
   ---
-  duration_ms: 18.771634
+  duration_ms: 9.627372
   type: 'test'
   ...
 # Subtest: §4 — no event is duplicated and a retry cannot advance the world twice
 ok 201 - §4 — no event is duplicated and a retry cannot advance the world twice
   ---
-  duration_ms: 11.408809
+  duration_ms: 12.320748
   type: 'test'
   ...
 # Subtest: §4 — the returned generation result is immutable and outside canonical state
 ok 202 - §4 — the returned generation result is immutable and outside canonical state
   ---
-  duration_ms: 6.760944
+  duration_ms: 11.380888
   type: 'test'
   ...
 # Subtest: §4 — the hook-free API and the hook API produce identical biology
 ok 203 - §4 — the hook-free API and the hook API produce identical biology
   ---
-  duration_ms: 8.124727
+  duration_ms: 9.670878
   type: 'test'
   ...
 # Subtest: §4/§16 — a throwing observer over many generations never diverges from clean biology
 ok 204 - §4/§16 — a throwing observer over many generations never diverges from clean biology
   ---
-  duration_ms: 1294.273986
+  duration_ms: 1365.092165
   type: 'test'
   ...
 # Subtest: §16 — a successful observer still receives every birth, and tracer values stay correct
 ok 205 - §16 — a successful observer still receives every birth, and tracer values stay correct
   ---
-  duration_ms: 21.274739
+  duration_ms: 21.996208
   type: 'test'
   ...
 # Subtest: §4 — runGenerations is equally isolated
 ok 206 - §4 — runGenerations is equally isolated
   ---
-  duration_ms: 79.206577
+  duration_ms: 76.004023
   type: 'test'
   ...
 # Subtest: §22 — load fixture, reset random, enter legibility: the fixture is active
 ok 207 - §22 — load fixture, reset random, enter legibility: the fixture is active
   ---
-  duration_ms: 43.434341
+  duration_ms: 55.047252
   type: 'test'
   ...
 # Subtest: §22 — entering legibility twice is idempotent and stays on the fixture
 ok 208 - §22 — entering legibility twice is idempotent and stays on the fixture
   ---
-  duration_ms: 16.284634
+  duration_ms: 12.056565
   type: 'test'
   ...
 # Subtest: §22 — a failed fixture load shows an explicit error and no fixture-valid mode
 ok 209 - §22 — a failed fixture load shows an explicit error and no fixture-valid mode
   ---
-  duration_ms: 5.487901
+  duration_ms: 5.77253
   type: 'test'
   ...
 # Subtest: §16 — a tracer created at a later generation is seeded from LIVING individuals
 ok 210 - §16 — a tracer created at a later generation is seeded from LIVING individuals
   ---
-  duration_ms: 64.852512
+  duration_ms: 78.69394
   type: 'test'
   ...
 # Subtest: §16 — a random world never seeds a tracer from cached fixture ids
 ok 211 - §16 — a random world never seeds a tracer from cached fixture ids
   ---
-  duration_ms: 17.085186
+  duration_ms: 20.345794
   type: 'test'
   ...
 # Subtest: §16 — no living candidates yields an explicit unavailable result, not a zero channel
 ok 212 - §16 — no living candidates yields an explicit unavailable result, not a zero channel
   ---
-  duration_ms: 1.108576
+  duration_ms: 1.503916
   type: 'test'
   ...
 # Subtest: §22 — worldSource is observer-side only and never enters canonical biology
 ok 213 - §22 — worldSource is observer-side only and never enters canonical biology
   ---
-  duration_ms: 2.941076
+  duration_ms: 7.394531
   type: 'test'
   ...
 # Subtest: §22 — advancing a fixture world then entering legibility restores the exact baseline
 ok 214 - §22 — advancing a fixture world then entering legibility restores the exact baseline
   ---
-  duration_ms: 80.614236
+  duration_ms: 94.106707
   type: 'test'
   ...
 # Subtest: §22 — entering legibility after ONE generation also restores the baseline
 ok 215 - §22 — entering legibility after ONE generation also restores the baseline
   ---
-  duration_ms: 13.548569
+  duration_ms: 14.067819
   type: 'test'
   ...
 # Subtest: §22 — the high-webbing fixture is replaced by the unmodified baseline on entry
 ok 216 - §22 — the high-webbing fixture is replaced by the unmodified baseline on entry
   ---
-  duration_ms: 18.475854
+  duration_ms: 18.198784
   type: 'test'
   ...
 # Subtest: §22 — a random world entering legibility lands on the exact baseline fixture
 ok 217 - §22 — a random world entering legibility lands on the exact baseline fixture
   ---
-  duration_ms: 15.668813
+  duration_ms: 13.058454
   type: 'test'
   ...
 # Subtest: §22 — isBaselineFixtureActive distinguishes origin from exact identity
 ok 218 - §22 — isBaselineFixtureActive distinguishes origin from exact identity
   ---
-  duration_ms: 9.718309
+  duration_ms: 8.035389
   type: 'test'
   ...
 # Subtest: §22 — every control the contract requires exists in the probe markup
 ok 219 - §22 — every control the contract requires exists in the probe markup
   ---
-  duration_ms: 1.595648
+  duration_ms: 1.694336
   type: 'test'
   ...
 # Subtest: §22 — the mode-switch and run controls are instrumented for input latency
 ok 220 - §22 — the mode-switch and run controls are instrumented for input latency
   ---
-  duration_ms: 2.24828
+  duration_ms: 3.311364
   type: 'test'
   ...
 # Subtest: §26 — the report contains no live runtime value
 ok 221 - §26 — the report contains no live runtime value
   ---
-  duration_ms: 1.129066
+  duration_ms: 1.049068
   type: 'test'
   ...
 # Subtest: §26 — declared Node support is unchanged at >=18
 ok 222 - §26 — declared Node support is unchanged at >=18
   ---
-  duration_ms: 0.443534
+  duration_ms: 0.517291
   type: 'test'
   ...
 # Subtest: §26 — rendering is a pure function of committed evidence
 ok 223 - §26 — rendering is a pure function of committed evidence
   ---
-  duration_ms: 103.29475
+  duration_ms: 114.190161
   type: 'test'
   ...
 # Subtest: §26 — the report renders identically on every recorded runtime
 ok 224 - §26 — the report renders identically on every recorded runtime
   ---
-  duration_ms: 0.431036
+  duration_ms: 0.544373
   type: 'test'
   ...
 # Subtest: §26 — the committed report is exactly what the generator produces
 ok 225 - §26 — the committed report is exactly what the generator produces
   ---
-  duration_ms: 73.751339
+  duration_ms: 83.969863
   type: 'test'
   ...
 # Subtest: §20 — the report's suite counts equal the raw TAP summary
 ok 226 - §20 — the report's suite counts equal the raw TAP summary
   ---
-  duration_ms: 1.371236
+  duration_ms: 1.543627
   type: 'test'
   ...
 # Subtest: §9/§18 — modelDefinitionHash is the principal identity and the subset hash is labelled nonauthoritative
 ok 227 - §9/§18 — modelDefinitionHash is the principal identity and the subset hash is labelled nonauthoritative
   ---
-  duration_ms: 0.392175
+  duration_ms: 0.422327
   type: 'test'
   ...
 # Subtest: §26 — the report's status comes from the single source of truth
 ok 228 - §26 — the report's status comes from the single source of truth
   ---
-  duration_ms: 0.566134
+  duration_ms: 0.694363
   type: 'test'
   ...
 # Subtest: §19.3/§19.4 — fixture numbers in the report match the evidence AND a fresh computation
 ok 229 - §19.3/§19.4 — fixture numbers in the report match the evidence AND a fresh computation
   ---
-  duration_ms: 0.828991
+  duration_ms: 0.905748
   type: 'test'
   ...
 # Subtest: §9 — every trait delta in the report reproduces from the production path
 ok 230 - §9 — every trait delta in the report reproduces from the production path
   ---
-  duration_ms: 2.751526
+  duration_ms: 3.201126
   type: 'test'
   ...
 # Subtest: §21.4 — guardrail figures and the named limitation match the raw batch
 ok 231 - §21.4 — guardrail figures and the named limitation match the raw batch
   ---
-  duration_ms: 0.426999
+  duration_ms: 0.567504
   type: 'test'
   ...
 # Subtest: §22 — desktop figures in the report match the desktop JSON exactly
 ok 232 - §22 — desktop figures in the report match the desktop JSON exactly
   ---
-  duration_ms: 0.797795
+  duration_ms: 0.986143
   type: 'test'
   ...
 # Subtest: §21.6 — the report gives the traversal claim to the isolated worlds
 ok 233 - §21.6 — the report gives the traversal claim to the isolated worlds
   ---
-  duration_ms: 1.167916
+  duration_ms: 1.421155
   type: 'test'
   ...
 # Subtest: §27 — observer-invariance and reference-file claims match their evidence
 ok 234 - §27 — observer-invariance and reference-file claims match their evidence
   ---
-  duration_ms: 0.443598
+  duration_ms: 0.590233
   type: 'test'
   ...
 # Subtest: §27 — the manifest's evidence-file list matches what actually exists
 ok 235 - §27 — the manifest's evidence-file list matches what actually exists
   ---
-  duration_ms: 0.702196
+  duration_ms: 0.871671
   type: 'test'
   ...
 # Subtest: §27 — every published command is documented in the manifest's clean-run section
 ok 236 - §27 — every published command is documented in the manifest's clean-run section
   ---
-  duration_ms: 0.499797
+  duration_ms: 0.593854
   type: 'test'
   ...
 # Subtest: §26 — the report is marked as generated so it is not hand-edited
 ok 237 - §26 — the report is marked as generated so it is not hand-edited
   ---
-  duration_ms: 0.131932
+  duration_ms: 0.24447
   type: 'test'
   ...
 # Subtest: §24 Stage G — the self-audit scans report the live tree, and are clean
 ok 238 - §24 Stage G — the self-audit scans report the live tree, and are clean
   ---
-  duration_ms: 12.611576
+  duration_ms: 14.567113
   type: 'test'
   ...
 # Subtest: §20/§26 — injecting a failure into any gate category turns that gate FAIL, never PASS
 ok 239 - §20/§26 — injecting a failure into any gate category turns that gate FAIL, never PASS
   ---
-  duration_ms: 1.828848
+  duration_ms: 2.265604
   type: 'test'
   ...
 # Subtest: §20/§26 — an UNATTRIBUTABLE failure degrades every other gate to UNVERIFIED
 ok 240 - §20/§26 — an UNATTRIBUTABLE failure degrades every other gate to UNVERIFIED
   ---
-  duration_ms: 0.392196
+  duration_ms: 0.42716
   type: 'test'
   ...
 # Subtest: §20/§26 — a gate whose evidencing test did not run reads UNVERIFIED, never PASS
 ok 241 - §20/§26 — a gate whose evidencing test did not run reads UNVERIFIED, never PASS
   ---
-  duration_ms: 0.30936
+  duration_ms: 0.233729
   type: 'test'
   ...
 # Subtest: §20/§26 — externally determined gates can never read PASS
 ok 242 - §20/§26 — externally determined gates can never read PASS
   ---
-  duration_ms: 0.263456
+  duration_ms: 0.301401
   type: 'test'
   ...
 # Subtest: §20/§26 — the committed gate summary matches the report's table
 ok 243 - §20/§26 — the committed gate summary matches the report's table
   ---
-  duration_ms: 4.032204
+  duration_ms: 4.231991
   type: 'test'
   ...
 # Subtest: §20.13 — no production source file USES unseeded randomness
 ok 244 - §20.13 — no production source file USES unseeded randomness
   ---
-  duration_ms: 25.316117
+  duration_ms: 27.190661
   type: 'test'
   ...
 # Subtest: §20.13 — the unseeded-randomness scan still detects a real use
 ok 245 - §20.13 — the unseeded-randomness scan still detects a real use
   ---
-  duration_ms: 0.27407
+  duration_ms: 0.334891
   type: 'test'
   ...
 # Subtest: §17 — the PRNG is serializable with explicit state and reproduces exactly
 ok 246 - §17 — the PRNG is serializable with explicit state and reproduces exactly
   ---
-  duration_ms: 0.743315
+  duration_ms: 0.728665
   type: 'test'
   ...
 # Subtest: §17/§20.13 — uniform draws lie in [0,1) and use four uint32 state words
 ok 247 - §17/§20.13 — uniform draws lie in [0,1) and use four uint32 state words
   ---
-  duration_ms: 11.316859
+  duration_ms: 17.184251
   type: 'test'
   ...
 # Subtest: §20.13 — the normal-draw cache serializes correctly
 ok 248 - §20.13 — the normal-draw cache serializes correctly
   ---
-  duration_ms: 0.309118
+  duration_ms: 0.398084
   type: 'test'
   ...
 # Subtest: §17 — cloning a biological state clones the exact RNG state
 ok 249 - §17 — cloning a biological state clones the exact RNG state
   ---
-  duration_ms: 0.306647
+  duration_ms: 0.463865
   type: 'test'
   ...
 # Subtest: §20.13 — UI actions do not change simRngState
 ok 250 - §20.13 — UI actions do not change simRngState
   ---
-  duration_ms: 23.365603
+  duration_ms: 27.44981
   type: 'test'
   ...
 # Subtest: §17 — simRng and uiRng are independent roots and are never shared
 ok 251 - §17 — simRng and uiRng are independent roots and are never shared
   ---
-  duration_ms: 0.294354
+  duration_ms: 0.299828
   type: 'test'
   ...
 # Subtest: §18 — canonical serialization includes complete simRng state needed to reproduce the next draw
 ok 252 - §18 — canonical serialization includes complete simRng state needed to reproduce the next draw
   ---
-  duration_ms: 6.784236
+  duration_ms: 8.338959
   type: 'test'
   ...
 # Subtest: §17 — the PRNG never emits an all-zero state from a zero seed
 ok 253 - §17 — the PRNG never emits an all-zero state from a zero seed
   ---
-  duration_ms: 0.416867
+  duration_ms: 0.625626
   type: 'test'
   ...
 # Subtest: isInsideRoot rejects a sibling whose name shares the root prefix
 ok 254 - isInsideRoot rejects a sibling whose name shares the root prefix
   ---
-  duration_ms: 0.877624
+  duration_ms: 0.99371
   type: 'test'
   ...
 # Subtest: resolveSafePath rejects traversal, encoded traversal, and malformed input
 ok 255 - resolveSafePath rejects traversal, encoded traversal, and malformed input
   ---
-  duration_ms: 4.218751
+  duration_ms: 2.476268
   type: 'test'
   ...
 # Subtest: server serves in-root files and refuses every out-of-root request
 ok 256 - server serves in-root files and refuses every out-of-root request
   ---
-  duration_ms: 50.343402
+  duration_ms: 54.020738
   type: 'test'
   ...
 # Subtest: the served root is the project directory, and the project itself is reachable
 ok 257 - the served root is the project directory, and the project itself is reachable
   ---
-  duration_ms: 11.011146
+  duration_ms: 9.702805
   type: 'test'
   ...
 # Subtest: §6 — adjacency graph has no canopy-to-shoreline edge
 ok 258 - §6 — adjacency graph has no canopy-to-shoreline edge
   ---
-  duration_ms: 2.037939
+  duration_ms: 2.214464
   type: 'test'
   ...
 # Subtest: §20.9.4 — checked-in founder centroids produce exactly the required parental-use sets
 ok 259 - §20.9.4 — checked-in founder centroids produce exactly the required parental-use sets
   ---
-  duration_ms: 1.303418
+  duration_ms: 1.772238
   type: 'test'
   ...
 # Subtest: §7 — founders receive the exact band centroid with no initialization noise
 ok 260 - §7 — founders receive the exact band centroid with no initialization noise
   ---
-  duration_ms: 5.213228
+  duration_ms: 6.820842
   type: 'test'
   ...
 # Subtest: §20.9.1 — two exact canopy-heavy parents may reach canopy or forest_floor, never shoreline
 ok 261 - §20.9.1 — two exact canopy-heavy parents may reach canopy or forest_floor, never shoreline
   ---
-  duration_ms: 0.78617
+  duration_ms: 0.816325
   type: 'test'
   ...
 # Subtest: §20.9.2 — two exact shoreline-heavy parents may reach shoreline or forest_floor, never canopy
 ok 262 - §20.9.2 — two exact shoreline-heavy parents may reach shoreline or forest_floor, never canopy
   ---
-  duration_ms: 0.253813
+  duration_ms: 0.419686
   type: 'test'
   ...
 # Subtest: §20.9.3 — once a parent uses forest_floor at the threshold, the opposite edge becomes reachable
 ok 263 - §20.9.3 — once a parent uses forest_floor at the threshold, the opposite edge becomes reachable
   ---
-  duration_ms: 0.243848
+  duration_ms: 0.278068
   type: 'test'
   ...
 # Subtest: §20.9 — every current individual has finite shares in [0,1] summing to one
 ok 264 - §20.9 — every current individual has finite shares in [0,1] summing to one
   ---
-  duration_ms: 259.281802
+  duration_ms: 263.597951
   type: 'test'
   ...
 # Subtest: §20.9 — the zero-vector fallback counter remains zero in normal configured runs
 ok 265 - §20.9 — the zero-vector fallback counter remains zero in normal configured runs
   ---
-  duration_ms: 632.989782
+  duration_ms: 720.258837
   type: 'test'
   ...
 # Subtest: §20.9 — no child receives allocation in a non-eligible non-neighbour zone
 ok 266 - §20.9 — no child receives allocation in a non-eligible non-neighbour zone
   ---
-  duration_ms: 2.036937
+  duration_ms: 2.014748
   type: 'test'
   ...
 # Subtest: §20.9/§10.5 — no morphology function writes to allocation
 ok 267 - §20.9/§10.5 — no morphology function writes to allocation
   ---
-  duration_ms: 0.563808
+  duration_ms: 4.048131
   type: 'test'
   ...
 # Subtest: every official status artifact states the required status
 ok 268 - every official status artifact states the required status
   ---
-  duration_ms: 2.245277
+  duration_ms: 2.6175
   type: 'test'
   ...
 # Subtest: no artifact asserts M1_AUTOMATED_GATES_PASS as the current status
 ok 269 - no artifact asserts M1_AUTOMATED_GATES_PASS as the current status
   ---
-  duration_ms: 1.058062
+  duration_ms: 0.981532
   type: 'test'
   ...
 # Subtest: no artifact claims M1_ACCEPTED
 ok 270 - no artifact claims M1_ACCEPTED
   ---
-  duration_ms: 1.756416
+  duration_ms: 1.831344
   type: 'test'
   ...
 # Subtest: the process waiver and iPad gate are named as separately pending
 ok 271 - the process waiver and iPad gate are named as separately pending
   ---
-  duration_ms: 0.398115
+  duration_ms: 0.359527
   type: 'test'
   ...
 # Subtest: the iPad checklist does not instruct the operator to report a passing status
 ok 272 - the iPad checklist does not instruct the operator to report a passing status
   ---
-  duration_ms: 0.283366
+  duration_ms: 0.337402
   type: 'test'
   ...
 # Subtest: generated audit JSON carries the same status when present
 ok 273 - generated audit JSON carries the same status when present
   ---
-  duration_ms: 9.151258
+  duration_ms: 9.466055
   type: 'test'
   ...
 # Subtest: the audit manifest names the CURRENT bundle revision
 ok 274 - the audit manifest names the CURRENT bundle revision
   ---
-  duration_ms: 0.429425
+  duration_ms: 0.387516
   type: 'test'
   ...
 # Subtest: the status source of truth agrees with the literal this test enforces
 ok 275 - the status source of truth agrees with the literal this test enforces
   ---
-  duration_ms: 1.217797
+  duration_ms: 1.323376
   type: 'test'
   ...
 # Subtest: §20.12 — exact required survival composition values
 ok 276 - §20.12 — exact required survival composition values
   ---
-  duration_ms: 2.014195
+  duration_ms: 2.062946
   type: 'test'
   ...
 # Subtest: §20.12 — aggregate-first composition would produce a different answer
 ok 277 - §20.12 — aggregate-first composition would produce a different answer
   ---
-  duration_ms: 0.173916
+  duration_ms: 0.277981
   type: 'test'
   ...
 # Subtest: §20.12 — age multiplication occurs after allocation weighting
 ok 278 - §20.12 — age multiplication occurs after allocation weighting
   ---
-  duration_ms: 0.20602
+  duration_ms: 0.233039
   type: 'test'
   ...
 # Subtest: §10 — zone clamps bind independently before ecological weighting
 ok 279 - §10 — zone clamps bind independently before ecological weighting
   ---
-  duration_ms: 0.174832
+  duration_ms: 0.254804
   type: 'test'
   ...
 # Subtest: §10 — density factor uses that zone's own capacity and load
 ok 280 - §10 — density factor uses that zone's own capacity and load
   ---
-  duration_ms: 0.224718
+  duration_ms: 0.335018
   type: 'test'
   ...
 # Subtest: §20 — the self-audit scanner runs against an isolated tree, never src/
 ok 281 - §20 — the self-audit scanner runs against an isolated tree, never src/
   ---
-  duration_ms: 79.533597
+  duration_ms: 77.584185
   type: 'test'
   ...
 # Subtest: §20 — the production source tree is byte-identical before and after the scanner tests
 ok 282 - §20 — the production source tree is byte-identical before and after the scanner tests
   ---
-  duration_ms: 241.587021
+  duration_ms: 313.802334
   type: 'test'
   ...
 # Subtest: §20 — no test file writes into the production tree
 ok 283 - §20 — no test file writes into the production tree
   ---
-  duration_ms: 3.94578
+  duration_ms: 4.571585
   type: 'test'
   ...
 # Subtest: §20 — the comment stripper distinguishes use from mention
 ok 284 - §20 — the comment stripper distinguishes use from mention
   ---
-  duration_ms: 0.178012
+  duration_ms: 0.350963
   type: 'test'
   ...
 # Subtest: §20 — the scanner is deterministic and side-effect free on repeated calls
 ok 285 - §20 — the scanner is deterministic and side-effect free on repeated calls
   ---
-  duration_ms: 16.762631
+  duration_ms: 23.266827
   type: 'test'
   ...
 # Subtest: §21.6 — the plan's withdrawn claim is marked as withdrawn, and the original text survives
 ok 286 - §21.6 — the plan's withdrawn claim is marked as withdrawn, and the original text survives
   ---
-  duration_ms: 2.489765
+  duration_ms: 2.186769
   type: 'test'
   ...
 # Subtest: §21.6 — the raw characterization keys name the mixed world explicitly
 ok 287 - §21.6 — the raw characterization keys name the mixed world explicitly
   ---
-  duration_ms: 13.460445
+  duration_ms: 12.690196
   type: 'test'
   ...
 # Subtest: §21.6 — the raw characterization file points at the authoritative evidence
 ok 288 - §21.6 — the raw characterization file points at the authoritative evidence
   ---
-  duration_ms: 7.105659
+  duration_ms: 14.996047
   type: 'test'
   ...
 # Subtest: §21.6 — the authoritative edge-only evidence exists and is genuinely isolated
 ok 289 - §21.6 — the authoritative edge-only evidence exists and is genuinely isolated
   ---
-  duration_ms: 1.484812
+  duration_ms: 2.279632
   type: 'test'
   ...
 # Subtest: §21.6 — CHARACTERIZATION.md gives the traversal claim to the isolated worlds only
 ok 290 - §21.6 — CHARACTERIZATION.md gives the traversal claim to the isolated worlds only
   ---
-  duration_ms: 0.42754
+  duration_ms: 0.499561
   type: 'test'
   ...
 # Subtest: §21.6 — no file USES a retired name as an identifier (history mentions are allowed)
 ok 291 - §21.6 — no file USES a retired name as an identifier (history mentions are allowed)
   ---
-  duration_ms: 23.446082
+  duration_ms: 26.989186
   type: 'test'
   ...
 # Subtest: §21.6 — the retired names appear nowhere in the raw evidence, in any form
 ok 292 - §21.6 — the retired names appear nowhere in the raw evidence, in any form
   ---
-  duration_ms: 9.330451
+  duration_ms: 10.06751
   type: 'test'
   ...
 # Subtest: §21.6 — where a retired name IS mentioned, it is marked as retired
 ok 293 - §21.6 — where a retired name IS mentioned, it is marked as retired
   ---
-  duration_ms: 0.944365
+  duration_ms: 1.096241
   type: 'test'
   ...
 # Subtest: §22 — an older fixture load cannot overwrite a newer legibility world
 ok 294 - §22 — an older fixture load cannot overwrite a newer legibility world
   ---
-  duration_ms: 32.057404
+  duration_ms: 21.754965
   type: 'test'
   ...
 # Subtest: §22 — a stale fixture response cannot replace a newer random world
 ok 295 - §22 — a stale fixture response cannot replace a newer random world
   ---
-  duration_ms: 5.587016
+  duration_ms: 7.054602
   type: 'test'
   ...
 # Subtest: §22 — the newest requested fixture variant wins regardless of resolution order
 ok 296 - §22 — the newest requested fixture variant wins regardless of resolution order
   ---
-  duration_ms: 22.535609
+  duration_ms: 16.635954
   type: 'test'
   ...
 # Subtest: §22 — a failed or rejected stale request commits nothing
 ok 297 - §22 — a failed or rejected stale request commits nothing
   ---
-  duration_ms: 8.483846
+  duration_ms: 3.230971
   type: 'test'
   ...
 # Subtest: §22 — the CURRENT request's genuine failure is still reported honestly
 ok 298 - §22 — the CURRENT request's genuine failure is still reported honestly
   ---
-  duration_ms: 1.581611
+  duration_ms: 1.766435
   type: 'test'
   ...
 # Subtest: §22 — world-change tokens are monotonic and only the newest may commit
 ok 299 - §22 — world-change tokens are monotonic and only the newest may commit
   ---
-  duration_ms: 1.268553
+  duration_ms: 1.472123
   type: 'test'
   ...
 # Subtest: §22 — three concurrent requests leave exactly the newest world, in every completion order
 ok 300 - §22 — three concurrent requests leave exactly the newest world, in every completion order
   ---
-  duration_ms: 34.983341
+  duration_ms: 50.821474
   type: 'test'
   ...
 1..300
@@ -1827,4 +1827,4 @@ ok 300 - §22 — three concurrent requests leave exactly the newest world, in e
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 209385.442123
+# duration_ms 221367.944876
