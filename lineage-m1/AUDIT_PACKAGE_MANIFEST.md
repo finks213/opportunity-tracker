@@ -74,9 +74,35 @@ node tools/writeCharacterization.mjs
 npm install && npx playwright install chromium
 npm run audit:desktop                 # writes audit/desktop-measurements.json
 
-# 6c. generate FINAL_REPORT.md from the raw evidence (revision 4). Never edit
-#     FINAL_REPORT.md by hand; test/report-integrity.test.js fails if you do.
+# 6c. record the environment of the OFFICIAL evidence run. FINAL_REPORT.md reads
+#     this file instead of the live runtime, so re-rendering on a different
+#     supported Node does not change the report's bytes (revision-5 R5-6).
+npm run audit:environment             # writes audit/build-environment.json
+
+# 6d. generate FINAL_REPORT.md and audit/gate-summary.json from the raw evidence.
+#     Never edit FINAL_REPORT.md by hand; test/report-integrity.test.js fails if
+#     you do. Every gate row is DERIVED from the named tests in the published TAP
+#     (revision-5 R5-7), so run this AFTER `npm run audit:tests`.
 npm run report:final
+
+# 6e. refresh the generated path inventory in section 7 of this manifest.
+npm run manifest:paths
+
+# 6f. cross-runtime proof: render the report under every Node major present and
+#     hash the result; run the determinism-critical tests on each (revision-5
+#     R5-6). Run after 6d, because it compares against the committed report.
+npm run audit:runtime-matrix          # writes audit/runtime-matrix.json  (~6 min)
+
+# 6g. source-tree integrity proof: sample every file under src/ continuously while
+#     the full suite runs at high concurrency, and record any deviation
+#     (revision-5 R5-8).
+npm run audit:tree-integrity          # writes audit/tree-integrity.json  (~9 min)
+
+#     Steps 1, 6d and 6f form a fixed point: the suite checks the report, the
+#     report is generated from the suite's published TAP, and the matrix hashes
+#     the committed report. Run `audit:tests` -> `manifest:paths` -> `report:final`
+#     -> `audit:runtime-matrix` -> `audit:tests` and the last run is green with the
+#     report unchanged. That convergence is the intended state, not a workaround.
 
 # 7. the Canvas probe (desktop measurement and the manual iPad modes)
 #    Containment is covered by test/server-containment.test.js; run the suite

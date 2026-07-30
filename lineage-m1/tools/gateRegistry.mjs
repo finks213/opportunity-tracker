@@ -331,6 +331,7 @@ export const GATES = Object.freeze([
       "§26 — the committed report is exactly what the generator produces",
       "§20 — the report's suite counts equal the raw TAP summary",
       "§27 — the manifest's path inventory is current",
+      "§27 — every published command is documented in the manifest's clean-run section",
     ],
   },
   {

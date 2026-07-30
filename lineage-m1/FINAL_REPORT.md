@@ -85,7 +85,7 @@ failure produced `Full test suite: FAIL — 1 of 249` beside `Birth immutability
 
 | # | Gate | Contract § | Result |
 |---|---|---|---|
-| 1 | Full test suite | §20 | **FAIL** — 297/299, 2 failing |
+| 1 | Full test suite | §20 | **PASS** — 299/299, 0 failing |
 | 2 | Fixture raw SHA-256 integrity | §19 A | **PASS** |
 | 3 | Fixture-envelope canonical round trip | §19 B | **PASS** |
 | 4 | Deterministic hydration | §19 C | **PASS** |
@@ -118,13 +118,13 @@ failure produced `Full test suite: FAIL — 1 of 249` beside `Birth immutability
 | 31 | Generation result is deeply immutable | §4 | **PASS** |
 | 32 | Focal lineage resolved, never reseeded, never falsely terminated | §16 | **PASS** |
 | 33 | Quarantined Python references unchanged | §27 | **PASS** |
-| 34 | Report agrees with the raw evidence | §26 / §27 | **FAIL** — failing: §20 — the report's suite counts equal the raw TAP summary |
+| 34 | Report agrees with the raw evidence | §26 / §27 | **UNVERIFIED** — no result observed for: §27 — every published command is documented in the manifest's clean-run section |
 | 35 | Tests never mutate the production source tree | §20 | **PASS** |
-| 36 | Report bytes are runtime-independent across supported Node majors | §26 | **FAIL** — failing: §26 — the report renders identically on every recorded runtime |
+| 36 | Report bytes are runtime-independent across supported Node majors | §26 | **PASS** |
 | 37 | **Physical iPad acceptance** | §22 | **PENDING_HUMAN_DEVICE_TEST** — no measurement supplied; not performed |
 | 38 | **§24 Stage A pre-code planning order** | §24 | **VIOLATED — principal decision required** — unrepairable retrospectively; DECISIONS.md D-000 and D-024 |
 
-**Gate totals:** 32 PASS · 3 FAIL · 1 UNVERIFIED · 3 externally determined (of 38).
+**Gate totals:** 34 PASS · 0 FAIL · 2 UNVERIFIED · 3 externally determined (of 38).
 
 No unattributed failures: every failing test in this run, if any, maps to a declared gate.
 
@@ -140,8 +140,8 @@ and in `CHARACTERIZATION.md`.
 | Field | Value |
 |---|---|
 | tests | 299 |
-| pass | 297 |
-| fail | 2 |
+| pass | 299 |
+| fail | 0 |
 | cancelled | 0 |
 | skipped | 0 |
 | todo | 0 |
@@ -563,7 +563,7 @@ file. The result column is the scan's actual output, not a remembered claim.
 | observer/debug imports in `src/core`, `src/config`, `src/fixtures` | clean |
 | observer modules referencing the simulation RNG | none |
 | bare-specifier imports in `src/` (runtime dependencies) | none; `dependencies` is empty |
-| full test suite from clean | 297/299, 2 failures |
+| full test suite from clean | 299/299, 0 failures |
 | observer strategies compared after every generation | byte-identical: true |
 | quarantined Python references unchanged | true (3 files) |
 | fixture, both characterization batches, edge-only, desktop | regenerated for this revision |
@@ -652,7 +652,7 @@ provenance — make it addable later without rewriting the biological kernel.
 | genealogy and mating cores remain coherent | met |
 | neutral traits are exactly neutral | met |
 | the difference is visible in the diagnostic probe | met on desktop; **iPad legibility pending human test** |
-| every automated result reproducible from a clean run | NOT met — 297/299 from clean, 3 gate(s) FAIL, 1 UNVERIFIED |
+| every automated result reproducible from a clean run | NOT met — 299/299 from clean, 0 gate(s) FAIL, 2 UNVERIFIED |
 | remaining uncertainty named rather than hidden | met — §6, §11, and the audit response in the repair record |
 
 **Completion is NOT declared** (`mayDeclareCompletion: false`). §24 Stage A ordering was
@@ -675,6 +675,10 @@ status stays as printed at the top of this report.
 | observer invariance | `audit/observer-invariance-hashes.json` |
 | reference-file integrity | `audit/reference-file-hashes.json` |
 | §22 desktop measurement | `audit/desktop-measurements.json` |
+| every gate row above, machine-readable | `audit/gate-summary.json` |
+| the runtime of the official evidence run | `audit/build-environment.json` |
+| report bytes are runtime-independent | `audit/runtime-matrix.json` |
+| tests never modify the production tree | `audit/tree-integrity.json` |
 | status | `src/config/milestoneStatus.js` |
 
 Consistency between this report and those files is enforced by

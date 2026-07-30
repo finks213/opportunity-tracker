@@ -4,16 +4,16 @@
   "note": "Derived from audit/test-results.txt through tools/gateRegistry.mjs. Every gate maps to named tests; a gate whose evidencing test did not run is UNVERIFIED, never PASS. This file and the report's gate table are generated from the same call.",
   "suite": {
     "tests": 299,
-    "pass": 297,
-    "fail": 2
+    "pass": 299,
+    "fail": 0
   },
   "summary": {
     "total": 38,
-    "pass": 32,
-    "fail": 3,
-    "unverified": 1,
+    "pass": 34,
+    "fail": 0,
+    "unverified": 2,
     "external": 3,
-    "suiteHasFailures": true,
+    "suiteHasFailures": false,
     "everyAutomatedResultReproducible": "NOT met"
   },
   "unattributedFailures": [],
@@ -22,9 +22,9 @@
       "id": "fullSuite",
       "label": "Full test suite",
       "section": "§20",
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "suite",
-      "detail": "297/299, 2 failing",
+      "detail": "299/299, 0 failing",
       "mappedTests": []
     },
     {
@@ -560,23 +560,24 @@
       "id": "reportIntegrity",
       "label": "Report agrees with the raw evidence",
       "section": "§26 / §27",
-      "status": "FAIL",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
         "§26 — the committed report is exactly what the generator produces",
         "§20 — the report's suite counts equal the raw TAP summary",
-        "§27 — the manifest's path inventory is current"
+        "§27 — the manifest's path inventory is current",
+        "§27 — every published command is documented in the manifest's clean-run section"
       ],
       "observedTests": [
         "§26 — the committed report is exactly what the generator produces",
         "§20 — the report's suite counts equal the raw TAP summary",
         "§27 — the manifest's path inventory is current"
       ],
-      "failedTests": [
-        "§20 — the report's suite counts equal the raw TAP summary"
-      ],
-      "missingTests": []
+      "failedTests": [],
+      "missingTests": [
+        "§27 — every published command is documented in the manifest's clean-run section"
+      ]
     },
     {
       "id": "testTreeIntegrity",
@@ -600,7 +601,7 @@
       "id": "reportDeterminism",
       "label": "Report bytes are runtime-independent across supported Node majors",
       "section": "§26",
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -609,9 +610,7 @@
       "observedTests": [
         "§26 — the report renders identically on every recorded runtime"
       ],
-      "failedTests": [
-        "§26 — the report renders identically on every recorded runtime"
-      ],
+      "failedTests": [],
       "missingTests": []
     },
     {

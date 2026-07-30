@@ -413,6 +413,47 @@ test("§27 — the manifest's evidence-file list matches what actually exists", 
   }
 });
 
+test("§27 — every published command is documented in the manifest's clean-run section", () => {
+  // §23/§27 require the auditor to be able to re-run the evidence from the bundle.
+  // Revision 5 added four evidence commands (`audit:environment`,
+  // `audit:runtime-matrix`, `audit:tree-integrity`, `manifest:paths`) and the first
+  // draft of the manifest documented none of them, so three raw evidence files had
+  // no published way to regenerate them. This keeps the two in step in both
+  // directions.
+  const manifest = read("AUDIT_PACKAGE_MANIFEST.md");
+  const start = manifest.indexOf("## 2. Exact clean-run commands");
+  const end = manifest.indexOf("## 3. Required hashes");
+  assert.ok(start >= 0 && end > start, "the manifest must carry a clean-run command section");
+  const section = manifest.slice(start, end);
+
+  const pkg = readJson("package.json");
+  for (const [name, cmd] of Object.entries(pkg.scripts)) {
+    // A script is documented either by its npm alias or by the tool it runs — the
+    // manifest uses `node tools/…` form for the long evidence generators.
+    const tool = cmd.match(/tools\/[A-Za-z0-9._-]+\.mjs/);
+    const documented =
+      section.includes(`npm run ${name}`) ||
+      (name === "test" && section.includes("npm test")) ||
+      (tool !== null && section.includes(tool[0]));
+    assert.ok(
+      documented,
+      `package.json declares the "${name}" script but §2 of the manifest documents no way to run it`
+    );
+  }
+
+  // ...and no phantom command: every npm alias the manifest names must exist.
+  for (const m of section.matchAll(/npm run ([A-Za-z0-9:_-]+)/g)) {
+    assert.ok(
+      m[1] in pkg.scripts,
+      `the manifest documents \`npm run ${m[1]}\`, which package.json does not declare`
+    );
+  }
+  // ...and every tool the manifest names must ship.
+  for (const m of section.matchAll(/tools\/[A-Za-z0-9._-]+\.mjs/g)) {
+    assert.ok(existsSync(join(ROOT, m[0])), `the manifest names ${m[0]}, which does not exist`);
+  }
+});
+
 test("§26 — the report is marked as generated so it is not hand-edited", () => {
   assert.ok(REPORT.startsWith("# LINEAGE Milestone 1 — Final Implementation Report"));
   assert.ok(REPORT.includes("> **GENERATED FILE.**"));
