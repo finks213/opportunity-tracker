@@ -45,7 +45,22 @@ export function verifyProvenance(root = ROOT) {
   for (const [rel, r] of Object.entries(rec.evidence)) check(rel, r);
   for (const [rel, r] of Object.entries(rec.generated)) check(rel, r);
   check(rec.fixture.path, rec.fixture);
-  check(rec.testResults.path, rec.testResults);
+
+  // The published TAP is bound by COUNTS, not bytes — see the note in the record.
+  const tapPath = join(root, rec.testResults.path);
+  if (!existsSync(tapPath)) {
+    missing.push(rec.testResults.path);
+  } else {
+    const text = readFileSync(tapPath, "utf8");
+    checked++;
+    for (const key of ["tests", "pass", "fail"]) {
+      const m = text.match(new RegExp(`^# ${key} (\\d+)$`, "m"));
+      const found = m ? Number(m[1]) : null;
+      if (found !== rec.testResults[key]) {
+        mismatches.push(`${rec.testResults.path}: recorded ${key} ${rec.testResults[key]}, found ${found}`);
+      }
+    }
+  }
 
   // No undisclosed evidence: every audit file must be recorded.
   const unrecorded = [];
@@ -54,6 +69,7 @@ export function verifyProvenance(root = ROOT) {
       const child = `${d}/${name}`;
       if (statSync(join(root, child)).isDirectory()) { walk(child); continue; }
       if (child.endsWith(".partial") || child.endsWith("provenance.json")) continue;
+      if (child === rec.testResults.path) continue;   // recorded separately, by counts
       if (!(child in rec.evidence)) unrecorded.push(child);
     }
   };

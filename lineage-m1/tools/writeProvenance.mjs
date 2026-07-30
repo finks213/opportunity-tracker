@@ -73,7 +73,13 @@ export function buildProvenance() {
   const git = gitFacts();
   const evidence = {};
   for (const rel of filesUnder("audit")) {
+    // `.partial` exists only while a suite is running. `provenance.json` cannot
+    // record its own hash. `test-results.txt` is recorded separately, by COUNTS
+    // rather than bytes: the suite that verifies this record publishes a new TAP
+    // whose wall-clock lines differ, so a byte comparison would be unsatisfiable
+    // by construction rather than by tampering.
     if (rel.endsWith(".partial") || rel.endsWith("provenance.json")) continue;
+    if (rel === "audit/test-results.txt") continue;
     evidence[rel] = fileRecord(rel);
   }
   const generated = {};
@@ -105,6 +111,12 @@ export function buildProvenance() {
       tests: gateSummary.suite.tests,
       pass: gateSummary.suite.pass,
       fail: gateSummary.suite.fail,
+      boundBy: "counts",
+      note:
+        "The sha256 below is of the published run at the moment this record was written. It is NOT " +
+        "byte-verified by tools/verifyProvenance.mjs: the suite that verifies this record publishes a " +
+        "new TAP whose wall-clock lines differ, so a byte comparison would fail by construction rather " +
+        "than by tampering. The COUNTS are verified, and every other file is verified byte for byte.",
     },
     milestone: gateSummary.milestone,
     generated,

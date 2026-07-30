@@ -147,11 +147,18 @@ an acceptance target here.**
 M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED
 ```
 
-Revision 5. Revision 4 was audited twice — the AFE-Δ evidence and claim audit
-and an independent structural code audit — and both returned `BREAKS-FOUND` with
-nine verified defects. All nine are repaired here, each independently
-reproduced first, but **no automated-gate pass is self-certified**: the status
-holds until revision 5 survives independent re-audit.
+Revision 6. Revision 5 was audited twice — the AFE-Δ evidence and claim audit
+(5 breaks) and an independent structural code audit (9 findings) — and both
+returned `BREAKS-FOUND`. The two are treated as one consolidated defect set of
+twelve findings, every one reproduced against the exact audited artifact before
+any production change and every one carrying a committed regression test. **No
+automated-gate pass is self-certified**: the status is derived from the published
+run plus `audit/external-gate-status.json`, and the standing
+`independentClosureAudit` condition keeps it blocked until revision 6 survives
+independent re-audit.
+
+The status is no longer written in source. `deriveMilestoneStatus()` computes it,
+and `FINAL_REPORT.md` prints every blocker the derivation found.
 
 The revision-3 biological, fixture, security, traversal and long-run memory
 repairs are preserved unchanged; revision 4 adds transaction atomicity against

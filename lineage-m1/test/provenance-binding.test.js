@@ -60,6 +60,12 @@ test("§27 — every audit file is covered, and the archive hash is honestly abs
   const p = readJson("audit/provenance.json");
   for (const name of readdirSync(join(ROOT, "audit"))) {
     if (name.endsWith(".partial") || name === "provenance.json") continue;
+    if (`audit/${name}` === p.testResults.path) {
+      // Bound by counts rather than bytes, and the record says why.
+      assert.equal(p.testResults.boundBy, "counts");
+      assert.match(p.testResults.note, /wall-clock lines differ/);
+      continue;
+    }
     assert.ok(`audit/${name}` in p.evidence, `audit/${name} must be bound by the provenance record`);
   }
   // An archive cannot contain its own hash; the record must say so rather than
@@ -76,7 +82,7 @@ test("§27 — a tampered file is detected", () => {
   const dir = mkdtempSync(join(tmpdir(), "lineage-prov-"));
   try {
     for (const rel of ["audit", "tools", "src", "fixtures", "FINAL_REPORT.md", "CHARACTERIZATION.md",
-      "AUDIT_PACKAGE_MANIFEST.md", "DECISIONS.md", "package.json"]) {
+      "AUDIT_PACKAGE_MANIFEST.md", "DECISIONS.md", "REVISION_6_REPAIR_RECORD.md", "package.json"]) {
       if (existsSync(join(ROOT, rel))) cpSync(join(ROOT, rel), join(dir, rel), { recursive: true });
     }
     assert.equal(verifyProvenance(dir).ok, true, "the untampered copy must verify");

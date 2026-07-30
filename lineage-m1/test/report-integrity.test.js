@@ -38,7 +38,7 @@ import { readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 import { renderFinalReport, parseTap, selfAuditScans } from "../tools/writeFinalReport.mjs";
-import { deriveGateStatuses, GATES } from "../tools/gateRegistry.mjs";
+import { deriveGateStatuses, readExternalStatuses, deriveMilestoneStatus, GATES } from "../tools/gateRegistry.mjs";
 import { MILESTONE_STATUS, HASH_LABELS } from "../src/config/milestoneStatus.js";
 import { exactProbabilityGate } from "../tools/runFixture.mjs";
 import { buildMeaningfulTraitGateEvidence } from "../tools/writeAuditEvidence.mjs";
@@ -166,15 +166,25 @@ test("§9/§18 — modelDefinitionHash is the principal identity and the subset 
   assert.notEqual(CHAR.modelDefinitionHash, CHAR.tuningConfigHash, "the two hashes must be distinguishable");
 });
 
-test("§26 — the report's status comes from the single source of truth", () => {
-  assert.ok(REPORT.includes(MILESTONE_STATUS.status), "the report must state the canonical status");
-  assert.ok(REPORT.includes(MILESTONE_STATUS.processWaiver));
-  assert.ok(REPORT.includes(MILESTONE_STATUS.ipadTest));
-  assert.equal(MILESTONE_STATUS.mayDeclareCompletion, false);
+test("§26 — the report's status is the one the evidence derives", () => {
+  // REVISION-6 CHANGE (M-2 / R6-J). This test used to compare the report against a
+  // literal in `src/config/milestoneStatus.js`. That file no longer asserts a
+  // status: it is derived from the published run plus the external inputs, so the
+  // comparison is now between the report and a fresh derivation.
+  const external = readExternalStatuses(read);
+  const milestone = deriveMilestoneStatus(deriveGateStatuses(TAP, external), external);
+  assert.ok(REPORT.includes(milestone.status), "the report must state the derived status");
+  assert.ok(REPORT.includes("PROCESS WAIVER: PENDING PRINCIPAL DECISION"));
+  assert.ok(REPORT.includes("IPAD TEST: PENDING_HUMAN_DEVICE_TEST"));
+  assert.equal(milestone.mayDeclareCompletion, false);
   assert.ok(
     REPORT.includes("**Completion is NOT declared**"),
     "the report must not declare completion while mayDeclareCompletion is false"
   );
+  // Every blocker the derivation found must be printed, not summarised away.
+  for (const b of milestone.blockers) {
+    assert.ok(REPORT.includes(`- ${b}`), `the report must print the blocker "${b}"`);
+  }
   // Forbidden statuses may appear only inside an explicit withdrawal.
   for (const forbidden of MILESTONE_STATUS.forbiddenStatuses) {
     for (const line of REPORT.split("\n")) {
@@ -588,11 +598,15 @@ test("§20/§26 — a gate whose evidencing test did not run reads UNVERIFIED, n
 
 test("§20/§26 — externally determined gates can never read PASS", () => {
   // Checked against a fully-green run: even then they must not pass.
-  const d = deriveGateStatuses(syntheticGreenRun());
+  // Revision-6: external statuses are READ from their named inputs, so the shipped
+  // inputs are supplied here rather than being baked into the registry.
+  const d = deriveGateStatuses(syntheticGreenRun(), readExternalStatuses(read));
   const external = d.gates.filter((g) => g.evidence === "external");
   assert.ok(external.length >= 3, "the iPad gate, Stage A order and Canvas memory are external");
   for (const g of external) {
     assert.notEqual(g.status, "PASS", `${g.id} must never read PASS`);
+    assert.equal(g.machineVerified, false, `${g.id} must not be presented as machine-verified`);
+    assert.ok(g.evidenceSource, `${g.id} must name where its status was read from`);
   }
   const byId = Object.fromEntries(external.map((g) => [g.id, g.status]));
   assert.equal(byId.ipadGate, "PENDING_HUMAN_DEVICE_TEST");
@@ -602,7 +616,7 @@ test("§20/§26 — externally determined gates can never read PASS", () => {
 
 test("§20/§26 — the committed gate summary matches the report's table", () => {
   const summary = readJson("audit/gate-summary.json");
-  const derived = deriveGateStatuses(TAP);
+  const derived = deriveGateStatuses(TAP, readExternalStatuses(read));
   assert.equal(summary.gates.length, derived.gates.length);
   for (let i = 0; i < derived.gates.length; i++) {
     assert.equal(summary.gates[i].id, derived.gates[i].id);
