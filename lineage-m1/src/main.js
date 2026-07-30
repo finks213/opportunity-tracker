@@ -62,6 +62,20 @@ class ProbeApp {
     this.worldSource = "random";
     this.fixtureLoadError = null;
     this.lastAdvance = 0;
+    // ---- world-change transaction identity (revision-5 repair, BUG 2 / R5-2) ----
+    //
+    // Every asynchronous world-changing request takes a monotonic token. A request
+    // may commit ONLY if its token is still the newest one issued. Revision 4 had
+    // no request identity: an older in-flight fixture load resolved after a newer
+    // one and overwrote it, leaving legibility mode reporting the defining fixture
+    // while the bytes held the high-webbing override. Reproduced exactly:
+    //   start high-webbing load -> enter legibility (2nd load) -> resolve
+    //   legibility first (exact baseline true) -> resolve high-webbing last
+    //   => manualTestMode legibility, worldSource defining_fixture,
+    //      isBaselineFixtureActive() false
+    // A synchronous reset must also invalidate in-flight loads, or a stale fixture
+    // response replaces a newer random world.
+    this.worldChangeToken = 0;
     /** Glyphs actually drawn by the most recent render-stress frame; null before any. */
     this.lastRenderedGlyphCount = null;
     this.meter = new FrameMeter();
@@ -79,6 +93,29 @@ class ProbeApp {
     globalThis.addEventListener("resize", () => this.probe.resize());
   }
 
+  // ---- world-change transactions (revision-5 repair, BUG 2 / R5-2) ----
+
+  /**
+   * Claim the next world-change token, superseding every in-flight request.
+   * Call this at the START of any operation that will replace the world.
+   * @returns {number}
+   */
+  beginWorldChange() {
+    return ++this.worldChangeToken;
+  }
+
+  /**
+   * True when `token` is still the newest world-change request. A request whose
+   * token has been superseded must not commit anything: not biology, not
+   * `worldSource`, not the test mode, not the seed label, not tracer state, not
+   * the fixture variant.
+   * @param {number} token
+   * @returns {boolean}
+   */
+  isCurrentWorldChange(token) {
+    return token === this.worldChangeToken;
+  }
+
   // ---- controls ----
   setRunning(v) { this.running = v; this.meter.markInput(); this.updateStatus(); }
   stepOnce() { this.meter.markInput(); this.advance(); this.renderPanels(); }
@@ -88,6 +125,10 @@ class ProbeApp {
 
   resetRandomWorld(seed) {
     this.meter.markInput();
+    // Synchronous, but it must still supersede any in-flight fixture load —
+    // otherwise a stale fixture response replaces this newer random world while
+    // the seed label keeps showing the reset seed.
+    this.beginWorldChange();
     this.seed = seed;
     this.state = createInitialState(seed, currentModelConfig);
     this.observer = createObserverState();
@@ -108,6 +149,9 @@ class ProbeApp {
    */
   async loadDefiningFixture(opts = {}) {
     this.meter.markInput();
+    // A caller that already opened a transaction (setManualTestMode) passes its
+    // token in so the two do not fight over which is newest.
+    const token = opts.worldChangeToken ?? this.beginWorldChange();
     try {
       if (!this.fixtureEnvelope) {
         const response = await fetch("./fixtures/defining_fixture_v1.json");
@@ -118,6 +162,9 @@ class ProbeApp {
         this.fixtureEnvelope = parsed;
       }
     } catch (err) {
+      // A failed request must not clobber a newer world's state either — not even
+      // with an error message.
+      if (!this.isCurrentWorldChange(token)) return false;
       // Explicit failure: do not switch worldSource, do not enter a mode that
       // claims to show the fixture.
       this.fixtureLoadError = String(err && err.message ? err.message : err);
@@ -125,6 +172,10 @@ class ProbeApp {
       this.renderPanels();
       return false;
     }
+    // ---- COMMIT GATE ----
+    // Everything above is I/O. Everything below mutates the world, so a
+    // superseded request stops here and commits nothing.
+    if (!this.isCurrentWorldChange(token)) return false;
     this.fixtureLoadError = null;
     const env = this.fixtureEnvelope;
     this.state = hydrateDefiningFixtureV1(env, this.seed, currentModelConfig);
@@ -319,13 +370,15 @@ class ProbeApp {
    * replaced.
    * @returns {Promise<boolean>} false when the fixture cannot be loaded
    */
-  async ensureBaselineFixtureActive() {
+  async ensureBaselineFixtureActive(worldChangeToken) {
     if (this.isBaselineFixtureActive()) return true;
-    return await this.loadDefiningFixture();
+    return await this.loadDefiningFixture({ worldChangeToken });
   }
 
   async setManualTestMode(mode) {
     this.meter.markInput();
+    // Entering a mode that requires a specific world is itself a world change.
+    const token = this.beginWorldChange();
     this.manualTestMode = mode;
     if (mode === "legibility") {
       // §22 requires this mode to contain the DEFINING FIXTURE — the unmodified
@@ -340,11 +393,16 @@ class ProbeApp {
       // Entry now verifies exact baseline identity by canonical bytes and
       // rehydrates whenever it does not match.
       this.running = false;
-      if (!(await this.ensureBaselineFixtureActive())) {
-        this.manualTestMode = null;
-        this.renderPanels();
+      if (!(await this.ensureBaselineFixtureActive(token))) {
+        // Only clear the mode if this request is still the current one; a newer
+        // request has already set the mode it wants.
+        if (this.isCurrentWorldChange(token)) {
+          this.manualTestMode = null;
+          this.renderPanels();
+        }
         return false;
       }
+      if (!this.isCurrentWorldChange(token)) return false;
     }
     if (mode === "render-stress") {
       // Exactly 360 simultaneously visible glyphs (§22). Rendering benchmark
