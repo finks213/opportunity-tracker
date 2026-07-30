@@ -1,0 +1,50 @@
+{
+  "schema": "lineage-m1-tree-integrity-1",
+  "contractSection": "20 (build-blocking suite integrity)",
+  "claim": "The production source tree under src/ is never modified at any instant while the full suite runs at high concurrency. Sampled continuously, not merely compared before and after.",
+  "concurrency": 4,
+  "rounds": 2,
+  "samplesTaken": 712760,
+  "baselineDigest": "304ef686f17b37eec59ebd8d71f28cddcd980a2601ff1ec3c3f515fc299457aa",
+  "finalDigest": "304ef686f17b37eec59ebd8d71f28cddcd980a2601ff1ec3c3f515fc299457aa",
+  "fileCount": 31,
+  "treeUnchangedThroughout": true,
+  "deviations": [],
+  "runs": [
+    {
+      "exitCode": 1,
+      "tests": 299,
+      "pass": 290,
+      "fail": 9,
+      "failing": [
+        "§26 — rendering is a pure function of committed evidence",
+        "§26 — the report renders identically on every recorded runtime",
+        "§26 — the committed report is exactly what the generator produces",
+        "§20 — the report's suite counts equal the raw TAP summary",
+        "§27 — the manifest's evidence-file list matches what actually exists",
+        "§20/§26 — injecting a failure into any gate category turns that gate FAIL, never PASS",
+        "§20/§26 — an UNATTRIBUTABLE failure degrades every other gate to UNVERIFIED",
+        "§20/§26 — a gate whose evidencing test did not run reads UNVERIFIED, never PASS",
+        "§20/§26 — the committed gate summary matches the report's table"
+      ]
+    },
+    {
+      "exitCode": 1,
+      "tests": 299,
+      "pass": 290,
+      "fail": 9,
+      "failing": [
+        "§26 — rendering is a pure function of committed evidence",
+        "§26 — the report renders identically on every recorded runtime",
+        "§26 — the committed report is exactly what the generator produces",
+        "§20 — the report's suite counts equal the raw TAP summary",
+        "§27 — the manifest's evidence-file list matches what actually exists",
+        "§20/§26 — injecting a failure into any gate category turns that gate FAIL, never PASS",
+        "§20/§26 — an UNATTRIBUTABLE failure degrades every other gate to UNVERIFIED",
+        "§20/§26 — a gate whose evidencing test did not run reads UNVERIFIED, never PASS",
+        "§20/§26 — the committed gate summary matches the report's table"
+      ]
+    }
+  ],
+  "allRunsGreen": false
+}

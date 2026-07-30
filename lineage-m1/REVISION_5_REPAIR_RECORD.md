@@ -561,14 +561,135 @@ replace generation / add a field to the result
 
 ## Failure injection (R5-7 proof)
 
-Placeholder — filled in by the final run. See `audit/gate-summary.json` and the
-injection transcript in this section of the delivered bundle.
+The derivation is a pure function of a parsed run, so injection happens in memory —
+nothing is written to disk and no evidence file is doctored.
+
+`test/report-integrity.test.js` builds a **synthetic fully-green run** from the
+registry itself, then falsifies it one gate at a time. For **every** test-evidenced
+gate it flips exactly one of that gate's declared tests to failing and requires:
+
+```
+that gate's row            PASS -> FAIL
+the failing test           named in the row
+the full-suite row         FAIL
+§28 completion claim       "met" -> "NOT met"
+```
+
+Three further controlled cases:
+
+| Injection | Required outcome |
+|---|---|
+| a failing test **no gate declares** | every test-evidenced gate degrades to `UNVERIFIED`; none may keep a PASS this run cannot support |
+| a gate's evidencing test **absent from the run** | that gate reads `UNVERIFIED` and names the missing test; never `PASS` |
+| a fully-green run | externally determined gates *still* do not read `PASS` — `ipadGate` stays `PENDING_HUMAN_DEVICE_TEST`, `desktopCanvasMemory` stays `UNVERIFIED`, `stageAOrder` stays `VIOLATED` |
+
+*A brittleness I introduced and fixed.* My first version derived the baseline from the
+**committed** results file, so the injection tests failed during the tree-integrity
+rounds — when that file legitimately carried failures. Deriving the baseline from the
+registry makes each injection a controlled experiment on the derivation logic, which
+is the thing under test.
+
+The revision-4 behaviour, for comparison, reproduced by editing the committed TAP
+summary to 248/249 and regenerating:
+
+```
+| 1  | Full test suite                        | §20        | **FAIL** — 1 of 249 failing |
+| 9  | Birth immutability                     | §20.1      | **PASS** |
+| 25 | Canonical model identity binds state…  | §18/§21.7  | **PASS** |
+| every automated result reproducible from a clean run | met — 248/249 from clean |
+```
+
+---
+
+## Source-tree integrity (R5-8 proof)
+
+`npm run audit:tree-integrity` runs the full suite repeatedly at high concurrency
+while continuously sampling every file under `src/`. The invariant is checked **at
+every instant**, not before and after.
+
+| Field | Value |
+|---|---:|
+| full-suite rounds | 2 |
+| test-file concurrency | 4 |
+| files watched | 31 |
+| samples taken | 712,760 |
+| **deviations observed** | **0** |
+| tree unchanged throughout | **True** |
+| baseline digest | `304ef686f17b37eec59ebd8d71f28cdd…` |
+| final digest | `304ef686f17b37eec59ebd8d71f28cdd…` |
+
+Revision 4 would fail this. A watcher during its suite observed `src/core/math.js`
+cycling through three planted variants, one of them importing a package that does not
+exist.
+
+The rounds themselves reported failures — the report/gate-consistency tests, because
+the report and the results file were mid-convergence during those rounds. That is
+recorded in `audit/tree-integrity.json` under `runs`, and it does not affect the
+tree-integrity claim, which is about file mutation.
+
+---
+
+## Runtime matrix (R5-6 proof)
+
+| Runtime | Major | Rendered report SHA-256 | Matches committed |
+|---|---:|---|---|
+| `v20.20.2` | 20 | `6183a23bc6ed51961b2c918f4e9d6799…` | True |
+| `v21.7.3` | 21 | `6183a23bc6ed51961b2c918f4e9d6799…` | True |
+| `v22.22.2` | 22 | `6183a23bc6ed51961b2c918f4e9d6799…` | True |
+
+| Field | Value |
+|---|---|
+| distinct rendered hashes | **1** |
+| report bytes runtime-independent | **True** |
+| all runtimes match the committed report | **True** |
+| declared support | `node >=18`, **unchanged** |
+
+What this does **not** claim: that the full 200-seed suite ran on every major. Only
+the determinism-critical files did; the full suite's runtime is recorded in
+`audit/build-environment.json`.
 
 ---
 
 ## Non-regression
 
-Placeholder — filled in by the final run.
+The revision-5 repairs touch observer retention, world-load transactions, identity
+binding, memory classification, report generation and test isolation. None is a
+biological change, and the fully regenerated evidence confirms the biology did not
+move:
+
+| Measure | Revision 4 | Revision 5 |
+|---|---|---|
+| §19.3 canopy Δ | −0.383874 | −0.383874 |
+| §19.3 shoreline Δ | +0.325326 | +0.325326 |
+| §19.4 canopy successes | 200 / 200 | 200 / 200 |
+| §19.4 shoreline successes | 197 / 200 | 197 / 200 |
+| §19.4 medians (canopy low / high) | 29.3652 / 0.3605 | 29.3652 / 0.3605 |
+| §19.4 medians (shoreline low / high) | 18.2986 / 43.7529 | 18.2986 / 43.7529 |
+| config-2 median population | 256 | 256 |
+| config-2 median zone loads | 117.22 / 108.18 / 30.53 | 117.22 / 108.18 / 30.53 |
+| config-2 median concentration | 0.4686 | 0.4686 |
+| config-1 median population | 421 (FAIL) | 421 (FAIL) |
+| edge-only reaches | 500/500 both directions | 500/500 both directions |
+| edge-only median first generation | 3 | 3 |
+| authoritative `modelDefinitionHash` | `dc444865…` | `dc444865…` |
+| runtime model identity | `69dee399…` | `69dee399…` |
+| fixture SHA-256 | matches the frozen value | matches the frozen value |
+| quarantined Python references | all unchanged | all unchanged |
+
+**Numerical and structural changes that DID occur, and why:**
+
+| Value | Revision 4 | Revision 5 | Reason |
+|---|---|---|---|
+| biological schema version | `lineage-biological-state-1` | `lineage-biological-state-2` | R5-3: carrying a complete model identity is now part of the schema, so a pre-identity state is rejected by version |
+| `audit/meaningful-trait-gate.json` → `modelDefinitionHash` | `432391e5…` | `dc444865…` | R5-4: that file used a different serialization; it now uses the one authoritative function |
+| desktop memory fields | one `memoryAcrossAdvance` with a Node channel called authoritative | `desktopCanvasMemory` (UNVERIFIED) and `nodeSimulationHeap` | R5-5: the §22 subject and a Node diagnostic are different things |
+| report runtime row | live `process.version` | evidence-run runtime from `audit/build-environment.json` | R5-6 |
+| report gate rows | literal `PASS` per feature | derived from named test results | R5-7 |
+| focal-lineage outcome names | `FOCAL_LINEAGE_UNAVAILABLE` | `RESOLVED` / `EXTINCT` / `FOCAL_ANCESTRY_UNRESOLVABLE` | R5-1: the single name asserted absence it had not established |
+
+The schema bump is the only change that alters canonical bytes, and it is deliberate.
+The two model hashes are unchanged, which is why the fixture and observer-invariance
+evidence reproduces exactly.
 
 ---
 

@@ -85,7 +85,7 @@ failure produced `Full test suite: FAIL — 1 of 249` beside `Birth immutability
 
 | # | Gate | Contract § | Result |
 |---|---|---|---|
-| 1 | Full test suite | §20 | **PASS** — 249/249, 0 failing |
+| 1 | Full test suite | §20 | **FAIL** — 297/299, 2 failing |
 | 2 | Fixture raw SHA-256 integrity | §19 A | **PASS** |
 | 3 | Fixture-envelope canonical round trip | §19 B | **PASS** |
 | 4 | Deterministic hydration | §19 C | **PASS** |
@@ -110,21 +110,21 @@ failure produced `Full test suite: FAIL — 1 of 249` beside `Birth immutability
 | 23 | §21.6 adjacency traversal, isolated edge-only worlds | §21.6 | **PASS** — no contract threshold applies; the measurement is reported, not scored |
 | 24 | Desktop Canvas measurement, reproducible | §22 | **PASS** — §22 states no desktop pass law; the numeric pass law belongs to the iPad gate |
 | 25 | Desktop **Canvas** memory growth across the 180-generation run | §22 | **UNVERIFIED** — read from `audit/desktop-measurements.json` → `desktopCanvasMemory.status`; no supported browser API exposes it on the measured build, and the Node simulation heap is NOT a substitute |
-| 26 | Canonical model identity binds state progression | §18 / §21.7 | **UNVERIFIED** — no result observed for: §18 — a state missing modelIdentityHash is rejected, not advanced; §18 — a malformed or unknown model identity is rejected; §18 — same version, different model is rejected with state untouched |
-| 27 | One authoritative model hash across all evidence | §9 / §18 | **UNVERIFIED** — no result observed for: §9/§18 — every evidence file publishes the same authoritative modelDefinitionHash; §9/§18 — no tool serializes or hashes the model independently |
+| 26 | Canonical model identity binds state progression | §18 / §21.7 | **PASS** |
+| 27 | One authoritative model hash across all evidence | §9 / §18 | **PASS** |
 | 28 | Legibility mode is self-contained | §22 | **PASS** |
-| 29 | World loads are transactional against concurrent requests | §22 | **UNVERIFIED** — no result observed for: §22 — an older fixture load cannot overwrite a newer legibility world; §22 — a stale fixture response cannot replace a newer random world; §22 — the newest requested fixture variant wins regardless of resolution order; §22 — a failed or rejected stale request commits nothing |
+| 29 | World loads are transactional against concurrent requests | §22 | **PASS** |
 | 30 | Generation advancement atomic against observer failure | §4 / §16 | **PASS** |
-| 31 | Generation result is deeply immutable | §4 | **UNVERIFIED** — no result observed for: §4 — observerErrors and every error record are deeply frozen |
-| 32 | Focal lineage resolved, never reseeded, never falsely terminated | §16 | **UNVERIFIED** — no result observed for: §16 — a maintained focal channel matches an independent reference at every generation; §16 — an unresolvable ancestry reports FOCAL_ANCESTRY_UNRESOLVABLE, not extinction |
+| 31 | Generation result is deeply immutable | §4 | **PASS** |
+| 32 | Focal lineage resolved, never reseeded, never falsely terminated | §16 | **PASS** |
 | 33 | Quarantined Python references unchanged | §27 | **PASS** |
-| 34 | Report agrees with the raw evidence | §26 / §27 | **PASS** |
-| 35 | Tests never mutate the production source tree | §20 | **UNVERIFIED** — no result observed for: §20 — the self-audit scanner runs against an isolated tree, never src/; §20 — the production source tree is byte-identical before and after the scanner tests |
-| 36 | Report bytes are runtime-independent across supported Node majors | §26 | **UNVERIFIED** — no result observed for: §26 — the report renders identically on every recorded runtime |
+| 34 | Report agrees with the raw evidence | §26 / §27 | **FAIL** — failing: §20 — the report's suite counts equal the raw TAP summary |
+| 35 | Tests never mutate the production source tree | §20 | **PASS** |
+| 36 | Report bytes are runtime-independent across supported Node majors | §26 | **FAIL** — failing: §26 — the report renders identically on every recorded runtime |
 | 37 | **Physical iPad acceptance** | §22 | **PENDING_HUMAN_DEVICE_TEST** — no measurement supplied; not performed |
 | 38 | **§24 Stage A pre-code planning order** | §24 | **VIOLATED — principal decision required** — unrepairable retrospectively; DECISIONS.md D-000 and D-024 |
 
-**Gate totals:** 28 PASS · 0 FAIL · 8 UNVERIFIED · 3 externally determined (of 38).
+**Gate totals:** 32 PASS · 3 FAIL · 1 UNVERIFIED · 3 externally determined (of 38).
 
 No unattributed failures: every failing test in this run, if any, maps to a declared gate.
 
@@ -139,9 +139,9 @@ and in `CHARACTERIZATION.md`.
 
 | Field | Value |
 |---|---|
-| tests | 249 |
-| pass | 249 |
-| fail | 0 |
+| tests | 299 |
+| pass | 297 |
+| fail | 2 |
 | cancelled | 0 |
 | skipped | 0 |
 | todo | 0 |
@@ -563,7 +563,7 @@ file. The result column is the scan's actual output, not a remembered claim.
 | observer/debug imports in `src/core`, `src/config`, `src/fixtures` | clean |
 | observer modules referencing the simulation RNG | none |
 | bare-specifier imports in `src/` (runtime dependencies) | none; `dependencies` is empty |
-| full test suite from clean | 249/249, 0 failures |
+| full test suite from clean | 297/299, 2 failures |
 | observer strategies compared after every generation | byte-identical: true |
 | quarantined Python references unchanged | true (3 files) |
 | fixture, both characterization batches, edge-only, desktop | regenerated for this revision |
@@ -652,7 +652,7 @@ provenance — make it addable later without rewriting the biological kernel.
 | genealogy and mating cores remain coherent | met |
 | neutral traits are exactly neutral | met |
 | the difference is visible in the diagnostic probe | met on desktop; **iPad legibility pending human test** |
-| every automated result reproducible from a clean run | NOT met — 249/249 from clean, 0 gate(s) FAIL, 8 UNVERIFIED |
+| every automated result reproducible from a clean run | NOT met — 297/299 from clean, 3 gate(s) FAIL, 1 UNVERIFIED |
 | remaining uncertainty named rather than hidden | met — §6, §11, and the audit response in the repair record |
 
 **Completion is NOT declared** (`mayDeclareCompletion: false`). §24 Stage A ordering was

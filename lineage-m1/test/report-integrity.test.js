@@ -38,7 +38,7 @@ import { readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 import { renderFinalReport, parseTap, selfAuditScans } from "../tools/writeFinalReport.mjs";
-import { deriveGateStatuses } from "../tools/gateRegistry.mjs";
+import { deriveGateStatuses, GATES } from "../tools/gateRegistry.mjs";
 import { MILESTONE_STATUS, HASH_LABELS } from "../src/config/milestoneStatus.js";
 import { exactProbabilityGate } from "../tools/runFixture.mjs";
 import { buildMeaningfulTraitGateEvidence } from "../tools/writeAuditEvidence.mjs";
@@ -78,28 +78,38 @@ test("§20 — the report's suite counts equal the raw TAP summary", () => {
       `the report must print the raw ${label} count ${value}`
     );
   }
-  // ...and the gate-table summary must state the SAME outcome, in whichever form
-  // applies. A green run reads "N/N, 0 failures"; a failing run must say FAIL with
-  // the real numbers rather than quietly printing a pass shape.
-  if (TAP.fail === 0) {
-    const green = [...REPORT.matchAll(/(\d+)\s*\/\s*(\d+), 0 failures/g)].map((m) => [Number(m[1]), Number(m[2])]);
-    assert.ok(green.length > 0, "a green run must state the pass/total summary");
-    for (const [p, t] of green) {
-      assert.equal(t, TAP.tests, `the report claims ${t} tests but the runner reported ${TAP.tests}`);
-      assert.equal(p, TAP.pass, `the report claims ${p} passing but the runner reported ${TAP.pass}`);
-    }
-    assert.ok(
-      !/\*\*FAIL\*\* — \d+ of \d+ failing/.test(REPORT),
-      "a green run must not print a failing summary"
-    );
-  } else {
-    const red = [...REPORT.matchAll(/\*\*FAIL\*\* — (\d+) of (\d+) failing/g)].map((m) => [Number(m[1]), Number(m[2])]);
-    assert.ok(red.length > 0, "a failing run must be reported as FAIL, not hidden");
-    for (const [f, t] of red) {
-      assert.equal(f, TAP.fail, `the report claims ${f} failures but the runner reported ${TAP.fail}`);
-      assert.equal(t, TAP.tests, `the report claims ${t} tests but the runner reported ${TAP.tests}`);
-    }
-  }
+  // ...and the gate-table row for the whole suite must state the SAME outcome. The
+  // generator prints one canonical shape for that row,
+  //
+  //   | 1 | Full test suite | §20 | **PASS** — 299/299, 0 failing |
+  //   | 1 | Full test suite | §20 | **FAIL** — 297/299, 2 failing |
+  //
+  // so both branches below match that shape and check the numbers in it. (Revision 5:
+  // the failing branch previously matched `**FAIL** — N of M failing`, the wording of
+  // the revision-3 example quoted in §9b rather than the wording this generator emits,
+  // so the branch could not fire. It fired for the first time on a genuinely failing
+  // run and was wrong; the numbers, not the prose, are what must agree.)
+  const suiteRow = /\| Full test suite \| §20 \| \*\*(PASS|FAIL)\*\* — (\d+)\/(\d+), (\d+) failing \|/;
+  const row = REPORT.match(suiteRow);
+  assert.ok(row, "the report must carry a Full test suite gate row with the raw counts");
+  const [, verdict, rowPass, rowTests, rowFail] = row;
+  assert.equal(Number(rowPass), TAP.pass, `the report claims ${rowPass} passing, the runner reported ${TAP.pass}`);
+  assert.equal(Number(rowTests), TAP.tests, `the report claims ${rowTests} tests, the runner reported ${TAP.tests}`);
+  assert.equal(Number(rowFail), TAP.fail, `the report claims ${rowFail} failing, the runner reported ${TAP.fail}`);
+  assert.equal(
+    verdict,
+    TAP.fail === 0 ? "PASS" : "FAIL",
+    TAP.fail === 0
+      ? "a green run must not print a failing summary"
+      : "a failing run must be reported as FAIL, not hidden"
+  );
+
+  // The reproduction section restates the same run and must not disagree with it.
+  assert.match(
+    REPORT,
+    new RegExp(`\\| full test suite from clean \\| ${TAP.pass}/${TAP.tests}, ${TAP.fail} failures \\|`),
+    "the reproduction table must restate the same counts"
+  );
 
   // Wall-clock duration must NOT be reproduced: it differs on every run, so
   // printing it would make this comparison unsatisfiable by construction.
@@ -436,6 +446,21 @@ test("§24 Stage G — the self-audit scans report the live tree, and are clean"
 // R5-7 / BUG 7 — failure injection: a failing test must turn ITS gate FAIL
 // ---------------------------------------------------------------------------
 
+/**
+ * A synthetic, fully-green run in which every registry-declared test passed.
+ *
+ * The injection tests below must not depend on the COMMITTED run being green — that
+ * made them fail during the tree-integrity rounds, when the committed results file
+ * legitimately carried failures. Deriving the baseline from the registry makes each
+ * injection a controlled experiment on the derivation logic itself, which is the
+ * thing under test.
+ */
+function syntheticGreenRun() {
+  const perTest = new Map();
+  for (const g of GATES) for (const name of g.tests ?? []) perTest.set(name, true);
+  return { tests: perTest.size, pass: perTest.size, fail: 0, perTest };
+}
+
 test("§20/§26 — injecting a failure into any gate category turns that gate FAIL, never PASS", () => {
   // Revision 4 derived only the full-suite row from tap.fail; every feature row was
   // a literal `**PASS**`, so changing the summary from 249/249 to 248/249 produced:
@@ -447,9 +472,11 @@ test("§20/§26 — injecting a failure into any gate category turns that gate F
   //
   // Nothing is written to disk here: the derivation is a pure function of a parsed
   // run, so the injection happens in memory.
-  const baseline = deriveGateStatuses(TAP);
+  const GREEN = syntheticGreenRun();
+  const baseline = deriveGateStatuses(GREEN);
 
-  // Only gates that are actually evidenced by this run can be falsified by it.
+  // In a fully-green run every test-evidenced gate must read PASS; that is the
+  // precondition the injections then falsify one at a time.
   const testGates = baseline.gates.filter((g) => g.evidence === "tests" && g.status === "PASS");
   assert.ok(testGates.length >= 8, `expected many evidenced gates, found ${testGates.length}`);
 
@@ -459,10 +486,10 @@ test("§20/§26 — injecting a failure into any gate category turns that gate F
 
     // Flip exactly that one test to failing.
     const injected = {
-      ...TAP,
-      pass: (TAP.pass ?? 0) - 1,
-      fail: (TAP.fail ?? 0) + 1,
-      perTest: new Map([...TAP.perTest, [victim, false]]),
+      ...GREEN,
+      pass: GREEN.pass - 1,
+      fail: 1,
+      perTest: new Map([...GREEN.perTest, [victim, false]]),
     };
     const after = deriveGateStatuses(injected);
     const row = after.gates.find((g) => g.id === gate.id);
@@ -487,11 +514,12 @@ test("§20/§26 — injecting a failure into any gate category turns that gate F
 test("§20/§26 — an UNATTRIBUTABLE failure degrades every other gate to UNVERIFIED", () => {
   // A failing test that no gate claims means the run does not evidence the other
   // gates either. Revision 4 would have kept every hardcoded PASS.
+  const GREEN = syntheticGreenRun();
   const injected = {
-    ...TAP,
-    pass: (TAP.pass ?? 0) - 1,
-    fail: (TAP.fail ?? 0) + 1,
-    perTest: new Map([...TAP.perTest, ["some test no gate declares", false]]),
+    ...GREEN,
+    pass: GREEN.pass,
+    fail: 1,
+    perTest: new Map([...GREEN.perTest, ["some test no gate declares", false]]),
   };
   const after = deriveGateStatuses(injected);
   assert.deepEqual(after.unattributedFailures, ["some test no gate declares"]);
@@ -504,12 +532,13 @@ test("§20/§26 — an UNATTRIBUTABLE failure degrades every other gate to UNVER
 });
 
 test("§20/§26 — a gate whose evidencing test did not run reads UNVERIFIED, never PASS", () => {
-  const baseline = deriveGateStatuses(TAP);
+  const GREEN = syntheticGreenRun();
+  const baseline = deriveGateStatuses(GREEN);
   const gate = baseline.gates.find((g) => g.evidence === "tests" && g.status === "PASS");
   const missing = gate.mappedTests[0];
-  const perTest = new Map(TAP.perTest);
+  const perTest = new Map(GREEN.perTest);
   perTest.delete(missing);
-  const after = deriveGateStatuses({ ...TAP, perTest });
+  const after = deriveGateStatuses({ ...GREEN, perTest });
   const row = after.gates.find((g) => g.id === gate.id);
   assert.equal(row.status, "UNVERIFIED", `${gate.id} must be UNVERIFIED when its test did not run`);
   assert.ok(row.missingTests.includes(missing));
@@ -517,7 +546,8 @@ test("§20/§26 — a gate whose evidencing test did not run reads UNVERIFIED, n
 });
 
 test("§20/§26 — externally determined gates can never read PASS", () => {
-  const d = deriveGateStatuses(TAP);
+  // Checked against a fully-green run: even then they must not pass.
+  const d = deriveGateStatuses(syntheticGreenRun());
   const external = d.gates.filter((g) => g.evidence === "external");
   assert.ok(external.length >= 3, "the iPad gate, Stage A order and Canvas memory are external");
   for (const g of external) {

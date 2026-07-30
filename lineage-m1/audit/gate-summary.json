@@ -3,17 +3,17 @@
   "contractSection": "20 / 26 / 28",
   "note": "Derived from audit/test-results.txt through tools/gateRegistry.mjs. Every gate maps to named tests; a gate whose evidencing test did not run is UNVERIFIED, never PASS. This file and the report's gate table are generated from the same call.",
   "suite": {
-    "tests": 249,
-    "pass": 249,
-    "fail": 0
+    "tests": 299,
+    "pass": 297,
+    "fail": 2
   },
   "summary": {
     "total": 38,
-    "pass": 28,
-    "fail": 0,
-    "unverified": 8,
+    "pass": 32,
+    "fail": 3,
+    "unverified": 1,
     "external": 3,
-    "suiteHasFailures": false,
+    "suiteHasFailures": true,
     "everyAutomatedResultReproducible": "NOT met"
   },
   "unattributedFailures": [],
@@ -22,9 +22,9 @@
       "id": "fullSuite",
       "label": "Full test suite",
       "section": "§20",
-      "status": "PASS",
+      "status": "FAIL",
       "evidence": "suite",
-      "detail": "249/249, 0 failing",
+      "detail": "297/299, 2 failing",
       "mappedTests": []
     },
     {
@@ -416,7 +416,7 @@
       "id": "modelIdentity",
       "label": "Canonical model identity binds state progression",
       "section": "§18 / §21.7",
-      "status": "UNVERIFIED",
+      "status": "PASS",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -424,31 +424,31 @@
         "§18 — a malformed or unknown model identity is rejected",
         "§18 — same version, different model is rejected with state untouched"
       ],
-      "observedTests": [],
-      "failedTests": [],
-      "missingTests": [
+      "observedTests": [
         "§18 — a state missing modelIdentityHash is rejected, not advanced",
         "§18 — a malformed or unknown model identity is rejected",
         "§18 — same version, different model is rejected with state untouched"
-      ]
+      ],
+      "failedTests": [],
+      "missingTests": []
     },
     {
       "id": "modelHashProvenance",
       "label": "One authoritative model hash across all evidence",
       "section": "§9 / §18",
-      "status": "UNVERIFIED",
+      "status": "PASS",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
         "§9/§18 — every evidence file publishes the same authoritative modelDefinitionHash",
         "§9/§18 — no tool serializes or hashes the model independently"
       ],
-      "observedTests": [],
-      "failedTests": [],
-      "missingTests": [
+      "observedTests": [
         "§9/§18 — every evidence file publishes the same authoritative modelDefinitionHash",
         "§9/§18 — no tool serializes or hashes the model independently"
-      ]
+      ],
+      "failedTests": [],
+      "missingTests": []
     },
     {
       "id": "legibilitySelfContained",
@@ -470,7 +470,7 @@
       "id": "worldLoadRaceSafety",
       "label": "World loads are transactional against concurrent requests",
       "section": "§22",
-      "status": "UNVERIFIED",
+      "status": "PASS",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -479,14 +479,14 @@
         "§22 — the newest requested fixture variant wins regardless of resolution order",
         "§22 — a failed or rejected stale request commits nothing"
       ],
-      "observedTests": [],
-      "failedTests": [],
-      "missingTests": [
+      "observedTests": [
         "§22 — an older fixture load cannot overwrite a newer legibility world",
         "§22 — a stale fixture response cannot replace a newer random world",
         "§22 — the newest requested fixture variant wins regardless of resolution order",
         "§22 — a failed or rejected stale request commits nothing"
-      ]
+      ],
+      "failedTests": [],
+      "missingTests": []
     },
     {
       "id": "observerTransaction",
@@ -510,35 +510,35 @@
       "id": "generationResultImmutable",
       "label": "Generation result is deeply immutable",
       "section": "§4",
-      "status": "UNVERIFIED",
+      "status": "PASS",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
         "§4 — observerErrors and every error record are deeply frozen"
       ],
-      "observedTests": [],
-      "failedTests": [],
-      "missingTests": [
+      "observedTests": [
         "§4 — observerErrors and every error record are deeply frozen"
-      ]
+      ],
+      "failedTests": [],
+      "missingTests": []
     },
     {
       "id": "focalLineage",
       "label": "Focal lineage resolved, never reseeded, never falsely terminated",
       "section": "§16",
-      "status": "UNVERIFIED",
+      "status": "PASS",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
         "§16 — a maintained focal channel matches an independent reference at every generation",
         "§16 — an unresolvable ancestry reports FOCAL_ANCESTRY_UNRESOLVABLE, not extinction"
       ],
-      "observedTests": [],
-      "failedTests": [],
-      "missingTests": [
+      "observedTests": [
         "§16 — a maintained focal channel matches an independent reference at every generation",
         "§16 — an unresolvable ancestry reports FOCAL_ANCESTRY_UNRESOLVABLE, not extinction"
-      ]
+      ],
+      "failedTests": [],
+      "missingTests": []
     },
     {
       "id": "referencesUnchanged",
@@ -560,7 +560,7 @@
       "id": "reportIntegrity",
       "label": "Report agrees with the raw evidence",
       "section": "§26 / §27",
-      "status": "PASS",
+      "status": "FAIL",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -573,42 +573,46 @@
         "§20 — the report's suite counts equal the raw TAP summary",
         "§27 — the manifest's path inventory is current"
       ],
-      "failedTests": [],
+      "failedTests": [
+        "§20 — the report's suite counts equal the raw TAP summary"
+      ],
       "missingTests": []
     },
     {
       "id": "testTreeIntegrity",
       "label": "Tests never mutate the production source tree",
       "section": "§20",
-      "status": "UNVERIFIED",
+      "status": "PASS",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
         "§20 — the self-audit scanner runs against an isolated tree, never src/",
         "§20 — the production source tree is byte-identical before and after the scanner tests"
       ],
-      "observedTests": [],
-      "failedTests": [],
-      "missingTests": [
+      "observedTests": [
         "§20 — the self-audit scanner runs against an isolated tree, never src/",
         "§20 — the production source tree is byte-identical before and after the scanner tests"
-      ]
+      ],
+      "failedTests": [],
+      "missingTests": []
     },
     {
       "id": "reportDeterminism",
       "label": "Report bytes are runtime-independent across supported Node majors",
       "section": "§26",
-      "status": "UNVERIFIED",
+      "status": "FAIL",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
         "§26 — the report renders identically on every recorded runtime"
       ],
-      "observedTests": [],
-      "failedTests": [],
-      "missingTests": [
+      "observedTests": [
         "§26 — the report renders identically on every recorded runtime"
-      ]
+      ],
+      "failedTests": [
+        "§26 — the report renders identically on every recorded runtime"
+      ],
+      "missingTests": []
     },
     {
       "id": "ipadGate",
