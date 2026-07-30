@@ -1,44 +1,146 @@
 {
-  "note": "Desktop measurement only (contract §22 'Desktop measurement'). This is headless Chromium on Linux and is NOT a substitute for the physical iPad Safari gate, which remains PENDING_HUMAN_DEVICE_TEST.",
+  "schema": "lineage-m1-desktop-measurement-3",
+  "note": "Desktop measurement only (contract §22 'Desktop measurement'). Headless Chromium on Linux; NOT a substitute for the physical iPad Safari gate, which remains PENDING_HUMAN_DEVICE_TEST.",
+  "generatedBy": "node tools/measureDesktop.mjs  (npm run audit:desktop)",
+  "frozenParameters": {
+    "schema": "lineage-m1-desktop-measurement-3",
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "deviceScaleFactor": 1,
+    "measurementSeed": 1,
+    "advanceGenerations": 180,
+    "warmupMs": 2000,
+    "normalSampleMs": 3000,
+    "stressSampleMs": 20000,
+    "controlActions": 20,
+    "stressGlyphCount": 360,
+    "memoryProbeBytes": 320000000
+  },
+  "windowComparison": {
+    "desktopWarmupMs": 2000,
+    "desktopStressSampleMs": 20000,
+    "ipadGateWarmupMs": 30000,
+    "ipadGateStressSampleMs": 180000,
+    "satisfiesIpadGateWindows": false,
+    "note": "The desktop windows are shorter than the iPad gate's 30 s warm-up and 180 s stress window. These numbers are NOT measured against the iPad pass law and do not advance that gate."
+  },
+  "generationSemantics": {
+    "initialStateGeneration": 0,
+    "transitionsPerformed": 180,
+    "finalStateGeneration": 180,
+    "rule": "a freshly hydrated fixture is generation 0; N transitions produce state.generation === N"
+  },
   "environment": {
     "viewport": {
       "width": 1280,
       "height": 800
     },
     "devicePixelRatio": 1,
-    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.0.0 Safari/537.36"
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.37 Safari/537.36"
   },
-  "browser": "headless Chromium (Playwright 1.56.1)",
+  "browser": {
+    "engine": "chromium",
+    "version": "141.0.7390.37",
+    "headless": true
+  },
   "normalMode": {
-    "status": "defining fixture · generation 181 · 234 living · canopy 118 · forest floor 116 · shoreline 0",
-    "populationAfter180Generations": 234,
-    "frameCount": 206,
-    "medianFrameTimeMs": 16.700000000186265,
-    "p95FrameTimeMs": 20.5,
-    "maxFrameTimeMs": 27.59999999962747,
-    "inputActionCount": 1,
-    "p95InputToNextPaintMs": 9.899999999906868,
+    "statusLine": "defining fixture · generation 180 · 224 living · canopy 118 · forest floor 106 · shoreline 0",
+    "finalStateGeneration": 180,
+    "populationAfterAdvance": 224,
+    "zoneBins": {
+      "canopy": 118,
+      "forest_floor": 106,
+      "shoreline": 0
+    },
+    "frameCount": 181,
+    "medianFrameTimeMs": 16.699999999953434,
+    "p95FrameTimeMs": 17,
+    "maxFrameTimeMs": 17.399999999906868,
+    "inputActionCount": 0,
+    "p95InputToNextPaintMs": null,
     "memory": {
-      "usedJSHeapBytes": 16290684,
-      "available": true
+      "usedJSHeapBytes": 10000000,
+      "exposed": true,
+      "resolutionVerified": false,
+      "note": "API exposed; resolution NOT verified here. May be quantized — not growth evidence on its own."
     }
   },
-  "renderStressMode360Glyphs": {
-    "frameCount": 1544,
-    "medianFrameTimeMs": 16.700000000186265,
-    "p95FrameTimeMs": 20,
-    "maxFrameTimeMs": 43.39999999990687,
-    "inputActionCount": 20,
-    "p95InputToNextPaintMs": 9.899999999906868,
+  "renderStressMode": {
+    "declaredGlyphCount": 360,
+    "renderedGlyphCount": 360,
+    "glyphCountMatchesDeclaration": true,
+    "frameCount": 1469,
+    "medianFrameTimeMs": 16.699999999953434,
+    "p95FrameTimeMs": 17.800000000046566,
+    "maxFrameTimeMs": 40.10000000009313,
+    "inputActionCount": 21,
+    "p95InputToNextPaintMs": 12,
     "memory": {
-      "usedJSHeapBytes": 15365089,
-      "available": true
-    }
+      "usedJSHeapBytes": 10000000,
+      "exposed": true,
+      "resolutionVerified": false,
+      "note": "API exposed; resolution NOT verified here. May be quantized — not growth evidence on its own."
+    },
+    "controlActionsDriven": 20,
+    "inputActionCountNote": "inputActionCount can exceed controlActionsDriven by one: the mode-switch click into render-stress is itself instrumented and its latency is sampled in this window. The contract requires AT LEAST 20 control actions, so a higher count is the measured value, not a target."
   },
-  "memoryGrowthAcross180Generations": {
-    "beforeBytes": 3759944,
-    "afterBytes": 16290684,
-    "deltaBytes": 12530740
+  "headlessCrossCheck": {
+    "initialGeneration": 0,
+    "transitionsPerformed": 180,
+    "finalStateGeneration": 180,
+    "population": 224,
+    "zoneBins": {
+      "canopy": 118,
+      "forest_floor": 106,
+      "shoreline": 0
+    },
+    "note": "Computed in Node from the same fixture, seed and transition count as the browser run. The browser figures below must agree with these; browserAgreesWithHeadless records the check.",
+    "browserAgreesWithHeadless": true,
+    "disagreements": []
+  },
+  "memoryAcrossAdvance": {
+    "authoritativeChannel": "node:process.memoryUsage()",
+    "node": {
+      "channel": "node:process.memoryUsage()",
+      "authoritative": true,
+      "gcExposed": false,
+      "heapUsedBeforeBytes": 25006336,
+      "heapUsedAfterBytes": 60250736,
+      "heapUsedAfterBeforeGcBytes": 60250472,
+      "heapUsedDeltaBytes": 35244400,
+      "rssBeforeBytes": 93941760,
+      "rssAfterBytes": 156196864,
+      "rssDeltaBytes": 62255104,
+      "retainedRecordCounts": {
+        "livingIndividuals": 224,
+        "retainedGenealogy": 22470,
+        "birthEvents": 22470,
+        "deathEvents": 22246,
+        "biologicalMatingEvents": 11175,
+        "bodyMutationEvents": 4566,
+        "allocationMutationEvents": 1785
+      },
+      "note": "Exact retained-record counts are the quantization-free growth measure; heap bytes are reported as observed and are sensitive to GC timing (run with --expose-gc for the deterministic figure). This 180-generation window is BELOW the 360-generation genealogy retention boundary, so pruning is not exercised here; the retention bound itself is tested through generation 1000 by test/long-run-memory.test.js."
+    },
+    "browser": {
+      "channel": "browser:performance.memory.usedJSHeapSize",
+      "usable": false,
+      "probe": {
+        "exposed": true,
+        "responsive": false,
+        "beforeBytes": 10000000,
+        "afterBytes": 10000000,
+        "allocatedBytes": 320000000,
+        "jsHeapSizeLimit": 3760000000,
+        "reason": "usedJSHeapSize did NOT move after allocating the probe buffer; the value is quantized (Chromium anonymizes performance.memory without cross-origin isolation), so browser-side heap deltas carry no information"
+      },
+      "beforeBytes": 10000000,
+      "afterBytes": 10000000,
+      "deltaBytes": null,
+      "note": "WITHDRAWN AS EVIDENCE. The in-page probe allocated 320000000 bytes and usedJSHeapSize did not move, so any browser-side delta here (including 0) is a quantization artefact and must not be read as memory growth. Use the node figures above. performance.memory is also absent on Safari, where it is reported as unavailable rather than guessed."
+    }
   },
   "pageErrors": []
 }

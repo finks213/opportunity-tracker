@@ -7,14 +7,15 @@ device.
 
 > **DO NOT PERFORM THIS TEST YET.** The overall milestone status is
 > `M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED`.
-> The device test is gated behind revision 3 surviving independent re-audit
+> The device test is gated behind revision 4 surviving independent re-audit
 > (structural code audit and AFE-Δ evidence audit). Running it earlier measures a
 > build that is not yet accepted for device testing.
 
 > **SECURITY NOTE.** `tools/serve.mjs` is bound on the local network for this
 > workflow. Revision 2 contained a path-traversal defect that returned
-> out-of-root files; it is repaired in revision 3 and covered by
-> `test/server-containment.test.js`. Run that test before exposing the server.
+> out-of-root files; it is repaired (revision 3, preserved in revision 4) and
+> covered by `test/server-containment.test.js`. Run that test before exposing
+> the server.
 
 Any supplied measurement that violates a threshold makes this gate `FAIL` and
 the overall status `M1_BLOCKED` until repaired and retested.

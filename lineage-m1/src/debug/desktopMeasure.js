@@ -68,13 +68,33 @@ function now() {
   return typeof performance !== "undefined" && performance.now ? performance.now() : Date.now();
 }
 
-/** Best-effort heap reading; unavailable in Safari, which is reported honestly. */
+/**
+ * Best-effort heap reading; not exposed in Safari, which is reported honestly.
+ *
+ * `exposed` says only that the API is PRESENT. It does NOT say the value has
+ * usable resolution: Chromium quantizes `usedJSHeapSize` to a fixed constant
+ * unless the page is cross-origin isolated, so a delta of 0 can mean "no
+ * growth" or "no measurement" (revision-4 honesty repair). Nothing may treat
+ * this reading as memory-growth evidence without first proving the channel
+ * responds to allocation — `tools/measureDesktop.mjs` performs exactly that
+ * probe and withdraws the browser figures when it fails.
+ */
 export function readMemory() {
   const perf = /** @type {any} */ (globalThis.performance);
   if (perf && perf.memory && typeof perf.memory.usedJSHeapSize === "number") {
-    return { usedJSHeapBytes: perf.memory.usedJSHeapSize, available: true };
+    return {
+      usedJSHeapBytes: perf.memory.usedJSHeapSize,
+      exposed: true,
+      resolutionVerified: false,
+      note: "API exposed; resolution NOT verified here. May be quantized — not growth evidence on its own.",
+    };
   }
-  return { usedJSHeapBytes: null, available: false, note: "performance.memory is not exposed in this browser" };
+  return {
+    usedJSHeapBytes: null,
+    exposed: false,
+    resolutionVerified: false,
+    note: "performance.memory is not exposed in this browser",
+  };
 }
 
 /**

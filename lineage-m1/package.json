@@ -14,8 +14,13 @@
     "report": "node tools/writeCharacterization.mjs",
     "serve": "node tools/serve.mjs",
     "edge-only": "node tools/runEdgeOnlyTraversal.mjs",
-    "audit-evidence": "node tools/writeAuditEvidence.mjs"
+    "audit-evidence": "node tools/writeAuditEvidence.mjs",
+    "audit:desktop": "node tools/measureDesktop.mjs",
+    "report:final": "node tools/writeFinalReport.mjs",
+    "manifest:paths": "node tools/writeManifestPaths.mjs",
+    "audit:tests": "node tools/runTests.mjs"
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {
+    "playwright": "^1.56.1"
+  }
 }

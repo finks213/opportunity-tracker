@@ -12,6 +12,7 @@
 
 import { createInitialState } from "./core/individual.js";
 import { advanceGeneration } from "./core/simulation.js";
+import { serializeCanonicalBiology } from "./core/canonicalSerialize.js";
 import { currentModelConfig } from "./config/modelConfig.js";
 import { TRAIT_INDEX } from "./config/traits.js";
 import {
@@ -25,6 +26,7 @@ import {
   createTracerChannel,
   tracerBirthHook,
   observerAfterGenerationHook,
+  resolveLivingDescendants,
 } from "./observer/tracerChannels.js";
 import { zoneBinCounts } from "./observer/currentZoneBins.js";
 import { CanvasProbe } from "./debug/canvasProbe.js";
@@ -56,6 +58,8 @@ class ProbeApp {
     this.worldSource = "random";
     this.fixtureLoadError = null;
     this.lastAdvance = 0;
+    /** Glyphs actually drawn by the most recent render-stress frame; null before any. */
+    this.lastRenderedGlyphCount = null;
     this.meter = new FrameMeter();
     this.meter.start(0);
     this.seed = 1;
@@ -135,75 +139,162 @@ class ProbeApp {
   }
 
   /**
-   * Create an observer tracer channel from CURRENTLY LIVING individuals.
+   * Follow a FOCAL LINEAGE (§16). Resolves the requested focal founders to their
+   * actual living descendants through genealogy.
    *
-   * Revision-3 repair. Revision 2 used the cached fixture focal ids whenever the
-   * metadata had ever been loaded, so two failures were reachable: seeding
-   * fixture ids into a random world, and seeding twelve already-dead ids when
-   * the tracer was created at a later generation. Both produced a
-   * valid-looking channel whose living contribution was permanently 0, which a
-   * user cannot distinguish from "this lineage genuinely died out".
+   * Revision-4 repair. Revision 3 fell back to "the first twelve current animals
+   * with sufficient habitat use" when the focal members were gone. Those animals
+   * are not necessarily descendants of the requested lineage, so the interface
+   * presented a newly selected habitat group as continuation of the focal group —
+   * silent focal-lineage reseeding. That fallback is removed.
    *
-   * Now the founder set is always resolved against the living population, and an
-   * empty resolution returns an explicit unavailable result instead of a
-   * plausible zero channel.
+   * When no living descendant remains, this returns FOCAL_LINEAGE_UNAVAILABLE.
+   * Starting a fresh group is a separate, explicitly named action
+   * (`followNewHabitatGroup`).
    *
-   * @returns {{created:boolean, reason?:string, founderCount?:number}}
+   * @param {string} channelId
+   * @param {"canopy"|"shoreline"} which
+   * @returns {{created:boolean, reason?:string, founderCount?:number, resolvedFromGenealogy?:boolean}}
    */
-  createTracer(channelId, which) {
+  followFocalLineage(channelId, which) {
     this.meter.markInput();
-    const living = this.state.currentIndividuals;
-    const livingIds = living.map((i) => i.id);
-    const livingIdSet = new Set(livingIds);
-    const bin = which === "canopy" ? 0 : 2;
+    if (this.worldSource !== "defining_fixture" || !this.fixtureEnvelope) {
+      this.tracerUnavailableReason =
+        "focal lineages are defined by the defining fixture; load the fixture first";
+      this.renderPanels();
+      return { created: false, reason: "FOCAL_LINEAGE_REQUIRES_FIXTURE" };
+    }
+    const requested =
+      which === "canopy" ? this.fixtureEnvelope.canopyFocalIds : this.fixtureEnvelope.shorelineFocalIds;
+    const { descendantIds, resolvedFromGenealogy } = resolveLivingDescendants(this.state, requested);
 
-    let founders = [];
-    if (this.worldSource === "defining_fixture" && this.fixtureEnvelope) {
-      // Requested focal set, intersected with the animals actually alive now.
-      const requested =
-        which === "canopy" ? this.fixtureEnvelope.canopyFocalIds : this.fixtureEnvelope.shorelineFocalIds;
-      founders = requested.filter((id) => livingIdSet.has(id));
-      if (founders.length === 0) {
-        // The declared founders are all dead. Fall back to their living
-        // descendants by current habitat use, which is a defensible observer
-        // selection, rather than seeding dead ids.
-        founders = living.filter((i) => i.timeAllocation[bin] >= 0.5).slice(0, 12).map((i) => i.id);
-      }
-    } else {
-      founders = living.filter((i) => i.timeAllocation[bin] >= 0.5).slice(0, 12).map((i) => i.id);
+    if (descendantIds.length === 0) {
+      // Explicit unavailable state. No substitution, no plausible zero channel.
+      this.tracerUnavailableReason =
+        `FOCAL_LINEAGE_UNAVAILABLE — no living descendant of the ${which} focal lineage remains. ` +
+        "Following a different group is a separate choice.";
+      this.renderPanels();
+      return { created: false, reason: "FOCAL_LINEAGE_UNAVAILABLE" };
     }
 
-    if (founders.length === 0) {
+    this.tracerUnavailableReason = null;
+    try {
+      createTracerChannel(this.observer, channelId, descendantIds, this.state.currentIndividuals.map((i) => i.id));
+    } catch (err) {
+      this.tracerUnavailableReason = `tracer not created — ${err.message}`;
+      this.renderPanels();
+      return { created: false, reason: err.reason ?? "TRACER_REJECTED" };
+    }
+    this.refreshChannelSelect();
+    this.renderPanels();
+    return { created: true, founderCount: descendantIds.length, resolvedFromGenealogy };
+  }
+
+  /**
+   * Follow a NEW habitat group — a separately named action that establishes a new
+   * channel from current animals by habitat use. This is explicitly NOT
+   * continuation of any focal lineage, and it is never used as a silent fallback.
+   *
+   * @param {string} channelId
+   * @param {"canopy"|"shoreline"} which
+   * @returns {{created:boolean, reason?:string, founderCount?:number}}
+   */
+  followNewHabitatGroup(channelId, which) {
+    this.meter.markInput();
+    const bin = which === "canopy" ? 0 : 2;
+    const selected = this.state.currentIndividuals
+      .filter((i) => i.timeAllocation[bin] >= 0.5)
+      .slice(0, 12)
+      .map((i) => i.id);
+    if (selected.length === 0) {
       this.tracerUnavailableReason =
         `no living animals currently use ${which === "canopy" ? "the canopy" : "the shoreline"} enough to follow`;
       this.renderPanels();
-      return { created: false, reason: this.tracerUnavailableReason };
+      return { created: false, reason: "NO_LIVING_CANDIDATES" };
     }
     this.tracerUnavailableReason = null;
-    createTracerChannel(this.observer, channelId, founders, livingIds);
+    try {
+      createTracerChannel(this.observer, channelId, selected, this.state.currentIndividuals.map((i) => i.id));
+    } catch (err) {
+      this.tracerUnavailableReason = `tracer not created — ${err.message}`;
+      this.renderPanels();
+      return { created: false, reason: err.reason ?? "TRACER_REJECTED" };
+    }
     this.refreshChannelSelect();
     this.renderPanels();
-    return { created: true, founderCount: founders.length };
+    return { created: true, founderCount: selected.length };
+  }
+
+  /**
+   * Back-compat dispatcher used by the control wiring. In a fixture world this is
+   * a FOCAL-LINEAGE action; in a random world there is no focal lineage to
+   * follow, so it is explicitly a new-habitat-group action. It never silently
+   * converts one into the other.
+   * @returns {{created:boolean, reason?:string, founderCount?:number}}
+   */
+  createTracer(channelId, which) {
+    if (this.worldSource === "defining_fixture" && this.fixtureEnvelope) {
+      return this.followFocalLineage(channelId, which);
+    }
+    return this.followNewHabitatGroup(channelId, which);
+  }
+
+  /**
+   * Canonical bytes of the pristine baseline fixture at the current seed.
+   * Computed from a throwaway hydration so it can be compared without touching
+   * the live world.
+   * @returns {string|null} null when the envelope is unavailable
+   */
+  baselineFixtureCanonicalBytes() {
+    if (!this.fixtureEnvelope) return null;
+    return serializeCanonicalBiology(
+      hydrateDefiningFixtureV1(this.fixtureEnvelope, this.seed, currentModelConfig)
+    );
+  }
+
+  /**
+   * True when the ACTIVE world is byte-identical to the pristine baseline
+   * fixture: right origin, generation 0, no webbing override, nothing advanced.
+   * @returns {boolean}
+   */
+  isBaselineFixtureActive() {
+    if (this.worldSource !== "defining_fixture") return false;
+    const baseline = this.baselineFixtureCanonicalBytes();
+    if (baseline === null) return false;
+    return serializeCanonicalBiology(this.state) === baseline;
+  }
+
+  /**
+   * Guarantee the active world is the pristine baseline fixture, rehydrating if
+   * it is not. The parsed envelope may stay cached; the biological state is
+   * replaced.
+   * @returns {Promise<boolean>} false when the fixture cannot be loaded
+   */
+  async ensureBaselineFixtureActive() {
+    if (this.isBaselineFixtureActive()) return true;
+    return await this.loadDefiningFixture();
   }
 
   async setManualTestMode(mode) {
     this.meter.markInput();
     this.manualTestMode = mode;
     if (mode === "legibility") {
-      // §22 requires this mode to show the DEFINING FIXTURE. Decide from the
-      // actual world identity, never from whether the metadata happens to be
-      // cached: "load fixture -> reset random -> enter legibility" must still
-      // end up on the fixture.
+      // §22 requires this mode to contain the DEFINING FIXTURE — the unmodified
+      // baseline at generation 0, with no experimental webbing override.
+      //
+      // Revision-4 repair. Revision 3 reloaded only when
+      // `worldSource !== "defining_fixture"`. That marker records the state's
+      // ORIGIN, not its current identity, so all of these left a non-baseline
+      // world in place while the mode claimed the fixture:
+      //   load fixture -> advance N generations -> legibility
+      //   load fixture WITH the webbing override -> legibility
+      // Entry now verifies exact baseline identity by canonical bytes and
+      // rehydrates whenever it does not match.
       this.running = false;
-      if (this.worldSource !== "defining_fixture") {
-        const ok = await this.loadDefiningFixture();
-        if (!ok) {
-          // Fixture unavailable: stay out of legibility mode entirely rather
-          // than rendering a plausible-looking test over the wrong world.
-          this.manualTestMode = null;
-          this.renderPanels();
-          return false;
-        }
+      if (!(await this.ensureBaselineFixtureActive())) {
+        this.manualTestMode = null;
+        this.renderPanels();
+        return false;
       }
     }
     if (mode === "render-stress") {
@@ -251,6 +342,9 @@ class ProbeApp {
     ctx.fillRect(0, 0, W, H);
     const perZone = 120; // 3 x 120 = exactly 360 glyphs
     const rng = this.probe.uiRng;
+    // Counted rather than asserted, so the measurement tool can verify the
+    // "exactly 360" claim instead of restating the constant (revision-4).
+    let drawn = 0;
     for (let z = 0; z < 3; z++) {
       const x0 = (z / 3) * W + 8;
       const w = W / 3 - 16;
@@ -264,11 +358,23 @@ class ProbeApp {
           ((i + 1) % 10) / 10, ((i + 8) % 10) / 10, ((i + 9) % 10) / 10,
         ];
         drawAnimal(ctx, x0 + col * (w / cols) + w / cols / 2, 30 + row * ((H - 60) / (perZone / cols)), 12, genome, {});
+        drawn++;
       }
     }
+    this.lastRenderedGlyphCount = drawn;
     ctx.fillStyle = "#f0f2f4";
     ctx.font = "600 13px system-ui, sans-serif";
     ctx.fillText("render-stress mode — exactly 360 procedural glyphs (rendering benchmark only)", 14, 10);
+  }
+
+  /**
+   * Current debug zone-bin counts in canonical zone order, exposed so the
+   * desktop measurement tool can cross-check the browser against an independent
+   * Node run of the same fixture and seed (revision-4). Observer-side only.
+   * @returns {number[]}
+   */
+  zoneBinCountsForMeasurement() {
+    return zoneBinCounts(this.state.currentIndividuals);
   }
 
   /**

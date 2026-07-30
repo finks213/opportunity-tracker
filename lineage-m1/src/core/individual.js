@@ -6,7 +6,7 @@
  */
 
 import { Rng, createSimRng } from "./rng.js";
-import { currentModelConfig, SCHEMA_VERSION, founderAgeForId } from "../config/modelConfig.js";
+import { currentModelConfig, SCHEMA_VERSION, founderAgeForId, modelIdentityFor } from "../config/modelConfig.js";
 import { NUM_TRAITS } from "../config/traits.js";
 import { clamp } from "./math.js";
 
@@ -63,6 +63,10 @@ export function makeEmptyState(simRng, config = currentModelConfig) {
   return {
     schemaVersion: SCHEMA_VERSION,
     configVersion: config.version,
+    // Runtime identity of the COMPLETE biological model that produced this state
+    // (revision-4 repair). Bound at every transition, so a modified model reusing
+    // the same version string is rejected rather than silently accepted.
+    modelIdentityHash: modelIdentityFor(config),
     generation: 0,
     nextIndividualId: 1,
     nextBirthEventId: 1,
@@ -78,6 +82,9 @@ export function makeEmptyState(simRng, config = currentModelConfig) {
     allocationMutationEvents: [],
     prunedAncestorBoundaries: [],
     simRng,
+    // Immutable record of the last completed generation, for post-commit
+    // observer processing. Excluded from canonical serialization (§18).
+    lastGenerationResult: null,
     // diagnostics excluded from canonical serialization (§18)
     diagnostics: {
       zeroAllocationFallbackCount: 0,

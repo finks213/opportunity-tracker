@@ -246,12 +246,14 @@ export function renderCharacterization(r, compare = null, edgeOnly = null) {
   lines.push("empty shoreline late in a run would matter to what a child actually sees.");
   lines.push("");
 
-  lines.push("### Adjacency traversal — the DECLARED edge-only-world experiment");
+  lines.push("### §21.6 adjacency traversal — AUTHORITATIVE isolated-world experiment");
   lines.push("");
-  lines.push("`CHARACTERIZATION_PLAN.md` declares traversal in a world descended **only**");
-  lines.push("from one edge founder band. That experiment is executed by");
-  lines.push("`tools/runEdgeOnlyTraversal.mjs` in genuinely isolated 40-founder worlds and its");
-  lines.push("raw output is `audit/edge-only-traversal-results.json`.");
+  lines.push("**This subsection, and only this subsection, carries the adjacency-traversal");
+  lines.push("claim.** `CHARACTERIZATION_PLAN.md` (see its dated Amendment 1) declares");
+  lines.push("traversal in a world descended **only** from one edge founder band. That");
+  lines.push("experiment is executed by `tools/runEdgeOnlyTraversal.mjs` in genuinely isolated");
+  lines.push("40-founder worlds with no forest-floor founders at all, and its raw output is");
+  lines.push("`audit/edge-only-traversal-results.json`.");
   lines.push("");
   if (edgeOnly) {
     lines.push("| Experiment | Retained founders | Target zone | Seeds reaching | Earliest | Median first generation | Latest | Extinct seeds |");
@@ -278,18 +280,25 @@ export function renderCharacterization(r, compare = null, edgeOnly = null) {
     lines.push("this render.** Run `node tools/runEdgeOnlyTraversal.mjs` and re-render.");
   }
   lines.push("");
-  lines.push("#### Separate additional measure — mixed-world single-band ancestry");
+  lines.push("#### Additional supporting measure — mixed-world single-band ancestry (NOT the §21.6 claim)");
+  lines.push("");
+  lines.push("Raw JSON keys: `additionalMixedWorldCanopyAncestryReachesShoreline` and");
+  lines.push("`additionalMixedWorldShorelineAncestryReachesCanopy`. Renamed in revision 4 so");
+  lines.push("that no field name can be mistaken for the authoritative traversal result.");
   lines.push("");
   lines.push("Reported under its own name because it is **not** the declared edge-only");
   lineage_note();
-  const cls = L.canopyLineageReachesShoreline ?? {};
-  const slc = L.shorelineLineageReachesCanopy ?? {};
+  const cls = L.additionalMixedWorldCanopyAncestryReachesShoreline ?? {};
+  const slc = L.additionalMixedWorldShorelineAncestryReachesCanopy ?? {};
   lines.push("| Measure (mixed 120-founder world) | Seeds | Earliest | Median first generation |");
   lines.push("|---|---|---|---|");
   lines.push(`| canopy-only-ancestry lineage → shoreline | ${cls.seedsReaching ?? "—"} of ${cls.ofSeeds ?? r.seeds.length} | ${cls.earliestGeneration ?? "—"} | ${fmt(cls.medianFirstGeneration, 1)} |`);
   lines.push(`| shoreline-only-ancestry lineage → canopy | ${slc.seedsReaching ?? "—"} of ${slc.ofSeeds ?? r.seeds.length} | ${slc.earliestGeneration ?? "—"} | ${fmt(slc.medianFirstGeneration, 1)} |`);
   lines.push("");
-  lines.push("Revision 2 presented these mixed-world numbers under the edge-only label. They");
+  lines.push("Revision 2 presented these mixed-world numbers under the edge-only label.");
+  lines.push("Revision 3 separated the sections but left the raw JSON keys generic");
+  lines.push("(`canopyLineageReachesShoreline`), so a reader of the raw file alone could still");
+  lines.push("read them as the traversal result. Revision 4 renames the keys themselves. They");
   lines.push("are retained here as a genuine additional statistic, clearly distinguished.");
   lines.push("");
 

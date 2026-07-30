@@ -7,8 +7,23 @@
  * generation = targetGeneration; state.generation flips to targetGeneration
  * exactly once, after the next population and all events are assembled.
  *
- * Determinism law: observer callbacks run only AFTER biological child creation
- * from already-fixed parent ids and never touch simRng or biological state.
+ * TRANSACTION LAW (revision-4 repair). The complete biological generation is
+ * calculated and committed BEFORE any observer callback runs. Revision 3 invoked
+ * `hooks.onBirth` inside the transaction, so an observer exception left canonical
+ * state between generations: generation still 0, generation-1 death/mating/birth
+ * records present, RNG and counters advanced, old population still current, and
+ * canonical bytes matching neither generation. An observer-layer failure could
+ * therefore corrupt canonical biology.
+ *
+ * Now:
+ *  - birth records are COLLECTED during the transaction, never dispatched;
+ *  - the transaction commits (population, generation, pruning);
+ *  - observers are dispatched post-commit and each callback is exception-isolated;
+ *  - observer failures are collected on the returned result, outside canonical state;
+ *  - `advanceGenerationAndCollect()` offers a hook-free API returning immutable
+ *    event records for the observer layer to process afterwards.
+ *
+ * Observer callbacks still receive only already-fixed ids, never simRng.
  */
 
 import { survivalProbability, computeZoneLoads } from "./survival.js";
@@ -16,7 +31,7 @@ import { formMatingPairs } from "./mating.js";
 import { createChild, makeDeathEvent } from "./events.js";
 import { pruneGenealogy } from "./genealogy.js";
 import { ZONES } from "../config/zones.js";
-import { currentModelConfig } from "../config/modelConfig.js";
+import { currentModelConfig, modelIdentityFor } from "../config/modelConfig.js";
 
 /**
  * Advance one generation in place. Returns the same mutated state.
@@ -84,6 +99,8 @@ export function advanceGeneration(state, config = currentModelConfig, hooks = {}
   // Steps 8-9 — exactly two children per pair, in pair and child-index order.
   const survivorById = new Map(survivors.map((s) => [s.id, s]));
   const newborns = [];
+  /** @type {Array<{childId:number,parentAId:number,parentBId:number,generation:number}>} */
+  const birthRecords = [];
   for (const pair of pairs) {
     const A = survivorById.get(pair.parentAId);
     const B = survivorById.get(pair.parentBId);
@@ -102,11 +119,15 @@ export function advanceGeneration(state, config = currentModelConfig, hooks = {}
       overlap: pair.overlap,
       childIds,
     });
-    // Observer-only birth notification, after biology is fully fixed.
-    if (hooks.onBirth) {
-      for (const id of childIds) {
-        hooks.onBirth({ childId: id, parentAId: pair.parentAId, parentBId: pair.parentBId, generation: targetGeneration });
-      }
+    // Birth records are COLLECTED here, never dispatched to observers inside the
+    // transaction. Observer processing happens only after the commit below.
+    for (const id of childIds) {
+      birthRecords.push({
+        childId: id,
+        parentAId: pair.parentAId,
+        parentBId: pair.parentBId,
+        generation: targetGeneration,
+      });
     }
   }
 
@@ -119,14 +140,66 @@ export function advanceGeneration(state, config = currentModelConfig, hooks = {}
   // Retention/pruning (§15) at the new generation.
   pruneGenealogy(state, config);
 
-  // Observer-only notification, after biology is completely fixed. Used by the
-  // observer layer to keep its own maps bounded to the living population. It
-  // receives ids only, consumes no simRng, and cannot alter canonical bytes.
+  // ---- COMMIT COMPLETE ----------------------------------------------------
+  // Biology is now fully committed for targetGeneration. Everything below is
+  // observer-side and cannot alter canonical biological state.
+
+  const livingIds = state.currentIndividuals.map((i) => i.id);
+  /** @type {GenerationResult} */
+  const result = {
+    generation: targetGeneration,
+    births: Object.freeze(birthRecords.map((r) => Object.freeze({ ...r }))),
+    livingIds: Object.freeze(livingIds.slice()),
+    observerErrors: [],
+  };
+
+  // Post-commit, exception-isolated observer dispatch. An observer throwing here
+  // cannot leave biology between generations: the transaction is already
+  // complete, and each callback is individually guarded. Errors are collected on
+  // the returned result, which is NOT part of canonical biological state.
+  if (hooks.onBirth) {
+    for (const record of result.births) {
+      try {
+        hooks.onBirth(record);
+      } catch (err) {
+        result.observerErrors.push({ phase: "onBirth", childId: record.childId, error: err });
+      }
+    }
+  }
   if (hooks.afterGeneration) {
-    hooks.afterGeneration(state.currentIndividuals.map((i) => i.id));
+    try {
+      hooks.afterGeneration(result.livingIds);
+    } catch (err) {
+      result.observerErrors.push({ phase: "afterGeneration", error: err });
+    }
   }
 
+  state.lastGenerationResult = Object.freeze(result);
   return state;
+}
+
+/**
+ * @typedef {Object} GenerationResult
+ * @property {number} generation                 the completed target generation
+ * @property {ReadonlyArray<{childId:number,parentAId:number,parentBId:number,generation:number}>} births
+ *           immutable birth records, in creation order
+ * @property {ReadonlyArray<number>} livingIds   living ids after the transition
+ * @property {Array<{phase:string, childId?:number, error:unknown}>} observerErrors
+ *           observer failures, collected outside canonical biological state
+ */
+
+/**
+ * Advance one generation and return the immutable event record, without any
+ * observer hooks. This is the strongest separation the contract describes: the
+ * biological core computes and commits, and the caller processes the returned
+ * records afterwards.
+ * @param {Object} state
+ * @param {Object} [config]
+ * @returns {GenerationResult}
+ */
+export function advanceGenerationAndCollect(state, config = currentModelConfig) {
+  advanceGeneration(state, config, {});
+  return state.lastGenerationResult;
 }
 
 /**
@@ -141,6 +214,18 @@ export function assertConfigMatchesState(state, config) {
     throw new Error(
       `configuration mismatch: state.configVersion="${state.configVersion}" but supplied config.version="${config.version}". ` +
       "A biological state may only be advanced under the model that produced it."
+    );
+  }
+  // Revision-4 repair: the version string alone is reusable. Revision 3 accepted
+  // a modified model that kept `lineage-m1-config-2` — capacities [90,90,90]
+  // under that version produced a different population while both worlds
+  // retained the same canonical label. Bind to the COMPLETE model identity.
+  const suppliedIdentity = modelIdentityFor(config);
+  if (state.modelIdentityHash !== undefined && state.modelIdentityHash !== suppliedIdentity) {
+    throw new Error(
+      `model mismatch: state.modelIdentityHash="${state.modelIdentityHash}" but the supplied model hashes to ` +
+      `"${suppliedIdentity}" under the same version "${config.version}". ` +
+      "Two materially different biological models may not share one canonical identity."
     );
   }
 }

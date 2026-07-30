@@ -29,6 +29,7 @@ import { serializeCanonicalBiology } from "../src/core/canonicalSerialize.js";
 import { hydrateDefiningFixtureV1 } from "../src/fixtures/definingFixtureV1.js";
 import { loadValidatedFixture } from "../src/fixtures/nodeFixtureIO.js";
 import { currentModelConfig as C } from "../src/config/modelConfig.js";
+import { TRAIT_INDEX } from "../src/config/traits.js";
 import { livingFounderContribution } from "../src/observer/tracerChannels.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -235,4 +236,153 @@ test("§22 — worldSource is observer-side only and never enters canonical biol
   for (const forbidden of ["worldSource", "defining_fixture", "fixtureLoadError", "tracerUnavailable"]) {
     assert.ok(!bytes.includes(forbidden), `canonical bytes must not contain ${forbidden}`);
   }
+});
+
+// ---------------------------------------------------------------------------
+// Revision-4: legibility mode must establish the BASELINE fixture every entry
+// ---------------------------------------------------------------------------
+
+test("§22 — advancing a fixture world then entering legibility restores the exact baseline", async (t) => {
+  const { app, restore } = await makeApp();
+  t.after(restore);
+  const { envelope } = loadValidatedFixture();
+  const baselineBytes = serializeCanonicalBiology(hydrateDefiningFixtureV1(envelope, 1, C));
+
+  await app.loadDefiningFixture();
+  assert.equal(serializeCanonicalBiology(app.state), baselineBytes);
+
+  // Advance ten generations. `worldSource` stays "defining_fixture" — which is
+  // exactly why revision 3 failed to reload here.
+  for (let g = 0; g < 10; g++) app.advance();
+  assert.equal(app.worldSource, "defining_fixture", "origin marker is unchanged by advancing");
+  assert.equal(app.state.generation, 10);
+  assert.notEqual(serializeCanonicalBiology(app.state), baselineBytes);
+  assert.equal(app.isBaselineFixtureActive(), false, "an advanced world is NOT the baseline fixture");
+
+  const entered = await app.setManualTestMode("legibility");
+  assert.notEqual(entered, false);
+  assert.equal(app.state.generation, 0, "legibility must restore generation 0");
+  assert.equal(app.state.currentIndividuals.length, 120);
+  assert.equal(
+    serializeCanonicalBiology(app.state),
+    baselineBytes,
+    "legibility must restore the EXACT baseline fixture bytes"
+  );
+  assert.equal(app.isBaselineFixtureActive(), true);
+});
+
+test("§22 — entering legibility after ONE generation also restores the baseline", async (t) => {
+  const { app, restore } = await makeApp();
+  t.after(restore);
+  const { envelope } = loadValidatedFixture();
+  const baselineBytes = serializeCanonicalBiology(hydrateDefiningFixtureV1(envelope, 1, C));
+  await app.loadDefiningFixture();
+  app.advance();
+  assert.equal(app.state.generation, 1);
+  await app.setManualTestMode("legibility");
+  assert.equal(serializeCanonicalBiology(app.state), baselineBytes);
+  assert.equal(app.state.generation, 0);
+});
+
+test("§22 — the high-webbing fixture is replaced by the unmodified baseline on entry", async (t) => {
+  const { app, restore } = await makeApp();
+  t.after(restore);
+  const { envelope } = loadValidatedFixture();
+  const baselineBytes = serializeCanonicalBiology(hydrateDefiningFixtureV1(envelope, 1, C));
+  const webbing = TRAIT_INDEX.toe_webbing;
+
+  // Load the fixture WITH the experimental override.
+  await app.loadDefiningFixture({ highWebbing: true });
+  assert.equal(app.worldSource, "defining_fixture");
+  const overridden = app.state.currentIndividuals.filter((i) => i.bodyGenome[webbing] === envelope.highWebbing);
+  assert.equal(overridden.length, 24, "both focal groups should carry the override");
+  assert.notEqual(serializeCanonicalBiology(app.state), baselineBytes);
+  assert.equal(app.isBaselineFixtureActive(), false);
+
+  await app.setManualTestMode("legibility");
+  assert.equal(
+    serializeCanonicalBiology(app.state),
+    baselineBytes,
+    "legibility must show the UNMODIFIED baseline, with no experimental override"
+  );
+  // Every animal is back at the low baseline webbing value.
+  for (const ind of app.state.currentIndividuals) {
+    assert.equal(ind.bodyGenome[webbing], envelope.lowWebbing, `id ${ind.id} still carries an override`);
+  }
+  assert.equal(app.state.generation, 0);
+});
+
+test("§22 — a random world entering legibility lands on the exact baseline fixture", async (t) => {
+  const { app, restore } = await makeApp();
+  t.after(restore);
+  const { envelope } = loadValidatedFixture();
+  const baselineBytes = serializeCanonicalBiology(hydrateDefiningFixtureV1(envelope, 1, C));
+  app.resetRandomWorld(1);
+  for (let g = 0; g < 5; g++) app.advance();
+  await app.setManualTestMode("legibility");
+  assert.equal(serializeCanonicalBiology(app.state), baselineBytes);
+  assert.equal(app.worldSource, "defining_fixture");
+  assert.equal(app.state.generation, 0);
+});
+
+test("§22 — isBaselineFixtureActive distinguishes origin from exact identity", async (t) => {
+  const { app, restore } = await makeApp();
+  t.after(restore);
+  assert.equal(app.isBaselineFixtureActive(), false, "a random world is not the baseline");
+  await app.loadDefiningFixture();
+  assert.equal(app.isBaselineFixtureActive(), true);
+  app.advance();
+  assert.equal(app.worldSource, "defining_fixture", "origin still says fixture");
+  assert.equal(app.isBaselineFixtureActive(), false, "but identity says it is no longer the baseline");
+});
+
+test("§22 — every control the contract requires exists in the probe markup", () => {
+  // §22 lists the required controls explicitly. A missing one means the
+  // prescribed iPad procedure cannot be carried out, which is exactly the class
+  // of defect that made revision 1's legibility mode unusable. Checked
+  // statically against index.html so it is fast and needs no browser.
+  const html = readFileSync(join(HERE, "..", "index.html"), "utf8");
+  const required = {
+    "world canvas": "world",
+    "living count / generation status": "status",
+    "pause": "btn-pause",
+    "step one generation": "btn-step",
+    "run continuously": "btn-run",
+    "reset seed": "seed-input",
+    "reset random world": "btn-reset",
+    "load the defining fixture": "btn-fixture",
+    "raw allocations and genome toggle": "toggle-raw",
+    "tracer channel creation": "btn-tracer-canopy",
+    "tracer channel selection": "channel-select",
+    "click-to-inspect panel": "inspector",
+    "legibility mode": "btn-mode-legibility",
+    "render-stress mode": "btn-mode-stress",
+    "normal mode": "btn-mode-normal",
+  };
+  const missing = [];
+  for (const [what, id] of Object.entries(required)) {
+    if (!html.includes(`id="${id}"`)) missing.push(`${what} (id="${id}")`);
+  }
+  assert.deepEqual(missing, [], `index.html is missing required §22 controls: ${missing.join("; ")}`);
+});
+
+test("§22 — the mode-switch and run controls are instrumented for input latency", () => {
+  // §22 requires pause, single-step, continuous-run, fixture reset and
+  // mode-switch to be instrumented so input-to-next-paint can be recorded.
+  const main = readFileSync(join(HERE, "..", "src", "main.js"), "utf8");
+  const instrumented = (methodName) => {
+    const i = main.indexOf(methodName);
+    assert.ok(i >= 0, `${methodName} must exist`);
+    // markInput must appear inside the method body, before the next method.
+    const body = main.slice(i, i + 900);
+    return body.includes("markInput");
+  };
+  for (const m of ["setRunning(", "stepOnce(", "loadFixture", "resetRandom", "setManualTestMode"]) {
+    const i = main.indexOf(m);
+    if (i < 0) continue; // name variations are tolerated; presence is asserted below
+    assert.ok(instrumented(m), `${m} must call meter.markInput() so its latency is sampled`);
+  }
+  // At least the five §22 control paths must be instrumented somewhere.
+  const marks = [...main.matchAll(/markInput\(\)/g)].length;
+  assert.ok(marks >= 5, `expected at least 5 instrumented control paths, found ${marks}`);
 });

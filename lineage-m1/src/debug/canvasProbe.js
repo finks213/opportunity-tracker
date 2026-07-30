@@ -68,7 +68,10 @@ export class CanvasProbe {
    * @returns {number} entries removed
    */
   pruneJitterTo(rendered) {
-    if (this.jitter.size <= rendered.length) return 0;
+    // Revision-4 repair: prune by SET MEMBERSHIP, never by count. Revision 3
+    // returned early when `jitter.size <= rendered.length`, but equal counts do
+    // not imply equal membership: cached {1,2} with rendered {3,4} removed
+    // nothing and left four entries for two rendered animals.
     const keep = new Set(rendered.map((i) => i.id));
     let removed = 0;
     for (const id of [...this.jitter.keys()]) {

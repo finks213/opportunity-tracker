@@ -17,10 +17,15 @@ import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { MILESTONE_STATUS } from "../src/config/milestoneStatus.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
-/** The single required status for this repair pass. */
+/**
+ * The single required status for this repair pass, read from the source of truth
+ * (revision-4 change). The literal is kept alongside it and asserted equal, so
+ * that editing `milestoneStatus.js` cannot silently relax this test.
+ */
 const REQUIRED_STATUS = "M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED";
 
 /** Artifacts that must carry the required status. */
@@ -124,11 +129,42 @@ test("generated audit JSON carries the same status when present", () => {
   assert.ok(checked >= 0);
 });
 
-test("the audit manifest names the revision-3 bundle", () => {
+test("the audit manifest names the CURRENT bundle revision", () => {
+  // Revision-4 change: the revision is read from `src/config/milestoneStatus.js`
+  // rather than hardcoded here. Revision 3 hardcoded `3`, so this test had to be
+  // edited every pass — and an edited assertion is a weak assertion. The bar is
+  // unchanged: the manifest must name the bundle it actually is.
   const manifest = read("AUDIT_PACKAGE_MANIFEST.md");
+  const rev = MILESTONE_STATUS.revision;
   assert.ok(
-    manifest.includes("LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV3.zip"),
-    "the manifest must name the revision-3 bundle"
+    manifest.includes(`LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV${rev}.zip`),
+    `the manifest must name the revision-${rev} bundle`
   );
-  assert.ok(/Bundle revision \| \*\*3\*\*/.test(manifest), "the manifest must declare revision 3");
+  assert.ok(
+    new RegExp(`Bundle revision \\| \\*\\*${rev}\\*\\*`).test(manifest),
+    `the manifest must declare revision ${rev}`
+  );
+  // No EARLIER revision may still be presented as this bundle.
+  for (let older = 1; older < rev; older++) {
+    assert.ok(
+      !new RegExp(`Bundle revision \\| \\*\\*${older}\\*\\*`).test(manifest),
+      `the manifest still declares revision ${older}`
+    );
+  }
+  assert.ok(
+    manifest.includes(`### Revision ${rev} (this bundle)`),
+    `the revision history must mark revision ${rev} as this bundle`
+  );
+});
+
+test("the status source of truth agrees with the literal this test enforces", () => {
+  // Revision-4 guard. `src/config/milestoneStatus.js` feeds the generated report,
+  // so if it could drift from the string asserted above, a generated artifact
+  // could carry a status this test never checked.
+  assert.equal(MILESTONE_STATUS.status, REQUIRED_STATUS);
+  assert.equal(MILESTONE_STATUS.processWaiver, "PROCESS WAIVER: PENDING PRINCIPAL DECISION");
+  assert.equal(MILESTONE_STATUS.ipadTest, "IPAD TEST: PENDING_HUMAN_DEVICE_TEST");
+  assert.equal(MILESTONE_STATUS.mayDeclareCompletion, false);
+  assert.deepEqual([...MILESTONE_STATUS.forbiddenStatuses], ["M1_AUTOMATED_GATES_PASS", "M1_ACCEPTED"]);
+  assert.ok(Object.isFrozen(MILESTONE_STATUS), "the status object must be frozen");
 });

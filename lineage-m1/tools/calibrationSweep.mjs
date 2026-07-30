@@ -13,6 +13,10 @@
  * excluding superseded tuning material just because it looks unhelpful.
  *
  * Usage: node tools/calibrationSweep.mjs
+ *
+ * NONCANONICAL PATHWAY. Every variant runs under a derived version identity of
+ * the form `noncanonical-calibration(...)`, never under a production config
+ * version. Its output is exploratory and is not audit evidence.
  */
 
 import { createInitialState } from "../src/core/individual.js";
@@ -21,7 +25,18 @@ import { computeZoneLoads } from "../src/core/survival.js";
 import { currentModelConfig } from "../src/config/modelConfig.js";
 import { ordinaryMedian } from "../src/core/math.js";
 function trial(overrides, seeds){
-  const cfg = {...currentModelConfig, ...overrides};
+  // Revision-4 repair: a calibration variant must NOT reuse a production version
+  // identity. Every variant gets its own derived, explicitly noncanonical version
+  // string, so the model-identity binding in advanceGeneration accepts it and no
+  // calibration world can ever be mistaken for a production-config world.
+  const label = Object.entries(overrides)
+    .map(([k, v]) => `${k}=${Array.isArray(v) ? v.join("/") : v}`)
+    .join(",");
+  const cfg = {
+    ...currentModelConfig,
+    ...overrides,
+    version: `noncanonical-calibration(${currentModelConfig.version};${label})`,
+  };
   const pops=[], concs=[]; let extinct=0; const zoneMed=[[],[],[]];
   for(const s of seeds){
     const st = createInitialState(s, cfg);

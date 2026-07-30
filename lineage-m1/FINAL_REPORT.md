@@ -1,41 +1,36 @@
 # LINEAGE Milestone 1 — Final Implementation Report
 
+> **GENERATED FILE.** Produced by `tools/writeFinalReport.mjs` (`npm run report:final`)
+> from the raw evidence under `audit/` and from `src/config/milestoneStatus.js`. Do not
+> hand-edit: `test/report-integrity.test.js` fails the build when this file disagrees
+> with the raw evidence, and any manual change is overwritten on the next generation.
+
 ## Status
 
 ```
 M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED
 ```
 
-**This report is revision 3.** Revision 2 was audited twice — by the AFE-Δ
-break-report (pass 2) and by an independent structural integrity audit — and both
-returned `BREAKS-FOUND` with ten verified defects, including one CRITICAL
-security defect in the device-test server.
-
-Per the repair-pass instruction, the status stays at
-`M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED`
-and **must not** return to `M1_AUTOMATED_GATES_PASS` until revision 3 survives
-independent re-audit by both the structural code audit and the AFE-Δ evidence and
-claim audit.
+**This report is revision 4** (generated 2026-07-30). Revisions 1, 2 and 3 were each
+audited and each returned `BREAKS-FOUND`. The status stays at the value above and
+**must not** advance until revision 4 survives independent re-audit by both the
+structural code audit and the AFE-Δ evidence and claim audit.
 
 Separately pending, and NOT the only blockers:
 
 ```
 PROCESS WAIVER: PENDING PRINCIPAL DECISION
-IPAD TEST:      PENDING_HUMAN_DEVICE_TEST
+IPAD TEST: PENDING_HUMAN_DEVICE_TEST
 ```
 
 Revision 2 stated that the Stage A process waiver was the only remaining blocker.
-That was false while implementation and evidence defects were open, and it has
-been withdrawn. Revision 1 reported `M1_AUTOMATED_GATES_PASS — IPAD TEST PENDING`;
-that was withdrawn in revision 2.
+That was false while implementation and evidence defects were open, and it is
+withdrawn. Revision 1 reported `M1_AUTOMATED_GATES_PASS — IPAD TEST PENDING`; that
+was withdrawn in revision 2 and is not reinstated here.
 
-**No claim is made here that the automated gates pass.** The repaired gates were
-re-run and their results are reported below as evidence for the next audit, not
+**No claim is made in this report that the automated gates pass.** The repaired gates
+were re-run and their results are reported below as evidence for the next audit, not
 as a self-certification.
-
-- Configuration: `lineage-m1-config-2`
-- Node: v22.22.2 · Linux 6.18.5 x86_64
-- Fixture SHA-256: `c80aaa523d3b3eec2655502b4eaebdbbb4d12f71f8b3378d9d3be60797342b78` ✔ matches the frozen value
 
 ---
 
@@ -50,172 +45,88 @@ Two statements the contract requires verbatim:
 > loop, no surfaced variation cards, no inspection UI, no prediction or journal
 > screens, no collection, no explanations, no teacher view, and no UI framework.
 
-- Configuration: `lineage-m1-config-2`
-- Config hash: `edb81695973b81ab8f87f7ef9dde9d8c5b3d4c7dfbeb45f385547edd86ee86de`
-- Node: v22.22.2 · Linux 6.18.5 x86_64
-- Fixture SHA-256: `c80aaa523d3b3eec2655502b4eaebdbbb4d12f71f8b3378d9d3be60797342b78` ✔ matches the frozen value
+### Build identity
+
+Exactly one identity block appears in this report. Revision 3 printed two, and the
+duplicate published the tuning-only subset hash as though it were the config hash.
+
+| Field | Value |
+|---|---|
+| Configuration | `lineage-m1-config-2` |
+| **`modelDefinitionHash`** (authoritative) | `dc444865163deb32a7a9d80bd23f576d1ab5a936896298b5cd13faac6f513b3d` |
+| `tuningConfigHash` (**NONAUTHORITATIVE**) | `edb81695973b81ab8f87f7ef9dde9d8c5b3d4c7dfbeb45f385547edd86ee86de` |
+| Fixture SHA-256 | `c80aaa523d3b3eec2655502b4eaebdbbb4d12f71f8b3378d9d3be60797342b78` |
+| Node · platform | v22.22.2 · linux x64 |
+
+- `modelDefinitionHash`: SHA-256 over the complete model definition — every biology-affecting value.
+- `tuningConfigHash`: NONAUTHORITATIVE. SHA-256 over the tuning-config subset only. Published as the config hash by revisions 1-2, which is why a trait-effect change could move survival without moving the hash. Retained solely so older evidence files remain traceable; it does not identify the model.
 
 ---
 
 ## 1. Gate-by-gate results
 
 Nothing below is hidden behind a summary. Failures, pending items, and named
-uncertainties appear in the same table as the passes.
+uncertainties appear in the same table as the passes. Counts in this section are read
+from `audit/test-results.txt` and the JSON files under `audit/`, not retyped.
 
 | # | Gate | Contract § | Result |
 |---|---|---|---|
-| 1 | Full test suite (119 tests) | §20 | **PASS** — 119/119, exit 0 (3 new regression tests added by the repairs) |
+| 1 | Full test suite | §20 | **FAIL** — 2 of 249 failing |
 | 2 | Fixture raw SHA-256 integrity | §19 A | **PASS** |
 | 3 | Fixture-envelope canonical round trip | §19 B | **PASS** |
 | 4 | Deterministic hydration | §19 C | **PASS** |
-| 5 | Paired-world construction | §19 D | **PASS** — exactly 12 toe_webbing values differ |
+| 5 | Paired-world construction | §19 D | **PASS** — exactly 12 `toe_webbing` values differ, one hydration cloned four ways |
 | 6 | Exact probability gate | §19.3 | **PASS** |
-| 7 | Matched trajectory gate, seeds 1..200 | §19.4 | **PASS** |
-| 8 | Meaningful-trait contextual gate | §9 / §20.5 | **PASS** — all seven traits |
+| 7 | Matched trajectory gate, seeds 1..200 | §19.4 | **PASS** — canopy 200/200, shoreline 197/200, threshold 130 |
+| 8 | Meaningful-trait contextual gate | §9 / §20.5 | **PASS** — all 7 traits |
 | 9 | Birth immutability | §20.1 | **PASS** |
-| 10 | Observer-state invariance | §20.2 | **PASS** — byte-identical |
+| 10 | Observer-state invariance | §20.2 | **PASS** — byte-identical, 0 mismatches |
 | 11 | No observer dependencies in biology | §20.3 | **PASS** — static import scan |
 | 12 | Neutral-trait integrity | §20.4 | **PASS** — exactly zero |
 | 13 | Full-path body-mutation independence | §20.6 | **PASS** |
 | 14 | Mutation provenance and counter ownership | §20.7 | **PASS** |
 | 15 | Allocation-mutation opportunity contract | §20.8 | **PASS** — draw counts asserted directly |
-| 16 | Spatial integrity and adjacency | §20.9 | **PASS** — zero fallbacks |
+| 16 | Spatial integrity and adjacency | §20.9 | **PASS** — 0 zero-allocation fallbacks |
 | 17 | Lifecycle and mating contract | §20.10 | **PASS** |
 | 18 | Genealogy integrity + forced 360-boundary | §20.11 | **PASS** — crossed at generation 400 |
-| 18b | Genealogy boundary records bounded | §15 | **PASS** — post-repair; stored set equals required set at generations 400/460/520/600 |
+| 18b | Genealogy boundary records bounded | §15 | **PASS** — stored set equals required set at generations 400/460/520/600 |
 | 19 | Exact survival composition | §20.12 | **PASS** — to 1e-12 |
 | 20 | RNG integrity | §20.13 | **PASS** |
 | 21 | Population guardrails, 500 seeds | §21.4 | **PASS** — all four |
 | 22 | Mutation-supply minimal functionality | §21.3 | **PASS** |
-| 23 | Desktop Canvas measurement | §22 | **PASS** (headless Chromium) |
-| 24 | Canonical config provenance | §18 / §21.7 | **PASS** — post-repair |
-| 25 | Legibility mode contains fixture + zones + pairs | §22 | **PASS** — post-repair |
-| 26 | **Physical iPad acceptance** | §22 | **PENDING_HUMAN_DEVICE_TEST** |
-| 27 | **§24 Stage A pre-code planning order** | §24 | **VIOLATED — principal decision required** |
+| 23 | §21.6 adjacency traversal, isolated edge-only worlds | §21.6 | **MEASURED** — 500/500 and 500/500 reached the opposite edge zone; no contract threshold applies |
+| 24 | Desktop Canvas measurement, reproducible | §22 | **RECORDED** (headless Chromium 141.0.7390.37), regenerable by `npm run audit:desktop`; §22 states no desktop pass law — the numeric pass law belongs to the iPad gate at row 30 |
+| 25 | Canonical model identity binds state progression | §18 / §21.7 | **PASS** — version *and* complete model identity checked |
+| 26 | Legibility mode is self-contained | §22 | **PASS** — rehydrates the fixture rather than trusting a flag |
+| 27 | Generation advancement atomic against observer failure | §4 / §16 | **PASS** — observers dispatched post-commit |
+| 28 | Focal lineage resolved from genealogy, never reseeded | §16 | **PASS** |
+| 29 | Quarantined Python references unchanged | §27 | **PASS** — 3 files |
+| 30 | **Physical iPad acceptance** | §22 | **PENDING_HUMAN_DEVICE_TEST** |
+| 31 | **§24 Stage A pre-code planning order** | §24 | **VIOLATED — principal decision required** |
 
 **Named uncertainty (not a gate failure):** shoreline *dominant-bin* occupancy is
-zero in 438 of 500 seeds at generation 180, even though shoreline *load* passes
-its guardrail comfortably. Detailed in §6 below and in `CHARACTERIZATION.md`.
+zero in 438 of 500 seeds at generation 180,
+even though shoreline *load* passes its guardrail comfortably. Detailed in §6 below
+and in `CHARACTERIZATION.md`.
 
----
+### Raw suite counts, as reported by the runner
 
-## 1b. Response to the revision-2 audits (pass 2 + structural)
+| Field | Value |
+|---|---|
+| tests | 249 |
+| pass | 247 |
+| fail | 2 |
+| cancelled | 0 |
+| skipped | 0 |
+| todo | 0 |
 
-Revision 2 was audited twice — the AFE-Δ break-report (pass 2) and an independent
-structural integrity audit — and both returned `BREAKS-FOUND`. Together they
-verified ten defects: 1 CRITICAL, 3 HIGH, 3 MEDIUM-CRITICAL, 2 MEDIUM, 1
-MEDIUM-MINOR.
+Wall-clock duration is deliberately **not** reproduced here. It differs on every run,
+so printing it would make the report and the results file permanently disagree and the
+integrity check unsatisfiable. It is in `audit/test-results.txt` as `# duration_ms`.
 
-**Every defect was independently reproduced here before repair, and the
-reproductions matched the auditors' figures.** Full detail, including the exact
-reproduction commands, is in `DECISIONS.md` D-025 through D-034.
-
-| # | Defect | Severity | § | Reproduced | Repair | Regression test |
-|---|---|---|---|---|---|---|
-| 1 | Device-test server path traversal | **CRITICAL** | §3/§22 | yes — `/..%2flineage-m1-secret.txt` returned HTTP 200 + content | D-025 | `server-containment.test.js` |
-| 2 | Config identity does not identify the model | HIGH | §9 | yes — trait-effect change moved survival, hash unchanged | D-026 | `model-identity.test.js` |
-| 3 | State progression unbound from `configVersion` | HIGH | §18/§21.7 | yes — two worlds, one label, populations 132 vs 160 | D-027 | `model-identity.test.js` |
-| 4 | Observer/Canvas memory grows with births | HIGH | §16/§22 | yes — 107,760 entries for 246 living at gen 800 | D-028 | `observer-memory-bounds.test.js` |
-| 5 | Adjacency statistic ran the wrong experiment | MEDIUM-CRITICAL | §21.6 | yes — mixed world, not an edge-only world | D-029 | `edge-only-traversal.test.js` |
-| 6 | Cached fixture metadata used as world identity | MEDIUM-CRITICAL | §22/§16 | yes — legibility rendered the random world | D-030 | `probe-world-identity.test.js` |
-| 7 | Exact 200-seed gate outside the suite | MEDIUM-CRITICAL | §19 | yes — 12 seeds, proportional floor | D-031 | `defining-fixture.test.js` |
-| 8 | Four hydrations instead of one-hydration cloning | MEDIUM | §19 D | yes — four `hydrateDefiningFixtureV1` calls | D-032 | `defining-fixture.test.js` |
-| 9 | Contradictory official status artifacts | MEDIUM | §26 | yes — report vs checklist disagreed | D-033 | `status-consistency.test.js` |
-| 10 | Limitation table used the lower middle value | MEDIUM-MINOR | §21.4 | yes — 117.202731 vs 117.223028 | D-034 | `median-consistency.test.js` |
-
-### Repair evidence
-
-**1. Server containment.** The live falsifier now returns `403 forbidden` with no
-body. Containment is decided by `path.relative()`, so a sibling sharing the root's
-name prefix is rejected: `"/tmp/lineage-m1-secret.txt".startsWith("/tmp/lineage-m1")`
-is `true` but `isInsideRoot()` is `false`. Encoded traversal, malformed percent
-encoding, control bytes, NULs, symlink escape, directory listing, and non-read
-methods are all refused.
-
-**2. Complete model identity.** The published hash changed because its input
-changed:
-
-| Hash | Value | Covers |
-|---|---|---|
-| `modelDefinitionHash` (new) | `dc444865163deb32a7a9d80bd23f576d1ab5a936896298b5cd13faac6f513b3d` | every biology-affecting value |
-| `tuningConfigHash` (what revision 2 published) | `edb81695973b81ab8f87f7ef9dde9d8c5b3d4c7dfbeb45f385547edd86ee86de` | the tuning config only |
-
-Every cell of the trait-effect matrix, every upkeep value, adjacency, trait order,
-founder ages, and capacity now move the hash. Both configurations are deeply
-frozen and share no mutable nested references.
-
-**3. Config binding.** A version mismatch throws before any RNG draw, counter,
-event, population change, or canonical byte, verified by comparing all of them
-across a rejected call.
-
-**4. Observer memory.** Seed 71, one channel:
-
-| Generation | Living | Revision 2 | Revision 3 | Cumulative births |
-|---|---|---|---|---|
-| 180 | 254 | 21,510 | **254** | 21,390 |
-| 400 | 257 | 52,194 | **257** | 52,074 |
-| 600 | 238 | 80,016 | **238** | 79,896 |
-| 800 | 246 | 107,760 | **246** | 107,640 |
-| 1000 | 323 | — | **323** | 134,980 |
-
-Five simultaneous channels at generation 200 hold 1,260 entries for 252 living
-animals — bounded by `channels x living`, not `channels x births`. Canvas jitter
-drops from 5,000 cached entries to the 250 rendered.
-
-**5. The declared edge-only experiment.** Isolated 40-founder worlds, seeds
-1..500, 180 generations:
-
-| Experiment | Retained founders | Target | Seeds reaching | Earliest | Median | Latest | Extinct |
-|---|---|---|---|---|---|---|---|
-| canopy-only | 1..40 | shoreline | **500 / 500** | 2 | 3 | 10 | 0 |
-| shoreline-only | 81..120 | canopy | **500 / 500** | 2 | 3 | 8 | 0 |
-
-These match the auditor's independent counterfactual exactly. The mixed-world
-ancestry statistic (495/500 and 499/500) is retained in `CHARACTERIZATION.md`
-under its own heading and is explicitly **not** presented as the edge-only
-experiment.
-
-**6. World identity.** Driven through the exact failing sequence in a real
-browser: after `load fixture -> reset random -> enter legibility`,
-`worldSource === "defining_fixture"` with 120 animals at generation 0 and the
-fixture's canonical bytes active. A tracer created at generation 10 now has 12
-living founders and a contribution of **12**, not a silent 0.
-
-**7. The exact gate inside the suite.** `audit/test-results.txt` shows, under the
-official `npm test` command:
-
-```
-§19.4 EXACT gate: canopy successes 200/200, shoreline 197/200, ties 0/0
-```
-
-with `successThreshold === 130` and `seedCount === 200` asserted.
-
-**8–10.** One hydration cloned four ways (`hydrationCount === 1`); all four status
-artifacts agreeing, enforced by a test; both median tables printing
-117.22 / 108.18 / 30.53.
-
-### Withdrawn revision-2 claims
-
-Stated plainly rather than quietly corrected:
-
-1. **"Adjacency traversal … implemented literally … the declared measure itself is
-   unchanged"** — false. It measured a mixed-world ancestry subset, not the
-   declared edge-only world. Withdrawn; see D-029.
-2. **"Automated implementation gates: PASS"** and **"the overall status is held at
-   `M1_BLOCKED` for one reason"** — false while the ten defects above were open.
-   Withdrawn; see D-033.
-
-### Consistency check
-
-The repairs changed measurement, retention, security, and provenance code — not
-biological trajectories. The regenerated evidence confirms this: the fixture gate
-reproduces exactly (canopy 200/200, shoreline 197/200, medians 29.3652 / 0.3605
-and 18.2986 / 43.7529), and the config-2 guardrails are unchanged (median
-population 256; zone loads 117.22 / 108.18 / 30.53; concentration 0.468617).
-That the biology did not move is the intended outcome and is itself a check that
-the repairs stayed inside their stated scope.
-
-Per instruction, all evidence was **regenerated**, not copied forward.
+Command: `npm run audit:tests` — the same suite as `npm test`
+(`node --test --test-timeout=3600000 test/*.test.js`), captured atomically so this file
+records a complete run. Raw stdout: `audit/test-results.txt`.
 
 ---
 
@@ -225,10 +136,10 @@ Per instruction, all evidence was **regenerated**, not copied forward.
 
 Baseline genome, standard loads `[39.84, 40.32, 39.84]`, age 1.
 
-| Probe | low webbing (0.15) | high webbing (0.75) | Δ | Required | Result |
+| Probe | low webbing | high webbing | Δ | Required | Result |
 |---|---|---|---|---|---|
-| canopy `[0.90, 0.10, 0.00]` | 0.579632 | 0.195758 | **−0.383874** | `<= −0.03` | **PASS** |
-| shoreline `[0.00, 0.10, 0.90]` | 0.579632 | 0.904958 | **+0.325326** | `>= +0.03` | **PASS** |
+| canopy | 0.579632 | 0.195758 | **-0.383874** | `<= −0.03` | **PASS** |
+| shoreline | 0.579632 | 0.904958 | **+0.325326** | `>= +0.03` | **PASS** |
 
 The same variation has opposite directional consequences in the two contexts.
 
@@ -259,80 +170,96 @@ Measured medians are **not** frozen as future targets in this session.
 
 ## 3. Meaningful-trait gate (§9)
 
-Exact three-zone delta vectors, emitted by the build-blocking test:
+Exact three-zone delta vectors, read from `audit/meaningful-trait-gate.json`, which
+is emitted by `tools/writeAuditEvidence.mjs` from the production survival path.
 
-| Trait | canopy | forest_floor | shoreline | Verdict |
+Probe: genome `[0.15, 0.45, 0.4, 0.45, 0.4, 0.4, 0.35, 0.5, 0.5, 0.5]`, loads `[39.84, 40.32, 39.84]`,
+age 1 (age multiplier 1), low 0.2 vs high 0.8.
+Frozen probe values equal the fixture's: **yes**.
+
+| Trait | canopy | forest_floor | shoreline | Positive in | Adverse/inactive in | Passes |
+|---|---|---|---|---|---|---|
+| `toe_webbing` | -0.394064 | -0.077299 | 0.320181 | shoreline | canopy, forest_floor | yes |
+| `curved_claws` | 0.454421 | 0.035301 | -0.236447 | canopy, forest_floor | shoreline | yes |
+| `dense_fur` | 0.062551 | 0.184805 | -0.145120 | canopy, forest_floor | shoreline | yes |
+| `long_hindlimbs` | 0.192220 | 0.377034 | -0.220446 | canopy, forest_floor | shoreline | yes |
+| `strong_tail` | -0.129755 | -0.165676 | 0.289158 | shoreline | canopy, forest_floor | yes |
+| `large_eyes` | 0.072942 | 0.253996 | -0.114328 | canopy, forest_floor | shoreline | yes |
+| `streamlined_body` | -0.278264 | -0.070471 | 0.358206 | shoreline | canopy, forest_floor | yes |
+
+Floors: benefit `>= +0.01`, cost `<= −0.01`, neutral-equivalence
+margin `0.001`, arithmetic tolerance `1e-12`. No floor was
+weakened after seeing a result.
+
+Every meaningful trait has a positive context **and** a different adverse-or-inactive
+context. None is beneficial everywhere; none is harmful everywhere.
+
+### Neutral traits (§20.4)
+
+| Trait | canopy | forest_floor | shoreline | max abs Δ |
 |---|---|---|---|---|
-| `toe_webbing` | −0.394064 | −0.077299 | **+0.320181** | positive at shoreline, adverse in canopy |
-| `curved_claws` | **+0.454421** | +0.035301 | −0.236447 | positive in canopy, adverse at shoreline |
-| `dense_fur` | +0.062551 | **+0.184805** | −0.145120 | positive inland, adverse at shoreline |
-| `long_hindlimbs` | +0.192220 | **+0.377034** | −0.220446 | positive inland, adverse at shoreline |
-| `strong_tail` | −0.129755 | −0.165676 | **+0.289158** | positive at shoreline, adverse inland |
-| `large_eyes` | +0.072942 | **+0.253996** | −0.114328 | positive inland, adverse at shoreline |
-| `streamlined_body` | −0.278264 | −0.070471 | **+0.358206** | positive at shoreline, adverse in canopy |
+| `coat_shade` | 0 | 0 | 0 | **0** |
+| `ear_tip_shape` | 0 | 0 | 0 | **0** |
+| `tail_tip_marking` | 0 | 0 | 0 | **0** |
 
-Every meaningful trait has a positive context **and** a different adverse-or-
-inactive context. None is beneficial everywhere; none is harmful everywhere. No
-floor was weakened after seeing a result.
-
-Neutral traits `coat_shade`, `ear_tip_shape`, `tail_tip_marking` produce a
-**maximum absolute exact difference of 0** across performance dimensions, zone
-fitness, survival probabilities, mating weights, allocation inheritance, and
-mutation probabilities. They are zero by construction in both the effect matrix
-and the upkeep vector, so this is an invariant rather than a measurement.
+Zero by construction in both the effect matrix and the upkeep vector, so this is an
+invariant rather than a measurement. The suite additionally asserts exact zero across
+performance dimensions, zone fitness, survival probabilities, mating weights,
+allocation inheritance, and mutation probabilities.
 
 ---
 
 ## 4. Observer-invariance evidence
 
 `audit/observer-invariance-hashes.json` records the SHA-256 of the canonical
-biological serialization after **every** generation, for all five required
-observer strategies in the defining fixture:
+biological serialization after **every** generation, for every required observer
+strategy in the defining fixture:
 
-1. follow nothing;
-2. tracer from canopy high-webbing founders;
-3. tracer from shoreline high-webbing founders;
-4. tracer from high `coat_shade` founders;
-5. multiple channels with switching, creation, deletion, zone-bin reads,
-   mating annotations, and inspection.
+1. follow_nothing;
+2. tracer_canopy_high_webbing_founders;
+3. tracer_shoreline_high_webbing_founders;
+4. tracer_high_coat_shade_founders;
+5. multiple_channels_with_switching;
 
-Result: **5 strategies × 31 generations, zero mismatches, byte-identical.**
+Result: **5 strategies × 31 generations, 0 mismatches, byte-identical: true.**
 
 Additional proofs in the suite:
 
-- observer actions do not advance `simRngState` (state compared before/after);
+- observer actions do not advance the simulation RNG state (state compared before/after);
 - canonical bytes contain none of `tracer`, `channels`, `activeChannel`,
-  `inspectedIds`, `currentZoneBin`, `annotationModelVersion`, `uiRng`,
-  `timestamp`, `diagnostics`;
+  `inspectedIds`, `currentZoneBin`, `annotationModelVersion`, `uiRng`, `timestamp`,
+  `diagnostics`, `lastGenerationResult`, `observerErrors`;
 - biological modules import no observer or debug module (static scan);
 - observer modules never reference the simulation RNG at all;
+- an observer exception at **any** birth, or from `afterGeneration`, leaves canonical
+  bytes and RNG state exactly equal to a clean no-observer generation
+  (`observer-transaction-integrity.test.js`);
 - comparison uses exact bytes, never a float tolerance.
 
 ---
 
 ## 5. Mutation-provenance evidence
 
-- Body-mutation and allocation-mutation events use **separate typed ID
-  namespaces**; IDs are unique and strictly increasing *within* each array;
-  numeric overlap between the two is expected and is never reported as a
-  collision.
+- Body-mutation and allocation-mutation events use **separate typed ID namespaces**;
+  IDs are unique and strictly increasing *within* each array; numeric overlap between
+  the two is expected and is never reported as a collision.
 - Recording a body mutation increments only `nextMutationEventId`; recording an
   allocation mutation increments only `nextAllocationMutationEventId`.
-- A failed opportunity records no event and increments neither counter (proved
-  directly with both probabilities set to zero: counters stayed at 1 while
-  opportunities still executed).
-- Every mutation event references a child born in the **same** generation, never
-  a survivor and never a founder.
+- A failed opportunity records no event and increments neither counter.
+- Every mutation event references a child born in the **same** generation, never a
+  survivor and never a founder.
 - Post-values are reconstructible from `preMutationValue + requestedDelta` with
   clamping, to 1e-15.
-- Both counters hydrate from the fixture exactly, and canonical serialization
-  changes when either counter changes.
+- Both counters hydrate from the fixture exactly, and canonical serialization changes
+  when either counter changes.
 - Across the 500-seed batch,
   `bodyMutationOpportunityCount === allocationMutationOpportunityCount === nonFounderBirthCount`
-  for **every** seed.
-- Allocation-mutation draw discipline is asserted directly, not inferred: one
-  draw on a failed occurrence, exactly four on every successful path including
-  the no-donor and zero-realized-transfer branches.
+  for every seed: **true**.
+- Allocation-mutation draw discipline is asserted directly, not inferred: one draw on a
+  failed occurrence, exactly four on every successful path including the no-donor and
+  zero-realized-transfer branches.
+- Allocation-mutation events per non-founder birth: **0.079884**;
+  transfers into a zone whose share was below `parentalUseEpsilon`: **87,299**.
 
 ---
 
@@ -343,93 +270,178 @@ Additional proofs in the suite:
 | Guardrail | Required | Measured | Result |
 |---|---|---|---|
 | whole-world extinction | < 5% | **0.00%** | PASS |
-| median total living population | 90..360 | **256** | PASS |
+| median total living population | 90..360 | **256.0** | PASS |
 | median load — canopy | >= 15 | **117.22** | PASS |
 | median load — forest_floor | >= 15 | **108.18** | PASS |
 | median load — shoreline | >= 15 | **30.53** | PASS |
 | median concentration | <= 0.80 | **0.4686** | PASS |
 
-Concentration used the exact §21.4 definition over all 500 non-extinct seeds;
-every seed-level value is in the raw JSON.
+Concentration used the exact §21.4 definition over all 500 non-extinct seeds
+with the ordinary median; every seed-level value is in the raw JSON.
 
 ### Named limitation — shoreline dominant-bin occupancy
 
 | Zone | min load | median load | seeds with zero dominant-bin animals |
 |---|---|---|---|
-| canopy | 47.41 | 117.20 | 2 of 500 |
-| forest_floor | 58.00 | 108.13 | 0 of 500 |
-| **shoreline** | 13.98 | 30.52 | **438 of 500** |
+| canopy | 47.41 | 117.22 | 2 of 500 |
+| forest_floor | 58.00 | 108.18 | 0 of 500 |
+| **shoreline** | 13.98 | 30.53 | **438 of 500** |
 
 All three zones remain meaningfully populated by the contract's own measure —
-effective load — and no seed has any zone load below 1. But under the debug
-zone-bin view, most late-run worlds contain no *shoreline-dominant* animal: the
-shoreline is used part-time by many animals rather than full-time by a resident
-subpopulation.
+effective load — and no seed has any zone load below 1. But under the debug zone-bin
+view, most late-run worlds contain no *shoreline-dominant* animal: the shoreline is
+used part-time by many animals rather than full-time by a resident subpopulation.
 
-This is **not** a §25 halt condition. The zone bin is explicitly a debug-only
-grouping with no persistent identity and no biological role (§5.4), and the
-contract's zone-population guardrail is load-based and passes. It is reported
-here rather than tuned away, and flagged as a concrete input to Milestone 2,
-where a visibly empty shoreline late in a run would matter to what a child sees.
+This is **not** a §25 halt condition. The zone bin is explicitly a debug-only grouping
+with no persistent identity and no biological role (§5.4), and the contract's
+zone-population guardrail is load-based and passes. It is reported here rather than
+tuned away, and flagged as a concrete input to Milestone 2, where a visibly empty
+shoreline late in a run would matter to what a child sees.
+
+---
+
+## 6b. §21.6 adjacency traversal
+
+**Authoritative evidence: the isolated edge-only worlds only.** See
+`CHARACTERIZATION_PLAN.md` Amendment 1 (dated) for why the mixed-world measure does
+not carry this claim.
+
+| Experiment | Retained founders | Target zone | Seeds reaching | Earliest | Median first generation | Latest | Extinct seeds |
+|---|---|---|---|---|---|---|---|
+| canopyOnly | 1..40 | shoreline | **500 of 500** | 2 | 3.0 | 10 | 0 |
+| shorelineOnly | 81..120 | canopy | **500 of 500** | 2 | 3.0 | 8 | 0 |
+
+40 founders only, no forest-floor founders at all. Because there is no
+canopy-shoreline edge, the opposite edge zone is reachable only across the
+forest-floor bridge. The frozen initializer is recorded in the raw JSON under
+`frozenInitializer`.
+
+### Supporting measure only — mixed-world single-band ancestry (NOT the §21.6 claim)
+
+Raw keys `additionalMixedWorldCanopyAncestryReachesShoreline` and
+`additionalMixedWorldShorelineAncestryReachesCanopy`, renamed in revision 4.
+
+| Measure (mixed 120-founder world) | Seeds | Earliest | Median first generation |
+|---|---|---|---|
+| canopy-only-ancestry → shoreline | 495 of 500 | 2 | 3.0 |
+| shoreline-only-ancestry → canopy | 499 of 500 | 2 | 3.0 |
+
+All 120 founders remain present and ecologically active in this world, so they still
+affect zone loads, density factors, survival probabilities, mating availability,
+mating order, and population dynamics. A lineage that stays genetically single-band is
+not an isolated world.
 
 ---
 
 ## 7. Tuning decisions
 
-Every decision is in `DECISIONS.md`. The one change from a contract-stated
-provisional constant:
+Every decision is in `DECISIONS.md`. The one change from a contract-stated provisional
+constant:
 
-### D-009 — `zoneCapacity` `[90,90,90]` → `[55,55,55]` (config-1 → config-2)
+### D-009 — `zoneCapacity` `[90,90,90]` → `[55,55,55]`
 
 **Rationale:** the contract's provisional capacity yields a median generation-180
-population of **421**, outside the required 90..360 band.
+population of **421.0**, outside the required 90..360 band.
 
 Per §21.7, both configurations were run over the full declared batch:
 
 | Guardrail | Required | `lineage-m1-config-1` | `lineage-m1-config-2` |
 |---|---|---|---|
 | extinction rate | < 5% | 0.00% | 0.00% |
-| median population | 90..360 | **421 — FAIL** | **256 — PASS** |
+| median population | 90..360 | **421.0 — FAIL** | **256.0 — PASS** |
 | median load canopy | >= 15 | 189.10 | 117.22 |
 | median load forest_floor | >= 15 | 179.68 | 108.18 |
 | median load shoreline | >= 15 | 51.24 | 30.53 |
 | median concentration | <= 0.80 | 0.4615 | 0.4686 |
 | all guardrails | — | **FAIL** | **PASS** |
 
-**No claim is made that config-2 is automatically correct.** It was adopted for
-exactly one reason: config-1 misses a predeclared band. Both capacities are
-authored model controls, not ecological claims. The superseded configuration is
-retained in source as `legacyModelConfigV1` and its full batch output is kept at
-`audit/characterization-results-config1.json`.
+**No claim is made that the newer configuration is automatically correct.** It was
+adopted for exactly one reason: the older one misses a predeclared band. Both
+capacities are authored model controls, not ecological claims. The superseded
+configuration is retained in source as `legacyModelConfigV1` and its full batch output
+is kept at `audit/characterization-results-config1.json`.
 
-Other recorded decisions of substance: the shoreline `visual_sensing` weight set
-to 0.0 so `large_eyes` has a genuinely adverse context (D-005); `fitnessZero`
-centered on the ancestor genome (D-006); balanced 5/5 side assignment in
-legibility mode so the identification check measures legibility rather than side
-bias (D-016). D-000 and D-010 disclose the actual document-authoring order and
-the pre-declaration calibration sweeps rather than presenting a tidier sequence.
+Other recorded decisions of substance: the shoreline `visual_sensing` weight set to
+0.0 so `large_eyes` has a genuinely adverse context (D-005); `fitnessZero` centered on
+the ancestor genome (D-006); balanced 5/5 side assignment in legibility mode so the
+identification check measures legibility rather than side bias (D-016). D-000 and
+D-010 disclose the actual document-authoring order and the pre-declaration calibration
+sweeps rather than presenting a tidier sequence.
 
 ---
 
-## 8. Desktop Canvas measurements (§22)
+## 8. Desktop Canvas measurement (§22)
 
-Headless Chromium (Playwright 1.56.1), viewport 1280×800, DPR 1. **This is not a
-substitute for the iPad gate.**
+Headless Chromium 141.0.7390.37, viewport 1280×800,
+device-pixel ratio 1. **This is not a substitute for the iPad gate.**
 
-| Measure | Normal mode | Render-stress (exactly 360 glyphs) |
+Reproducible from this bundle with one command:
+
+```
+npm install && npx playwright install chromium
+npm run audit:desktop
+```
+
+The driver (`tools/measureDesktop.mjs`) freezes every parameter, starts and stops its
+own ephemeral loopback server, and writes the schema below.
+
+**What is pinned, precisely.** `package-lock.json` pins the `playwright` package to an
+exact version with an integrity hash. That package determines which Chromium build
+`npx playwright install chromium` fetches, but the browser BINARY is downloaded, not
+vendored, so the build actually used is recorded in the output rather than asserted:
+`browser.version` above is the version this run measured (141.0.7390.37).
+A different environment may resolve a different Chromium build; the tool reports what
+it ran, which is why the memory channel is probed per run rather than assumed.
+
+| Measure | Normal mode | Render-stress |
 |---|---|---|
-| frames sampled | 158 | 1527 |
+| glyphs drawn | live world (224 animals) | 360 (declared 360, matches: true) |
+| frames sampled | 181 | 1469 |
 | median frame time | 16.70 ms | 16.70 ms |
-| 95th-percentile frame time | 17.60 ms | 19.20 ms |
-| maximum after warm-up | 34.60 ms | 43.60 ms |
-| p95 input-to-next-paint | 11.60 ms | 10.20 ms (20 actions) |
+| 95th-percentile frame time | 17.00 ms | 17.80 ms |
+| maximum after warm-up | 17.40 ms | 40.10 ms |
+| p95 input-to-next-paint | not sampled | 12.00 ms (21 actions) |
 | page errors | 0 | 0 |
 
-Memory across a 180-generation run: 4,204,963 → 11,898,432 bytes
-(**+7.69 MB**). Raw record: `audit/desktop-measurements.json`. Note this is
-below the 360-generation retention window, so it does not exercise the repaired
-boundary pruning; the bounded-growth evidence is the generation-400-to-600
-canonical-size test in `genealogy-retention-boundary.test.js`.
+### Generation semantics (explicit, not inferred)
+
+A freshly hydrated fixture is generation 0. The run performs exactly
+180 transitions, so the final state is generation
+**180** with **224** living animals. Revision 3 reported
+`generation: 181` beside a field named `populationAfter180Generations`; that ambiguity
+is gone.
+
+Independently cross-checked against a fresh Node run of the same fixture, seed and
+transition count: **agrees**
+(population 224, zone bins canopy 118, forest_floor 106, shoreline 0).
+
+### Window scope
+
+Desktop windows: 2000 ms warm-up, 3000 ms normal sample,
+20000 ms stress sample. The iPad gate requires
+30000 ms warm-up and 180000 ms of stress sampling.
+**Satisfies the iPad gate's windows: false.** These desktop numbers are
+not measured against the iPad pass law and do not advance that gate.
+
+### Memory across the 180-generation run
+
+Authoritative channel: `node:process.memoryUsage()`.
+
+| Channel | Result |
+|---|---|
+| Node `process.memoryUsage().heapUsed` | 25,006,336 → 60,250,736 bytes (Δ 35,244,400) |
+| Node RSS | 93,941,760 → 156,196,864 bytes (Δ 62,255,104) |
+| retained genealogy records | 22,470 |
+| living individuals | 224 |
+| browser `performance.memory` | usable: **false** |
+
+**The browser heap figure is withdrawn as evidence.** The in-page probe allocated 320,000,000 bytes and `usedJSHeapSize` did not move (10,000,000 before and after), so any browser-side delta — including zero — is a quantization artefact. Revision 3 published such a figure as memory-growth evidence without probing the channel. The Node figures above are used instead.
+
+Exact retained-record counts are the quantization-free growth measure. This
+180-generation window is **below** the 360-generation genealogy retention boundary,
+so it does not exercise boundary pruning; the retention bound itself is tested
+through generation 1000 by `observer-memory-bounds.test.js` and
+`genealogy-retention-boundary.test.js`.
 
 ---
 
@@ -440,90 +452,129 @@ PENDING_HUMAN_DEVICE_TEST
 ```
 
 `IPAD_TEST_CHECKLIST.md` is generated and ready. The probe provides both required
-deterministic modes: legibility mode (ten randomized high-versus-low webbing
-pairs, `uiRng` seed 32001, no raw trait values) and render-stress mode (exactly
-360 simultaneously visible glyphs). Pause, single-step, continuous-run, fixture
-reset, and mode-switch controls are instrumented for input-to-next-paint.
+deterministic modes: legibility mode (the defining fixture with all three zones
+visible **and** ten randomized high-versus-low webbing pairs, `uiRng` seed 32001, no
+raw trait values) and render-stress mode (exactly 360 simultaneously visible glyphs,
+counted rather than asserted). Pause, single-step, continuous-run, fixture reset, and
+mode-switch controls are instrumented for input-to-next-paint.
 
-No measurement is supplied. No threshold is claimed as met. Per §22 the gate
-stays `PENDING_HUMAN_DEVICE_TEST` until a human performs the test on an
-A14-class or newer iPad in current Safari.
+Legibility mode is self-contained: entering it **rehydrates the defining fixture**
+rather than trusting a flag, so the prescribed procedure cannot be run against a
+different world.
 
-Post-repair, the legibility mode now satisfies §22's composition requirement:
-the defining fixture, all three zone regions with occupancy counts, and the ten
-randomized pairs are present in one deterministic mode. Revision 1 split these
-across two conditions, which meant the prescribed acceptance procedure could not
-actually be run; that is repaired.
+**No measurement is supplied. No threshold is claimed as met.** Per §22 the gate stays
+`PENDING_HUMAN_DEVICE_TEST` until a human performs the test on an A14-class or newer
+iPad in current Safari. Per the standing instruction, the physical test has not been
+performed and is not being requested until revision 4 survives both audits.
 
 ---
 
-## 10. Files created
+## 9b. Claims withdrawn from earlier revisions
 
-```
-README.md  PLAN.md  DECISIONS.md  CHARACTERIZATION_PLAN.md  CHARACTERIZATION.md
-IPAD_TEST_CHECKLIST.md  FINAL_REPORT.md  AUDIT_PACKAGE_MANIFEST.md
-package.json  index.html  styles.css  .gitignore
+Stated here in the report itself, not only in the repair record, because a reader
+of this file alone must not be able to carry forward a claim that has been retracted.
 
-fixtures/defining_fixture_v1.json          (unchanged, hash-verified)
-reference/{biology,engine,analyze}.py      (unchanged, hash-verified, never imported)
+### Withdrawn in revision 4 (from revision 3)
 
-src/config/{modelConfig,traits,zones}.js
-src/core/{rng,math,individual,performance,survival,mating,inheritance,
-          mutation,genealogy,events,simulation,canonicalSerialize}.js
-src/fixtures/{definingFixtureV1,nodeFixtureIO}.js
-src/observer/{tracerChannels,currentZoneBins,matingAnnotations}.js
-src/debug/{canvasProbe,animalGlyph,inspector,controls,desktopMeasure}.js
-src/main.js
+1. **`populationAfter180Generations: 234`** in `audit/desktop-measurements.json` — that
+   figure is the population at generation **181**, not 180. Independently confirmed:
+   generation 180 → 224 living, generation 181 → 234 living. See §8 and D-041.
+2. **The desktop `memoryGrowthAcross180Generations.deltaBytes` figure as memory-growth
+   evidence** — published from a `performance.memory` channel that was never verified
+   to respond to allocation. See §8 and D-042.
+3. **"Config hash: `edb81695…`"** in the revision-3 report header — that is the
+   tuning-only subset hash, which the same report elsewhere states does not identify
+   the model. The authoritative identity is `modelDefinitionHash`. See the build
+   identity block above and D-040.
+4. **"119 tests … 119/119"** in the revision-3 gate table — the raw TAP summary in the
+   same bundle reported 172. No suite count is stated in prose any more; §1 reads it
+   from `audit/test-results.txt`. See D-040.
+5. **"The measure is now implemented literally"** in `CHARACTERIZATION_PLAN.md`, of the
+   mixed-world ancestry measure — it measured ancestry inside a mixed world, while the
+   declaration asks for an isolated world. Marked in place and superseded by the dated
+   Amendment 1. See §6b and D-039.
 
-test/  (17 contract test files + test/helpers/scriptedRng.js)
-tools/{serve,runFixture,runCharacterization,writeCharacterization,writeAuditEvidence}.mjs
-audit/{test-results.txt,fixture-results.json,characterization-results.json,
-       characterization-results-config1.json,observer-invariance-hashes.json,
-       reference-file-hashes.json,desktop-measurements.json}
-```
+### Withdrawn earlier, and not reinstated
 
-Two modules and one test helper are additions to the §23 layout, all recorded in
-`DECISIONS.md` D-011, and all preserving the §23 dependency boundaries. Every
-file required by §23 exists at its required path, asserted by
-`dependency-boundary.test.js`.
+6. **"Adjacency traversal … implemented literally … the declared measure itself is
+   unchanged"** (revision 2) — false; it measured a mixed-world ancestry subset. D-029.
+7. **"Automated implementation gates: PASS"** and **"the overall status is held at
+   `M1_BLOCKED` for one reason"** (revision 2) — false while implementation and evidence
+   defects were open. D-033.
+8. **`M1_AUTOMATED_GATES_PASS — IPAD TEST PENDING`** (revision 1) — withdrawn in
+   revision 2 after six confirmed defects.
+
+---
+
+## 10. Self-audit (§24 Stage G)
+
+Each scan below was executed by `tools/writeFinalReport.mjs` while generating this
+file. The result column is the scan's actual output, not a remembered claim.
+
+| Check | Result |
+|---|---|
+| unseeded-random search across `src/` and `tools/` | no occurrences |
+| observer/debug imports in `src/core`, `src/config`, `src/fixtures` | clean |
+| observer modules referencing the simulation RNG | none |
+| bare-specifier imports in `src/` (runtime dependencies) | none; `dependencies` is empty |
+| full test suite from clean | 247/249, 2 failures |
+| observer strategies compared after every generation | byte-identical: true |
+| quarantined Python references unchanged | true (3 files) |
+| fixture, both characterization batches, edge-only, desktop | regenerated for this revision |
+
+`playwright` is a **devDependency** used only by the desktop measurement; no runtime
+dependency was added and the shipped simulation still imports nothing outside `node:`.
 
 ---
 
 ## 11. Known limitations
 
-1. **The model is authored, not validated.** Trait effects, zone weights,
-   capacity, `selectionSlope`, and `fitnessZero` were chosen to satisfy authored
-   product gates.
+1. **The model is authored, not validated.** Trait effects, zone weights, capacity,
+   `selectionSlope`, and `fitnessZero` were chosen to satisfy authored product gates.
 2. **Shoreline dominant-bin occupancy collapses in most late random runs**
-   (438/500 seeds) even though shoreline load passes its guardrail. Reported in
-   §6; not tuned away.
-3. **Equilibrium population is almost entirely capacity-driven.** Raising
-   `fitnessZero` by +0.3 moved the median from 418 to 419, because lower survival
-   lowers load, which raises the density factor and compensates.
-4. **Zone loads are unequal by construction** — canopy and forest floor carry
-   roughly 3.5× the shoreline load. §21.3 explicitly does not require equal
-   prevalence across zones.
-5. **Desktop measurements are headless Chromium on Linux**, not Safari on iPad.
-6. **`performance.memory` is Chromium-only**; on Safari the probe reports memory
-   as unavailable rather than guessing.
-7. **The §19.4 gate is executed by `tools/runFixture.mjs`**, not inside the
-   build-blocking suite; the suite runs a 12-seed directional slice to stay fast.
-   The full 200-seed evidence is in `audit/fixture-results.json`.
-8. **`retainedGenealogy` keeps birth records for living individuals** past the
-   window; under the frozen lifecycle no living individual approaches the
-   360-generation boundary, so this never grows without bound.
-9. **Boundary `boundaryId` values are positional, not stable across prunes.**
-   The array is rebuilt each prune as the exact required set in ascending
-   original-id order, so a surviving boundary may be renumbered as older ones
-   drop out. `originalIndividualId` is the stable identity;
-   `lastRetainedGeneration` tracks the current window edge. This is deterministic
-   and idempotent, which is what §15 and §20.11 require.
-10. **Revision 1 of this report shipped six defects that its own test suite did
-   not catch.** The most serious — unbounded genealogy boundary growth — passed
-   because the retention test checked that old *complete* records disappear but
-   never that obsolete *boundary* records do. That was a gap in my tests, not a
-   contract ambiguity, and it is the clearest evidence in this bundle that a
-   passing suite is not proof of contract compliance.
+   (438/500 seeds) even though shoreline load passes its guardrail.
+   Reported in §6; not tuned away.
+3. **Equilibrium population is almost entirely capacity-driven.** Raising `fitnessZero`
+   by +0.3 moved the median only marginally, because lower survival lowers load, which
+   raises the density factor and compensates.
+4. **Zone loads are unequal by construction** — canopy and forest floor carry roughly
+   3.5× the shoreline load. §21.3 explicitly does not require equal prevalence across
+   zones.
+5. **Desktop measurements are headless Chromium on Linux**, not Safari on iPad, and use
+   shorter windows than the iPad gate.
+6. **`performance.memory` carries no usable resolution in this Chromium build** and is
+   absent on Safari. It is probed at run time and withdrawn as evidence when
+   unresponsive, rather than reported as a growth figure.
+7. **The full §19.4 200-seed run is executed by `tools/runFixture.mjs`**, while the
+   build-blocking suite runs the exact 200-seed gate assertions plus a fast directional
+   slice. The full evidence is in `audit/fixture-results.json`.
+8. **`retainedGenealogy` keeps birth records for living individuals** past the window;
+   under the frozen lifecycle no living individual approaches the 360-generation
+   boundary, so this never grows without bound.
+9. **Boundary `boundaryId` values are positional, not stable across prunes.** The array
+   is rebuilt each prune as the exact required set in ascending original-id order, so a
+   surviving boundary may be renumbered as older ones drop out. `originalIndividualId`
+   is the stable identity. This is deterministic and idempotent, which is what §15 and
+   §20.11 require.
+10. **Revisions 1, 2 and 3 each shipped defects their own passing suites did not catch**
+   — six, ten and eight respectively, as found by external audit. The clearest single
+   example: unbounded genealogy boundary growth passed revision 1 because the retention
+   test checked that old *complete* records disappear but never that obsolete *boundary*
+   records do. Those were gaps in my tests, not contract ambiguities, and they are the
+   strongest evidence in this bundle that a passing suite is not proof of contract
+   compliance.
+11. **Revision 4's own verification found eight further defects that neither auditor**
+   **reported** — including an evidence-capture path that made the report-integrity
+   check unpassable, and a self-audit table that asserted scans it never executed. They
+   are listed as R4-9a…h in `REVISION_4_REPAIR_RECORD.md`. Their existence is the
+   reason this report claims no gate pass: three consecutive audits have found real
+   defects, and so did I after the third.
+12. **The report and the raw suite results are mutually checking, so the committed pair**
+   **converges over a short cycle.** `FINAL_REPORT.md` states the suite counts and
+   `report-integrity.test.js` compares them, so `npm run report:final` followed by
+   `npm run audit:tests` may need one repetition before both are green together. This
+   is a consequence of making the report verifiable rather than declarative, and
+   `tools/runTests.mjs` prints the next step rather than leaving it implicit.
 
 ---
 
@@ -532,40 +583,22 @@ file required by §23 exists at its required path, asserted by
 All deliberately absent: the watch/flag/decide game loop; twelve-second surfaced
 variation cards; final inspection UI; prediction and journal screens; polished
 procedural animal art; sound; forms and collection; explanations; myths; teacher
-dashboard; room/server persistence; service worker and offline packaging; React
-or any other framework; persistent display-cluster identities; cluster
-split/merge history; divergence-panel claims; final cohort-ending rules;
-inferred reproductive isolation; all further zones and the full trait pool.
+dashboard; room/server persistence; service worker and offline packaging; React or any
+other framework; persistent display-cluster identities; cluster split/merge history;
+divergence-panel claims; final cohort-ending rules; inferred reproductive isolation;
+all further zones and the full trait pool.
 
-Persistent group identity is deliberately deferred. The biological records
-created here — parentage, birth, death, mating, and both mutation event streams
-with full provenance — make it addable later without rewriting the biological
-kernel.
+Persistent group identity is deliberately deferred. The biological records created
+here — parentage, birth, death, mating, and both mutation event streams with full
+provenance — make it addable later without rewriting the biological kernel.
 
 ---
 
-## 13. Self-audit (§24 Stage G)
-
-- `Math.random` search across `src/` and `tools/`: **no occurrences** (two
-  doc-comment mentions were reworded so the literal token appears nowhere in
-  production sources).
-- Observer-import scan of `src/core`, `src/config`, `src/fixtures`: **clean**.
-- Observer modules referencing the simulation RNG: **none**.
-- Bare-specifier imports (i.e. runtime dependencies): **none**; `dependencies` is
-  empty.
-- Full test suite re-run from clean: **119/119 pass**, raw stdout in
-  `audit/test-results.txt`.
-- Fixture and characterization re-run: outputs in `audit/`.
-- Observer strategies compared after every generation: **byte-identical**.
-- Reference files verified unchanged against the starter manifest: **all three
-  match**.
-- Deferred product features listed: §12 above.
-
-## 14. Completion law (§28)
+## 13. Completion law (§28)
 
 | Requirement | Status |
 |---|---|
-| observer actions provably cannot alter biology | met |
+| observer actions provably cannot alter biology | met — byte-identical across every strategy, and atomic against observer exceptions |
 | body and habitat variation occur only at birth | met |
 | the same webbing change has opposite consequences in the two contexts | met |
 | all three zones coexist in random worlds under broad guardrails | met by load; **see the named §6 limitation on dominant-bin occupancy** |
@@ -573,10 +606,30 @@ kernel.
 | genealogy and mating cores remain coherent | met |
 | neutral traits are exactly neutral | met |
 | the difference is visible in the diagnostic probe | met on desktop; **iPad legibility pending human test** |
-| every automated result reproducible from a clean run | met — 119/119 from clean; fixture and both batches re-run |
-| remaining uncertainty named rather than hidden | met — §6, §11, and the full audit response in §1b |
+| every automated result reproducible from a clean run | met — 247/249 from clean; fixture, both batches, edge-only and desktop regenerated |
+| remaining uncertainty named rather than hidden | met — §6, §11, and the audit response in the repair record |
 
-**Completion is nonetheless NOT declared.** §24 Stage A ordering was violated
-and cannot be repaired retrospectively (D-000, D-024). That is a principal
-decision, not an implementer decision, and the status stays `M1_BLOCKED` until it
-is recorded. The physical iPad gate also remains `PENDING_HUMAN_DEVICE_TEST`.
+**Completion is NOT declared** (`mayDeclareCompletion: false`). §24 Stage A ordering was
+violated and cannot be repaired retrospectively (D-000, D-024). That is a principal
+decision, not an implementer decision. The physical iPad gate is unperformed. The
+status stays as printed at the top of this report.
+
+---
+
+## 14. Where to verify each claim
+
+| Claim in this report | Raw evidence |
+|---|---|
+| suite counts | `audit/test-results.txt` (TAP summary) |
+| §19.3 / §19.4 fixture gates | `audit/fixture-results.json` |
+| §9 / §20.4 trait deltas | `audit/meaningful-trait-gate.json` |
+| §21.3–§21.6 batch measures | `audit/characterization-results.json` |
+| §21.7 side-by-side | `audit/characterization-results-config1.json` |
+| §21.6 traversal | `audit/edge-only-traversal-results.json` |
+| observer invariance | `audit/observer-invariance-hashes.json` |
+| reference-file integrity | `audit/reference-file-hashes.json` |
+| §22 desktop measurement | `audit/desktop-measurements.json` |
+| status | `src/config/milestoneStatus.js` |
+
+Consistency between this report and those files is enforced by
+`test/report-integrity.test.js`.

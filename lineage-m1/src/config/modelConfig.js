@@ -13,7 +13,7 @@
  * and zone rows are in canonical zone order [canopy, forest_floor, shoreline].
  */
 
-import { deepFreeze, deepClonePlain, buildModelDefinition } from "./modelDefinition.js";
+import { deepFreeze, deepClonePlain, buildModelDefinition, modelIdentityDigest } from "./modelDefinition.js";
 
 export const SCHEMA_VERSION = "lineage-biological-state-1";
 
@@ -135,3 +135,44 @@ export function modelDefinitionFor(config = currentModelConfig) {
 }
 
 export { deepFreeze, deepClonePlain };
+
+/**
+ * The runtime identity of a configuration's COMPLETE biological model.
+ *
+ * Revision-4 repair: canonical state now stores this alongside `configVersion`
+ * and every transition requires both to match. Revision 3 compared only the
+ * version string, so a modified model reusing `lineage-m1-config-2` was accepted
+ * — capacities [90,90,90] under that version produced a different population
+ * while both worlds kept the same canonical label.
+ *
+ * @param {Object} [config]
+ * @returns {string} 32-hex-character digest of the complete model definition
+ */
+export function modelIdentityFor(config = currentModelConfig) {
+  return modelIdentityDigest(canonicalModelText(modelDefinitionFor(config)));
+}
+
+/**
+ * Canonical text of a model definition, used as the digest input. Kept here so
+ * the digest input is defined in exactly one place.
+ * @param {Object} definition
+ * @returns {string}
+ */
+export function canonicalModelText(definition) {
+  // Deterministic, key-sorted, no dependency on the serializer module (which
+  // imports config, so importing it here would be circular).
+  const walk = (v) => {
+    if (v === null) return "null";
+    if (Array.isArray(v)) return "[" + v.map(walk).join(",") + "]";
+    if (typeof v === "object") {
+      return "{" + Object.keys(v).sort().map((k) => JSON.stringify(k) + ":" + walk(v[k])).join(",") + "}";
+    }
+    if (typeof v === "number") {
+      return Number.isInteger(v) ? String(v === 0 ? 0 : v) : v.toPrecision(17);
+    }
+    return JSON.stringify(v);
+  };
+  return walk(definition);
+}
+
+export { modelIdentityDigest };

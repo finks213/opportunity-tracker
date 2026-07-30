@@ -44,14 +44,97 @@ export function createObserverState() {
  * @param {number[]} currentIndividualIds all currently living ids
  */
 export function createTracerChannel(observer, channelId, founderIds, currentIndividualIds) {
+  const living = new Set(currentIndividualIds);
+
+  // §16 permits retroactive founder selection ONLY for animals already alive.
+  //
+  // Revision-4 repair. Revision 3 inserted every non-living requested founder at
+  // value 1, producing a valid-looking channel with zero living contribution and
+  // no way for the caller to distinguish "the followed contribution is genuinely
+  // zero" from "the channel was built from dead ids". Invalid founder sets are
+  // now rejected outright.
+  const invalid = founderIds.filter((id) => !living.has(id));
+  if (invalid.length > 0) {
+    throw new TracerFounderError(
+      `cannot create tracer "${channelId}": ${invalid.length} requested founder id(s) are not currently alive ` +
+      `(${invalid.slice(0, 8).join(", ")}${invalid.length > 8 ? ", …" : ""}). ` +
+      "§16 permits retroactive selection only for animals already alive.",
+      { channelId, invalidFounderIds: invalid, reason: "FOUNDERS_NOT_ALIVE" }
+    );
+  }
+  if (founderIds.length === 0) {
+    throw new TracerFounderError(
+      `cannot create tracer "${channelId}": the founder set is empty.`,
+      { channelId, invalidFounderIds: [], reason: "EMPTY_FOUNDER_SET" }
+    );
+  }
+
   const values = new Map();
   const founderSet = new Set(founderIds);
   for (const id of currentIndividualIds) values.set(id, founderSet.has(id) ? 1 : 0);
-  // Founder ids not currently alive still seed at 1 (retroactive selection only
-  // applies to observer state for animals already alive; guard anyway).
-  for (const id of founderIds) if (!values.has(id)) values.set(id, 1);
   observer.channels.set(channelId, { founderIds: founderIds.slice(), values });
   if (observer.activeChannel === null) observer.activeChannel = channelId;
+}
+
+/**
+ * Thrown when a tracer channel is requested from founders that are not currently
+ * alive, or from an empty founder set. Carries a machine-readable reason so a
+ * caller can surface an explicit unavailable state instead of a plausible
+ * zero-contribution channel.
+ */
+export class TracerFounderError extends Error {
+  /**
+   * @param {string} message
+   * @param {{channelId:string, invalidFounderIds:number[], reason:string}} detail
+   */
+  constructor(message, detail) {
+    super(message);
+    this.name = "TracerFounderError";
+    this.channelId = detail.channelId;
+    this.invalidFounderIds = detail.invalidFounderIds;
+    this.reason = detail.reason;
+  }
+}
+
+/**
+ * Resolve the living descendants of a requested founder set using genealogy.
+ *
+ * This is the ONLY sanctioned way to continue following a focal lineage whose
+ * original members have died: it walks actual parentage, so it can never
+ * substitute unrelated animals that merely occupy the same habitat.
+ *
+ * @param {Object} state biological state (read-only here)
+ * @param {number[]} founderIds the originally requested focal ids
+ * @returns {{descendantIds:number[], resolvedFromGenealogy:boolean}}
+ */
+export function resolveLivingDescendants(state, founderIds) {
+  const requested = new Set(founderIds);
+  const living = new Set(state.currentIndividuals.map((i) => i.id));
+
+  // Any requested founder still alive is itself a living member.
+  const direct = founderIds.filter((id) => living.has(id));
+
+  // Otherwise walk parentage forward: a child descends from the focal set when
+  // either parent does. Birth records are ordered by ascending child id and a
+  // parent id is always smaller than its child id, so one forward pass suffices.
+  const descends = new Set(requested);
+  const records = state.retainedGenealogy
+    .filter((r) => r.parentIds !== null)
+    .slice()
+    .sort((a, b) => a.childId - b.childId);
+  for (const r of records) {
+    if (descends.has(r.parentIds[0]) || descends.has(r.parentIds[1])) {
+      descends.add(r.childId);
+    }
+  }
+  const descendantIds = state.currentIndividuals
+    .map((i) => i.id)
+    .filter((id) => descends.has(id));
+
+  return {
+    descendantIds,
+    resolvedFromGenealogy: direct.length === 0 && descendantIds.length > 0,
+  };
 }
 
 /**

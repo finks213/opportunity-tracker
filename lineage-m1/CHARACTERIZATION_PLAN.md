@@ -142,6 +142,11 @@ Reported across the batch:
   shoreline-only-ancestry lineages reaching the canopy. The declared measure
   itself is unchanged; only the implementation was corrected to match it.
 
+  > **[Partly withdrawn — see Amendment 1 (2026-07-30) at the end of this
+  > document.]** The sentence "The measure is now implemented literally" was not
+  > true when written. The text above is left exactly as authored; the amendment
+  > states what was actually implemented and when.
+
 ## 6. Reporting rules (§21.7)
 
 - a failed directional fixture or guardrail is reported `FAIL`;
@@ -160,3 +165,89 @@ containing the per-seed records and aggregates sufficient to reproduce every
 table in `CHARACTERIZATION.md`, including every seed-level concentration value.
 `tools/writeCharacterization.mjs` renders `CHARACTERIZATION.md` from that file
 only, so the prose cannot drift from the raw evidence.
+
+---
+
+# Amendment 1 — adjacency-traversal measurement scope
+
+**Added 2026-07-30 (revision 4). Amendment, not a rewrite.** Everything above
+this line is the plan as originally authored, including two claims that later
+proved wrong. Nothing above has been altered except for a bracketed pointer to
+this amendment. The purpose of an amendment rather than an edit is that a reader
+must be able to see what was declared, what was actually built, and when the two
+diverged.
+
+## A1.1 What the plan declared
+
+Section 5 declares adjacency traversal as
+
+> the first generation at which any living individual has `shoreline >= 0.02` in
+> **a world descended only from canopy-heavy founders**, and symmetrically for
+> canopy from shoreline-heavy founders
+
+The operative phrase is *a world descended only from one edge band*. That is a
+statement about the **world**, not about an individual's genealogy.
+
+## A1.2 What each revision actually measured
+
+| Revision | What ran | Does it satisfy the declaration? |
+|---|---|---|
+| 1 | mixed 120-founder world; asked only whether any living animal held share in both edge zones | **No.** An ordinary forest-floor descendant satisfies it at generation 1. |
+| 2 | mixed 120-founder world; founder-band ancestry tracked per individual | **No.** The genealogy is single-band but the *world* is not. Forest-floor founders are present and ecologically active throughout. |
+| 3 | isolated 40-founder worlds added (`src/fixtures/edgeOnlyWorlds.js`, seeds 1..500 each direction); mixed-world measure retained alongside | **Yes**, by the isolated worlds. The mixed-world measure was retained but its raw JSON keys stayed generic. |
+| 4 | unchanged experiments; labels and raw JSON keys reconciled with this declaration | **Yes**, and now unambiguously labelled. |
+
+## A1.3 Withdrawn claims
+
+Two sentences authored earlier in this document and in `DECISIONS.md` D-019 are
+withdrawn as inaccurate:
+
+1. "The measure is now implemented literally." It was not. Revision 2 tracked
+   *ancestry* inside a mixed world; the declaration asks for an isolated
+   *world*. A single-band genealogy is not an isolated world: the other 80
+   founders still affect zone loads, density factors, survival probabilities,
+   mating availability, mating order, and population dynamics.
+2. Any wording implying that the mixed-world number is the §21.6 traversal
+   result.
+
+## A1.4 Authoritative evidence, fixed by this amendment
+
+The **only** authoritative §21.6 adjacency-traversal evidence is the isolated
+edge-only experiment:
+
+| Item | Value |
+|---|---|
+| Worlds | 40 founders only — canopy ids 1..40, or shoreline ids 81..120 |
+| Forest-floor founders | none |
+| Seeds | 1..500, each direction, run separately |
+| Fixture/initializer | `src/fixtures/edgeOnlyWorlds.js`, frozen; recorded under `frozenInitializer` in the raw JSON |
+| Driver | `tools/runEdgeOnlyTraversal.mjs` (`npm run edge-only`) |
+| Raw output | `audit/edge-only-traversal-results.json` |
+| Rendered in | `CHARACTERIZATION.md`, section "§21.6 adjacency traversal — AUTHORITATIVE isolated-world experiment" |
+
+## A1.5 The mixed-world measure is retained, renamed and demoted
+
+The mixed-world ancestry statistic is a real observation and is kept, but it is
+a **supporting** measure only. Its raw JSON keys were renamed in revision 4 so
+that a reader of the raw file alone cannot mistake it for the traversal result:
+
+| Revision 3 key | Revision 4 key |
+|---|---|
+| `lifecycle.canopyLineageReachesShoreline` | `lifecycle.additionalMixedWorldCanopyAncestryReachesShoreline` |
+| `lifecycle.shorelineLineageReachesCanopy` | `lifecycle.additionalMixedWorldShorelineAncestryReachesCanopy` |
+| `seeds[].firstCanopyLineageReachesShoreline` | `seeds[].firstAdditionalMixedWorldCanopyAncestryReachesShoreline` |
+| `seeds[].firstShorelineLineageReachesCanopy` | `seeds[].firstAdditionalMixedWorldShorelineAncestryReachesCanopy` |
+
+`lifecycle.authoritativeTraversalEvidence` was added to the same object as a
+pointer to the edge-only file, so the raw evidence names its own successor.
+
+## A1.6 What this amendment does NOT change
+
+- No threshold. `parentalUseEpsilon` and the `>= 0.02` meaningful-use bar are
+  unchanged.
+- No seed set, duration, configuration or initializer.
+- No experiment. The edge-only worlds and the mixed-world batch both ran
+  exactly as in revision 3; revision 4 renamed fields and reconciled labels.
+- No measured value. The revision-4 numbers are the revision-3 numbers under
+  new key names, and `test/median-consistency.test.js` plus
+  `test/edge-only-traversal.test.js` continue to hold.

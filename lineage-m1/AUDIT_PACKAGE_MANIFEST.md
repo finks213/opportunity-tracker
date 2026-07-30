@@ -1,6 +1,6 @@
 # LINEAGE Milestone 1 — Audit Package Manifest
 
-Bundle: `LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV3.zip`
+Bundle: `LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV4.zip`
 Contents: the complete `lineage-m1/` project directory required by contract §23.
 
 ---
@@ -13,28 +13,41 @@ Contents: the complete `lineage-m1/` project directory required by contract §23
 | npm version | 10.9.7 |
 | Operating system (final run) | Linux 6.18.5 x86_64 |
 | Runtime dependencies | none (`dependencies` is empty) |
+| Dev dependencies | `playwright` ^1.56.1, pinned by `package-lock.json`; used ONLY by `tools/measureDesktop.mjs` |
 | Final config version | `lineage-m1-config-2` |
 | Final **complete model-definition** hash (config-2) | `dc444865163deb32a7a9d80bd23f576d1ab5a936896298b5cd13faac6f513b3d` |
 | Tuning-config-only hash (subset, config-2) | `edb81695973b81ab8f87f7ef9dde9d8c5b3d4c7dfbeb45f385547edd86ee86de` |
-| Complete model-definition hash (config-1) | `4724f9b98be6457b...` (full value in the audit JSON) |
+| Complete model-definition hash (config-1) | `4724f9b98be6457bcd962f5f8f0851493884b9e882a87d84e939a237fa878119` |
+| Runtime model identity (config-2, 128-bit FNV-1a, isomorphic to the SHA-256 above) | `69dee399ec8a50cc7e1231959d2e31af` |
 | Superseded config retained | `lineage-m1-config-1` as `legacyModelConfigV1` |
 | **Final reported status** | **`M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED`** |
-| Bundle revision | **3** — after the pass-2 AFE-Δ break-report and an independent structural audit both returned `BREAKS-FOUND` |
-| Automated implementation gates | **NOT CLAIMED** — repaired and re-run, but no pass is self-certified until revision 3 survives independent re-audit |
+| Bundle revision | **4** — after the revision-3 AFE-Δ break-report and the revision-3 structural audit both returned `BREAKS-FOUND` (8 verified defects) |
+| Automated implementation gates | **NOT CLAIMED** — repaired and re-run, but no pass is self-certified until revision 4 survives independent re-audit |
 | Physical iPad gate | `PENDING_HUMAN_DEVICE_TEST` |
 | §24 Stage A planning order | VIOLATED — unrepairable, principal decision required (DECISIONS.md D-024). **Not** the only blocker. |
+| Revision-4 repair record | `REVISION_4_REPAIR_RECORD.md` — per-defect reproduction command, observed revision-3 result, repair, revision-4 result, regression test |
+| Revision-4 decisions | `DECISIONS.md` D-035 … D-043, plus the withdrawn revision-3 claims |
 
 ---
 
 ## 2. Exact clean-run commands
 
 ```bash
-# from the bundle root, after extracting; no install step is required
+# from the bundle root, after extracting. No install step is required for the
+# simulation, the tests, or any evidence generator EXCEPT the desktop measurement
+# (step 6b), which needs the `playwright` devDependency and its Chromium binary.
 cd lineage-m1
 
-# 1. every build-blocking invariant and contract test  (expect 172/172, exit 0)
+# 1. every build-blocking invariant and contract test  (exit 0; the raw count is
+#    whatever audit/test-results.txt records — no count is asserted in prose)
 #    This INCLUDES the exact 200-seed §19.4 fixture gate, so it is slow (~10 min).
 npm test                              # node --test --test-timeout=3600000 test/*.test.js
+
+#    To PUBLISH the raw output as audit evidence, use this instead. It writes to a
+#    temporary file and renames it over audit/test-results.txt only after the suite
+#    exits, so report-integrity.test.js compares FINAL_REPORT.md against the last
+#    COMPLETE run rather than the half-written file of the run executing it:
+npm run audit:tests
 
 # 2. the defining fixture matched trajectory gate, seeds 1..200 at generation 90
 node tools/runFixture.mjs             # writes audit/fixture-results.json   (~180 s)
@@ -52,6 +65,15 @@ node tools/writeAuditEvidence.mjs
 
 # 6. render CHARACTERIZATION.md from the raw audit JSON only
 node tools/writeCharacterization.mjs
+
+# 6b. reproducible desktop Canvas measurement (revision 4). Requires the
+#     playwright devDependency and its Chromium binary:
+npm install && npx playwright install chromium
+npm run audit:desktop                 # writes audit/desktop-measurements.json
+
+# 6c. generate FINAL_REPORT.md from the raw evidence (revision 4). Never edit
+#     FINAL_REPORT.md by hand; test/report-integrity.test.js fails if you do.
+npm run report:final
 
 # 7. the Canvas probe (desktop measurement and the manual iPad modes)
 #    Containment is covered by test/server-containment.test.js; run the suite
@@ -96,15 +118,16 @@ Machine-readable proof: `audit/reference-file-hashes.json`.
 
 | Path | Contents |
 |---|---|
-| `audit/test-results.txt` | unedited stdout/stderr from the final clean test run (119/119, exit 0), including the emitted three-zone trait deltas, the §19.3 probe values, and the post-repair boundary-record counts |
+| `audit/test-results.txt` | unedited stdout/stderr from the final clean test run, including the emitted three-zone trait deltas, the §19.3 probe values, and the post-repair boundary-record counts. The TAP summary in this file is the ONLY authority for the suite count; `FINAL_REPORT.md` reads it rather than restating it |
 | `audit/fixture-results.json` | seed-level paired fixture results for seeds 1..200: medians, successes, ties, focal-contribution and whole-world extinction counts, total-population distributions, full paired difference distributions, and the configuration hash |
 | `audit/characterization-results.json` | raw 500-seed metrics under `lineage-m1-config-2`, sufficient to reproduce every table in `CHARACTERIZATION.md`, including every seed-level concentration value |
 | `audit/characterization-results-config1.json` | the same batch under the superseded `lineage-m1-config-1`, for the §21.7 side-by-side |
 | `audit/observer-invariance-hashes.json` | generation-by-generation canonical biological SHA-256 hashes for all five required observer strategies in the defining fixture (5 × 31, zero mismatches) |
 | `audit/reference-file-hashes.json` | hashes proving the historical Python references remain unchanged |
 | `STRUCTURAL_AUDIT_REPAIR_RECORD.md` | one row per verified defect: reproduction command, observed revision-2 result, repair, revision-3 result, and regression test |
-| `audit/edge-only-traversal-results.json` | the DECLARED edge-only adjacency-traversal experiment: isolated 40-founder worlds, seeds 1..500 each direction, with the fully frozen initializer recorded under `frozenInitializer` |
-| `audit/desktop-measurements.json` | desktop Canvas frame-time, input-latency, and memory-growth measurements (headless Chromium; **not** the iPad gate) |
+| `audit/edge-only-traversal-results.json` | the **AUTHORITATIVE** §21.6 adjacency-traversal experiment: isolated 40-founder worlds, seeds 1..500 each direction, with the fully frozen initializer recorded under `frozenInitializer`. This file, and only this file, carries the traversal claim (see `CHARACTERIZATION_PLAN.md` Amendment 1) |
+| `audit/desktop-measurements.json` | desktop Canvas frame-time, input-latency and memory measurements (headless Chromium; **not** the iPad gate). Regenerable with `npm run audit:desktop`. Includes an in-page probe of `performance.memory` resolution, a Node cross-check of generation/population/zone bins, and explicit generation semantics |
+| `audit/meaningful-trait-gate.json` | the exact §9/§20.5 three-zone delta vectors and §20.4 neutral-trait maxima, emitted from the production survival path so `FINAL_REPORT.md` is generated rather than retyped |
 
 No failing test, unused module, superseded tuning result, or raw output was
 removed because it appeared unhelpful. `tools/calibrationSweep.mjs` and
@@ -140,6 +163,14 @@ does not make the implementation accepted; the pending state is preserved.
 
 ## 7. Every included path
 
+<!-- BEGIN GENERATED PATH INVENTORY -->
+
+Generated by `node tools/writeManifestPaths.mjs` from the bundle itself.
+`node tools/writeManifestPaths.mjs --check` fails if this list has gone stale, and
+`test/manifest-inventory.test.js` runs that check in the build-blocking suite.
+
+**99 files.**
+
 - `AUDIT_PACKAGE_MANIFEST.md`
 - `CHARACTERIZATION.md`
 - `CHARACTERIZATION_PLAN.md`
@@ -148,21 +179,25 @@ does not make the implementation accepted; the pending state is preserved.
 - `IPAD_TEST_CHECKLIST.md`
 - `PLAN.md`
 - `README.md`
+- `REVISION_4_REPAIR_RECORD.md`
 - `STRUCTURAL_AUDIT_REPAIR_RECORD.md`
 - `audit/characterization-results-config1.json`
 - `audit/characterization-results.json`
 - `audit/desktop-measurements.json`
 - `audit/edge-only-traversal-results.json`
 - `audit/fixture-results.json`
+- `audit/meaningful-trait-gate.json`
 - `audit/observer-invariance-hashes.json`
 - `audit/reference-file-hashes.json`
 - `audit/test-results.txt`
 - `fixtures/defining_fixture_v1.json`
 - `index.html`
+- `package-lock.json`
 - `package.json`
 - `reference/analyze.py`
 - `reference/biology.py`
 - `reference/engine.py`
+- `src/config/milestoneStatus.js`
 - `src/config/modelConfig.js`
 - `src/config/modelDefinition.js`
 - `src/config/traits.js`
@@ -194,15 +229,19 @@ does not make the implementation accepted; the pending state is preserved.
 - `styles.css`
 - `test/allocation-mutation-contract.test.js`
 - `test/birth-immutability.test.js`
+- `test/canvas-jitter-membership.test.js`
 - `test/defining-fixture-snapshot.test.js`
 - `test/defining-fixture.test.js`
 - `test/dependency-boundary.test.js`
+- `test/desktop-measurement-reproducibility.test.js`
 - `test/edge-only-traversal.test.js`
+- `test/focal-lineage-integrity.test.js`
 - `test/full-path-mutation-independence.test.js`
 - `test/genealogy-integrity.test.js`
 - `test/genealogy-retention-boundary.test.js`
 - `test/helpers/scriptedRng.js`
 - `test/lifecycle-contract.test.js`
+- `test/manifest-inventory.test.js`
 - `test/mating-integrity.test.js`
 - `test/meaningful-trait-context.test.js`
 - `test/median-consistency.test.js`
@@ -211,25 +250,75 @@ does not make the implementation accepted; the pending state is preserved.
 - `test/neutral-traits.test.js`
 - `test/observer-invariance.test.js`
 - `test/observer-memory-bounds.test.js`
+- `test/observer-transaction-integrity.test.js`
 - `test/probe-world-identity.test.js`
+- `test/report-integrity.test.js`
 - `test/rng-integrity.test.js`
 - `test/server-containment.test.js`
 - `test/spatial-integrity.test.js`
 - `test/status-consistency.test.js`
 - `test/survival-composition.test.js`
+- `test/traversal-label-integrity.test.js`
 - `tools/calibrationSweep.mjs`
+- `tools/measureDesktop.mjs`
 - `tools/runCharacterization.mjs`
 - `tools/runEdgeOnlyTraversal.mjs`
 - `tools/runFixture.mjs`
+- `tools/runTests.mjs`
 - `tools/serve.mjs`
 - `tools/writeAuditEvidence.mjs`
 - `tools/writeCharacterization.mjs`
+- `tools/writeFinalReport.mjs`
+- `tools/writeManifestPaths.mjs`
+
+<!-- END GENERATED PATH INVENTORY -->
 
 ---
 
 ## 8. Revision history
 
-### Revision 3 (this bundle)
+### Revision 4 (this bundle)
+
+Revision 3 was audited twice — the AFE-Δ evidence and claim audit and an
+independent structural code audit — and both returned `BREAKS-FOUND` with eight
+verified defects. All eight are repaired, each independently reproduced first.
+Full reproduction commands and outputs: `REVISION_4_REPAIR_RECORD.md`.
+
+| # | Defect | Severity | Repair | Regression test |
+|---|---|---|---|---|
+| 1 | observer exception inside the biological transaction left a torn world | HIGH | D-035 | `observer-transaction-integrity.test.js` |
+| 2 | focal lineage reseeded from the first N living instead of resolved from genealogy | MEDIUM-CRITICAL | D-036 | `focal-lineage-integrity.test.js` |
+| 3 | canonical state bound to the version label, not the complete model identity | MEDIUM | D-037 | `model-identity.test.js` |
+| 4 | legibility mode trusted a flag rather than the world | MEDIUM-CRITICAL | D-038 | `probe-world-identity.test.js` |
+| 5 | traversal plan, labels and raw keys disagreed | MEDIUM | D-039 | `traversal-label-integrity.test.js` |
+| 6 | `FINAL_REPORT.md` contradicted its own evidence (duplicate identity block, stale suite count, unverified memory figure) | MEDIUM-CRITICAL | D-040 | `report-integrity.test.js` |
+| 7 | desktop measurement unreproducible; browser memory published from an unprobed channel | MEDIUM-CRITICAL | D-041, D-042 | `desktop-measurement-reproducibility.test.js` |
+| 8 | Canvas jitter pruned by count instead of set membership | MEDIUM | D-043 | `canvas-jitter-membership.test.js` |
+
+Every evidence file was **regenerated**, not copied forward. The biology did not
+move: see the non-regression table in `REVISION_4_REPAIR_RECORD.md`. Four
+revision-3 claims are explicitly withdrawn there and in `DECISIONS.md`.
+
+New in this revision: `src/config/milestoneStatus.js`, `tools/measureDesktop.mjs`,
+`tools/writeFinalReport.mjs`, `tools/writeManifestPaths.mjs`, `tools/runTests.mjs`,
+`audit/meaningful-trait-gate.json`, `package-lock.json`, seven regression test files
+(`observer-transaction-integrity`, `focal-lineage-integrity`, `canvas-jitter-membership`,
+`desktop-measurement-reproducibility`, `traversal-label-integrity`, `report-integrity`,
+`manifest-inventory`), `REVISION_4_REPAIR_RECORD.md`, and Amendment 1 to
+`CHARACTERIZATION_PLAN.md`.
+
+Eight further defects were found by my own verification and are **not** in either
+audit report — including an evidence-capture path that made the report-integrity
+check unpassable, and a self-audit table that asserted scans it never executed.
+They are R4-9a through R4-9h in `REVISION_4_REPAIR_RECORD.md`. They are disclosed
+here rather than folded silently into the eight ordered repairs.
+
+`FINAL_REPORT.md` and the manifest path inventory are now **generated** from the
+raw evidence (`npm run report:final`, `npm run manifest:paths`) and guarded by
+`report-integrity.test.js` and `manifest-inventory.test.js`. No suite count is
+stated in prose anywhere; `audit/test-results.txt` is the only authority.
+
+### Revision 3
 
 Revision 2 was audited twice — the AFE-Δ break-report (pass 2) and an independent
 structural integrity audit — and both returned `BREAKS-FOUND` with ten verified
@@ -248,8 +337,11 @@ defects. All ten are repaired, each independently reproduced first:
 | 9 | contradictory official status artifacts | MEDIUM | D-033 | `status-consistency.test.js` |
 | 10 | limitation table used the lower middle value | MEDIUM-MINOR | D-034 | `median-consistency.test.js` |
 
-Tests 119 → **172** across six new files. All 60 `.js`/`.mjs` files pass
-`node --check`. Every evidence file was **regenerated**, not copied forward.
+Six new test files were added in that revision. Every evidence file was
+**regenerated**, not copied forward. (Revision 3's manifest stated a suite count
+in prose; revision 4 removes every such prose count in favour of the raw TAP
+summary, because a hand-maintained count is exactly what went stale in
+`FINAL_REPORT.md`.)
 
 Two revision-2 claims are explicitly withdrawn in `FINAL_REPORT.md` §1b and
 `DECISIONS.md`: that the adjacency measure was "implemented literally", and that

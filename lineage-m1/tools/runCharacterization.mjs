@@ -63,7 +63,19 @@ function runSeed(seed, config, generations) {
     finalCarrierPrevalence: null,
   }));
 
-  // Founder-band ancestry, needed for the declared adjacency-traversal measure.
+  // Founder-band ancestry for the ADDITIONAL mixed-world ancestry statistic.
+  //
+  // LABEL SCOPE (revision-4 repair). This is NOT the authoritative §21.6
+  // adjacency-traversal experiment. It runs the ordinary 120-founder MIXED
+  // world, where forest-floor founders are present from generation 0, so a
+  // canopy-only-descended individual can reach shoreline use without any
+  // lineage having to cross the forest-floor bridge itself. The authoritative
+  // traversal experiment uses ISOLATED 40-founder worlds with no forest-floor
+  // founders at all: `src/fixtures/edgeOnlyWorlds.js`, driven by
+  // `tools/runEdgeOnlyTraversal.mjs` into
+  // `audit/edge-only-traversal-results.json`. Read that file for the §21.6
+  // claim; read these fields as a weaker supporting observation only.
+  //
   // originBand[id] is a bitmask over founder bands: 1=canopy, 2=forest_floor,
   // 4=shoreline. A child inherits the union of its parents' bands, so a value of
   // exactly 1 means "descended only from canopy-heavy founders".
@@ -74,8 +86,8 @@ function runSeed(seed, config, generations) {
   for (const ind of state.currentIndividuals) {
     originBand.set(ind.id, 1 << Math.floor((ind.id - 1) / 40));
   }
-  let firstCanopyLineageReachesShoreline = null;
-  let firstShorelineLineageReachesCanopy = null;
+  let firstAdditionalMixedWorldCanopyAncestryReachesShoreline = null;
+  let firstAdditionalMixedWorldShorelineAncestryReachesCanopy = null;
 
   // §21.6 per-generation series.
   const birthsPerGeneration = [];
@@ -144,19 +156,25 @@ function runSeed(seed, config, generations) {
         }
       }
     }
-    // Allocation-mutation frequency and adjacency traversal.
+    // Allocation-mutation frequency, and the additional mixed-world ancestry
+    // statistic (NOT the authoritative §21.6 traversal experiment — see above).
     for (const ev of state.allocationMutationEvents.filter((e) => e.generation === targetGeneration)) {
       allocationMutationEvents++;
       const toIndex = ZONES.indexOf(ev.toZone);
       if (ev.preMutationAllocation[toIndex] < config.parentalUseEpsilon) lowShareTargetTransfers++;
     }
-    // Declared adjacency-traversal measure (§21.6): a lineage descended ONLY
-    // from one edge band must reach meaningful use of the opposite edge zone
-    // through the forest-floor bridge.
+    // ADDITIONAL MIXED-WORLD ancestry statistic: an individual descended ONLY
+    // from one edge band reaches meaningful use of the opposite edge zone.
     //
     // Ancestry is tracked explicitly. "Has positive share in both edge zones"
     // is NOT a substitute: an ordinary forest-floor descendant satisfies it at
     // generation 1 simply by using both of its legal neighbours.
+    //
+    // What this does NOT establish: because forest-floor founders exist in this
+    // world from generation 0, an edge-band-descended individual may acquire
+    // opposite-edge use without any ancestor of its own having bridged through
+    // the forest floor. Only the isolated 40-founder edge-only worlds force the
+    // bridge, and those carry the §21.6 claim.
     for (const b of newBirths) {
       if (!b.parentIds) continue;
       const a = originBand.get(b.parentIds[0]) ?? 0;
@@ -166,13 +184,13 @@ function runSeed(seed, config, generations) {
     for (const ind of state.currentIndividuals) {
       const band = originBand.get(ind.id);
       if (band === CANOPY_ONLY && ind.timeAllocation[2] >= config.parentalUseEpsilon) {
-        if (firstCanopyLineageReachesShoreline === null) {
-          firstCanopyLineageReachesShoreline = targetGeneration;
+        if (firstAdditionalMixedWorldCanopyAncestryReachesShoreline === null) {
+          firstAdditionalMixedWorldCanopyAncestryReachesShoreline = targetGeneration;
         }
       }
       if (band === SHORELINE_ONLY && ind.timeAllocation[0] >= config.parentalUseEpsilon) {
-        if (firstShorelineLineageReachesCanopy === null) {
-          firstShorelineLineageReachesCanopy = targetGeneration;
+        if (firstAdditionalMixedWorldShorelineAncestryReachesCanopy === null) {
+          firstAdditionalMixedWorldShorelineAncestryReachesCanopy = targetGeneration;
         }
       }
     }
@@ -243,8 +261,8 @@ function runSeed(seed, config, generations) {
     allocationMutationOpportunityCount: state.diagnostics.allocationMutationOpportunityCount,
     allocationMutationEvents,
     lowShareTargetTransfers,
-    firstCanopyLineageReachesShoreline,
-    firstShorelineLineageReachesCanopy,
+    firstAdditionalMixedWorldCanopyAncestryReachesShoreline,
+    firstAdditionalMixedWorldShorelineAncestryReachesCanopy,
     zeroAllocationFallbackCount: state.diagnostics.zeroAllocationFallbackCount,
     meanBirthsPerGeneration: mean(birthsPerGeneration),
     meanDeathsPerGeneration: mean(deathsPerGeneration),
@@ -444,9 +462,15 @@ export function runCharacterization(opts = {}) {
       seeds.reduce((a, s) => a + s.allocationMutationEvents, 0) /
       Math.max(1, seeds.reduce((a, s) => a + s.nonFounderBirthCount, 0)),
     lowShareTargetTransfers: seeds.reduce((a, s) => a + s.lowShareTargetTransfers, 0),
-    // Declared adjacency traversal, measured by founder-band ancestry.
-    canopyLineageReachesShoreline: (() => {
-      const v = seeds.map((s) => s.firstCanopyLineageReachesShoreline).filter((x) => x !== null);
+    // ADDITIONAL mixed-world ancestry statistic, measured by founder-band
+    // ancestry. Not the §21.6 traversal claim — see
+    // `audit/edge-only-traversal-results.json` for that.
+    authoritativeTraversalEvidence: "audit/edge-only-traversal-results.json (isolated 40-founder edge-only worlds)",
+    additionalMixedWorldNote:
+      "Mixed 120-founder world: forest-floor founders are present from generation 0, so opposite-edge use " +
+      "can be reached without any ancestor bridging through the forest floor. Supporting observation only.",
+    additionalMixedWorldCanopyAncestryReachesShoreline: (() => {
+      const v = seeds.map((s) => s.firstAdditionalMixedWorldCanopyAncestryReachesShoreline).filter((x) => x !== null);
       return {
         seedsReaching: v.length,
         ofSeeds: seeds.length,
@@ -454,8 +478,8 @@ export function runCharacterization(opts = {}) {
         earliestGeneration: v.length ? Math.min(...v) : null,
       };
     })(),
-    shorelineLineageReachesCanopy: (() => {
-      const v = seeds.map((s) => s.firstShorelineLineageReachesCanopy).filter((x) => x !== null);
+    additionalMixedWorldShorelineAncestryReachesCanopy: (() => {
+      const v = seeds.map((s) => s.firstAdditionalMixedWorldShorelineAncestryReachesCanopy).filter((x) => x !== null);
       return {
         seedsReaching: v.length,
         ofSeeds: seeds.length,

@@ -260,6 +260,52 @@
     "start": 1,
     "endInclusive": 200
   },
+  "exactProbabilityGate": {
+    "contractSection": "19.3",
+    "probe": {
+      "genome": [
+        0.15,
+        0.45,
+        0.4,
+        0.45,
+        0.4,
+        0.4,
+        0.35,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "zoneLoads": [
+        39.84,
+        40.32,
+        39.84
+      ],
+      "canopyAllocation": [
+        0.9,
+        0.1,
+        0
+      ],
+      "shorelineAllocation": [
+        0,
+        0.1,
+        0.9
+      ],
+      "lowWebbing": 0.15,
+      "highWebbing": 0.75,
+      "ageGenerations": 1,
+      "requiredCanopyDelta": -0.03,
+      "requiredShorelineDelta": 0.03
+    },
+    "canopyLow": 0.5796320520741872,
+    "canopyHigh": 0.1957584066711331,
+    "canopyDelta": -0.38387364540305413,
+    "canopyPass": true,
+    "shorelineLow": 0.5796320520741871,
+    "shorelineHigh": 0.9049578057635334,
+    "shorelineDelta": 0.32532575368934624,
+    "shorelinePass": true,
+    "allPass": true
+  },
   "medians": {
     "canopyLow": 29.365243832704593,
     "canopyHigh": 0.3604563622714263,

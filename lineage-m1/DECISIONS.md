@@ -690,6 +690,200 @@ Recorded explicitly rather than quietly corrected:
 
 ---
 
+# Revision-4 decisions (D-035 … D-043)
+
+Inputs: the AFE-Δ revision-3 BREAK-REPORT and `LINEAGE_M1_REV3_STRUCTURAL_AUDIT.md`,
+both `BREAKS-FOUND`, eight verified defects. Full reproduction commands and
+outputs are in `REVISION_4_REPAIR_RECORD.md`; the entries below record the
+*decisions*, not the transcripts.
+
+The revision-3 biological, fixture, security, traversal and long-run memory
+repairs are preserved unchanged. Nothing in this pass reopens the North Star, the
+biological lifecycle, the spatial architecture, the trait model, the
+observer-independence architecture, or deferred Milestone 2 scope.
+
+## D-035 — Observers are dispatched only after the biological commit (HIGH)
+
+Revision 3 called `hooks.onBirth` inside the birth loop, so a throwing observer
+left a torn world (at seed 1: generation still 0, 120 old individuals, but 2
+generation-1 births, 54 deaths and 1 mating already recorded). §§4 and 16 forbid
+an observer affecting biology, and an exception is an observer action.
+
+**Decision:** birth records are collected into a local array during the
+transaction and dispatched after the commit point, each call exception-isolated,
+with errors recorded on `state.lastGenerationResult.observerErrors` — outside
+canonical biology. `advanceGenerationAndCollect()` is added for callers that want
+the records with no hooks at all.
+
+**Rejected alternative:** wrapping each hook call in `try/catch` in place. That
+would stop the throw but still run observer code inside the transaction, so a
+hook that *mutated* state rather than throwing would remain able to corrupt it.
+The fix had to be ordering, not error handling.
+
+## D-036 — A focal lineage is resolved from genealogy, never reseeded (MEDIUM-CRITICAL)
+
+Revision 3's focal-lineage control created a channel from the first N living
+individuals. After turnover, the UI called a fresh set of animals "the focal
+lineage".
+
+**Decision:** `resolveLivingDescendants(state, founderIds)` performs a forward
+union pass over `retainedGenealogy` sorted by `childId`. Founders that are not
+alive are rejected with `TracerFounderError` (`FOUNDERS_NOT_ALIVE`); the two
+controls are separately named (`followFocalLineage`, `followNewHabitatGroup`); an
+unavailable lineage returns `FOCAL_LINEAGE_UNAVAILABLE` rather than silently
+following strangers. An **empty** focal set means "follow nothing" — no channel
+— which keeps the existing evidence generators working without a special case.
+
+## D-037 — Canonical state binds to the complete model identity, not the label (MEDIUM)
+
+`assertConfigMatchesState` compared only `configVersion`, so a forged config with
+the same version string but a different `zoneCapacity` was accepted and produced
+a different world under one label.
+
+**Decision:** `modelIdentityDigest()` computes a 128-bit FNV-1a over the
+canonical model text using four interleaved 32-bit lanes — isomorphic to the
+SHA-256 `modelDefinitionHash` but computable without `node:crypto`, so the
+browser probe can carry it. It is recorded on state, included in canonical bytes
+after `configVersion`, and checked before any RNG draw, counter, event or byte
+changes.
+
+**Why not just use SHA-256:** the probe runs in the browser, where `node:crypto`
+is unavailable, and the contract forbids adding a runtime dependency. Two hash
+functions over the same canonical text, with an asserted isomorphism, is the
+honest way to have one identity in both environments.
+
+## D-038 — Legibility mode rehydrates the fixture rather than trusting a flag (MEDIUM-CRITICAL)
+
+Revision 3 gated legibility mode on `worldSource === "defining_fixture"`. That
+flag was correct for the tested sequence, but it is a claim about the world rather
+than the world itself.
+
+**Decision:** entering legibility mode compares the live world's canonical bytes
+against the fixture's and rehydrates when they differ. The prescribed acceptance
+procedure can no longer be run against a different world, whatever the flag says.
+
+## D-039 — The §21.6 traversal label belongs to the isolated worlds only (MEDIUM)
+
+Revision 3 built the correct isolated experiment but left the raw JSON keys
+generic (`canopyLineageReachesShoreline`), so a reader of the raw file alone read
+the *mixed-world* measure as the §21.6 result. `CHARACTERIZATION_PLAN.md` also
+still asserted "the measure is now implemented literally", a claim already
+withdrawn elsewhere.
+
+**Decision:** the plan is **amended, not rewritten**. The original text stays
+exactly as authored with a bracketed pointer; a dated Amendment 1 (2026-07-30)
+tabulates what each revision actually measured, lists the withdrawn sentences,
+names the authoritative evidence, records the key renaming, and states that no
+threshold, seed set, duration, initializer, experiment or measured value changed.
+The raw keys are renamed to `additionalMixedWorld…`, and
+`lifecycle.authoritativeTraversalEvidence` points the raw file at its own
+successor.
+
+**Why an amendment:** rewriting a predeclaration to match the later
+implementation destroys the only evidence of the divergence. §21 exists to make
+predeclaration auditable; editing it retrospectively would defeat that even if
+every current number were right.
+
+## D-040 — FINAL_REPORT.md is generated, and its status has one source (MEDIUM-CRITICAL)
+
+Revision 3's report carried a duplicated build-identity block whose duplicate
+published the tuning-only subset hash as "Config hash" — the same hash the report
+demoted 87 lines later — and claimed `119 tests` while its own TAP summary said
+`172`.
+
+**Decision:** `tools/writeFinalReport.mjs` generates the report from `audit/*`
+and `src/config/milestoneStatus.js`. Counts are read from the TAP summary, never
+restated. `modelDefinitionHash` is labelled **authoritative** and
+`tuningConfigHash` **NONAUTHORITATIVE** with the reason inline.
+`test/report-integrity.test.js` asserts byte equality between the committed
+report and a fresh render, so a hand edit fails the build.
+
+Two hand-typed tables became raw evidence to make this possible:
+`audit/meaningful-trait-gate.json` (§9/§20.5 deltas, §20.4 neutral maxima) and
+`fixture-results.json → exactProbabilityGate` (§19.3 probe values). Both
+reproduce from the production survival path, asserted in the integrity test.
+
+## D-041 — The desktop measurement is reproducible from one command (MEDIUM-CRITICAL)
+
+Revision 3 reported a Playwright run but shipped no driver, no dependency, no
+lockfile and no command, and its `populationAfter180Generations: 234` was in fact
+the generation-**181** population (independently confirmed: gen 180 → 224, gen
+181 → 234).
+
+**Decision:** `tools/measureDesktop.mjs`, run by `npm run audit:desktop`, freezes
+every parameter in an exported `MEASUREMENT` object, starts and stops its own
+ephemeral loopback server, and writes schema
+`lineage-m1-desktop-measurement-3` with an explicit `generationSemantics` block.
+`playwright` is a **devDependency** pinned by `package-lock.json`; no runtime
+dependency was added.
+
+Two additions beyond the requirement:
+
+- a `headlessCrossCheck` that reruns the same fixture, seed and transition count
+  in Node and compares generation, population and zone bins, so the desktop
+  evidence is verifiable without a browser;
+- the stress glyph count is **counted** during rendering rather than restated
+  from the constant 360.
+
+## D-042 — Browser memory is probed before it is believed (MEDIUM-CRITICAL)
+
+An in-page probe allocating ~320 MB moved `performance.memory.usedJSHeapSize` not
+at all on the Chromium build available here: it is pinned at exactly 10,000,000.
+A browser-side delta from that channel — including zero — carries no information.
+
+**Decision:** the measurement probes the channel on every run. When the probe
+fails, the browser figures are reported with `usable: false`, `deltaBytes: null`
+and the note `WITHDRAWN AS EVIDENCE`, and the authoritative channel is
+`node:process.memoryUsage()` alongside exact retained-record counts.
+`readMemory()` no longer returns `available: true`; it returns `exposed` plus
+`resolutionVerified: false`, because API presence is not resolution.
+
+**Scope of the criticism, stated precisely:** revision 3 recorded non-round heap
+values on a different Chromium build (UA `141.0.0.0` vs `141.0.7390.37`), so its
+channel may have been responsive. The defect is publishing the figure without
+verifying the channel — not that the number was invented.
+
+## D-043 — Debug caches are pruned by membership, never by count (MEDIUM)
+
+`pruneJitterTo` opened with `if (this.jitter.size <= rendered.length) return 0;`.
+Equal or smaller size does not imply equal membership, so stale ids accumulated
+exactly when the population held steady while membership turned over — the normal
+case for an overlapping-generation lifecycle.
+
+**Decision:** the shortcut is removed. Pruning is always a set-membership pass.
+The regression file states explicitly which 3 of its 9 tests discriminate against
+revision 3 and which 6 are non-regression coverage, rather than claiming the
+whole file catches the defect.
+
+## Withdrawn revision-3 claims
+
+Recorded explicitly rather than quietly corrected:
+
+1. **`populationAfter180Generations: 234`** — that figure is the population at
+   generation **181**. Withdrawn; see D-041.
+2. **The desktop `memoryGrowthAcross180Generations.deltaBytes` figure as
+   memory-growth evidence** — published from a channel that was never verified to
+   respond to allocation. Withdrawn as evidence; see D-042.
+3. **`FINAL_REPORT.md`'s "Config hash: edb81695…"** — that is the tuning-only
+   subset hash, which the same report elsewhere states does not identify the
+   model. Withdrawn; the authoritative identity is `modelDefinitionHash`. See
+   D-040.
+4. **`FINAL_REPORT.md`'s "119 tests … 119/119"** — the raw TAP summary in the same
+   bundle reported 172. No suite count is stated in prose any more; the report
+   reads it from `audit/test-results.txt`. See D-040.
+5. **`CHARACTERIZATION_PLAN.md`'s "The measure is now implemented literally"** —
+   still present in revision 3 despite having been withdrawn in the revision-2
+   manifest. Now marked in place and superseded by the dated amendment. See D-039.
+
+## Process order — still not decided here
+
+The §24 Stage A pre-code planning-order violation (D-000, D-024) is
+principal-held. It is not decided or waived in this pass. No process waiver is
+requested and no physical iPad test is performed until revision 4 survives both
+the structural code audit and the AFE-Δ evidence and claim audit.
+
+---
+
 ## Open uncertainty (not hidden)
 
 - The performance matrix, zone weights, `selectionSlope`, `fitnessZero`, and

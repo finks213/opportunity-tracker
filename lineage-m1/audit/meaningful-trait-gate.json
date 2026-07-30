@@ -1,0 +1,206 @@
+{
+  "contractSection": "9 / 20.5 (meaningful-trait contextual gate) and 20.4 (neutral-trait integrity)",
+  "configVersion": "lineage-m1-config-2",
+  "modelDefinitionHash": "432391e5929bfeebf09d0c7f7b8408614fcb17a1e2e48407547c5191930e68a5",
+  "modelIdentityHash": "69dee399ec8a50cc7e1231959d2e31af",
+  "probe": {
+    "genome": [
+      0.15,
+      0.45,
+      0.4,
+      0.45,
+      0.4,
+      0.4,
+      0.35,
+      0.5,
+      0.5,
+      0.5
+    ],
+    "zoneLoads": [
+      39.84,
+      40.32,
+      39.84
+    ],
+    "allocations": [
+      [
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        1
+      ]
+    ],
+    "ageGenerations": 1,
+    "ageSurvivalMultiplier": 1,
+    "lowValue": 0.2,
+    "highValue": 0.8,
+    "benefitFloor": 0.01,
+    "costFloor": 0.01,
+    "neutralEquivalenceMargin": 0.001,
+    "arithmeticTolerance": 1e-12,
+    "fixtureGenomeMatches": true
+  },
+  "meaningful": [
+    {
+      "trait": "toe_webbing",
+      "traitIndex": 0,
+      "deltaByZone": {
+        "canopy": -0.3940638367676489,
+        "forest_floor": -0.07729923549258094,
+        "shoreline": 0.32018112737585325
+      },
+      "positiveZones": [
+        "shoreline"
+      ],
+      "adverseOrInactiveZones": [
+        "canopy",
+        "forest_floor"
+      ],
+      "passes": true
+    },
+    {
+      "trait": "curved_claws",
+      "traitIndex": 1,
+      "deltaByZone": {
+        "canopy": 0.45442076259134806,
+        "forest_floor": 0.03530069616551035,
+        "shoreline": -0.2364473423482784
+      },
+      "positiveZones": [
+        "canopy",
+        "forest_floor"
+      ],
+      "adverseOrInactiveZones": [
+        "shoreline"
+      ],
+      "passes": true
+    },
+    {
+      "trait": "dense_fur",
+      "traitIndex": 2,
+      "deltaByZone": {
+        "canopy": 0.06255078408763304,
+        "forest_floor": 0.1848052757178158,
+        "shoreline": -0.14512025243334953
+      },
+      "positiveZones": [
+        "canopy",
+        "forest_floor"
+      ],
+      "adverseOrInactiveZones": [
+        "shoreline"
+      ],
+      "passes": true
+    },
+    {
+      "trait": "long_hindlimbs",
+      "traitIndex": 3,
+      "deltaByZone": {
+        "canopy": 0.19221951660840902,
+        "forest_floor": 0.37703427171137177,
+        "shoreline": -0.22044597271702943
+      },
+      "positiveZones": [
+        "canopy",
+        "forest_floor"
+      ],
+      "adverseOrInactiveZones": [
+        "shoreline"
+      ],
+      "passes": true
+    },
+    {
+      "trait": "strong_tail",
+      "traitIndex": 4,
+      "deltaByZone": {
+        "canopy": -0.12975495399720516,
+        "forest_floor": -0.16567635642622103,
+        "shoreline": 0.28915842352007537
+      },
+      "positiveZones": [
+        "shoreline"
+      ],
+      "adverseOrInactiveZones": [
+        "canopy",
+        "forest_floor"
+      ],
+      "passes": true
+    },
+    {
+      "trait": "large_eyes",
+      "traitIndex": 5,
+      "deltaByZone": {
+        "canopy": 0.07294187072178149,
+        "forest_floor": 0.25399570430255974,
+        "shoreline": -0.11432796446896287
+      },
+      "positiveZones": [
+        "canopy",
+        "forest_floor"
+      ],
+      "adverseOrInactiveZones": [
+        "shoreline"
+      ],
+      "passes": true
+    },
+    {
+      "trait": "streamlined_body",
+      "traitIndex": 6,
+      "deltaByZone": {
+        "canopy": -0.278264453167808,
+        "forest_floor": -0.0704714593037915,
+        "shoreline": 0.35820605716923604
+      },
+      "positiveZones": [
+        "shoreline"
+      ],
+      "adverseOrInactiveZones": [
+        "canopy",
+        "forest_floor"
+      ],
+      "passes": true
+    }
+  ],
+  "neutral": [
+    {
+      "trait": "coat_shade",
+      "traitIndex": 7,
+      "deltaByZone": {
+        "canopy": 0,
+        "forest_floor": 0,
+        "shoreline": 0
+      },
+      "maxAbsoluteDelta": 0
+    },
+    {
+      "trait": "ear_tip_shape",
+      "traitIndex": 8,
+      "deltaByZone": {
+        "canopy": 0,
+        "forest_floor": 0,
+        "shoreline": 0
+      },
+      "maxAbsoluteDelta": 0
+    },
+    {
+      "trait": "tail_tip_marking",
+      "traitIndex": 9,
+      "deltaByZone": {
+        "canopy": 0,
+        "forest_floor": 0,
+        "shoreline": 0
+      },
+      "maxAbsoluteDelta": 0
+    }
+  ],
+  "allMeaningfulPass": true,
+  "allNeutralExactlyZero": true
+}

@@ -182,12 +182,14 @@ here as **named remaining uncertainty** (§28: "remaining uncertainty is named
 rather than hidden") and as a concrete input to Milestone 2, where a visibly
 empty shoreline late in a run would matter to what a child actually sees.
 
-### Adjacency traversal — the DECLARED edge-only-world experiment
+### §21.6 adjacency traversal — AUTHORITATIVE isolated-world experiment
 
-`CHARACTERIZATION_PLAN.md` declares traversal in a world descended **only**
-from one edge founder band. That experiment is executed by
-`tools/runEdgeOnlyTraversal.mjs` in genuinely isolated 40-founder worlds and its
-raw output is `audit/edge-only-traversal-results.json`.
+**This subsection, and only this subsection, carries the adjacency-traversal
+claim.** `CHARACTERIZATION_PLAN.md` (see its dated Amendment 1) declares
+traversal in a world descended **only** from one edge founder band. That
+experiment is executed by `tools/runEdgeOnlyTraversal.mjs` in genuinely isolated
+40-founder worlds with no forest-floor founders at all, and its raw output is
+`audit/edge-only-traversal-results.json`.
 
 | Experiment | Retained founders | Target zone | Seeds reaching | Earliest | Median first generation | Latest | Extinct seeds |
 |---|---|---|---|---|---|---|---|
@@ -204,7 +206,11 @@ Because there is no canopy-shoreline edge, the opposite edge zone is reachable
 only across the forest-floor bridge, which requires forest-floor use to reach
 `parentalUseEpsilon` first.
 
-#### Separate additional measure — mixed-world single-band ancestry
+#### Additional supporting measure — mixed-world single-band ancestry (NOT the §21.6 claim)
+
+Raw JSON keys: `additionalMixedWorldCanopyAncestryReachesShoreline` and
+`additionalMixedWorldShorelineAncestryReachesCanopy`. Renamed in revision 4 so
+that no field name can be mistaken for the authoritative traversal result.
 
 Reported under its own name because it is **not** the declared edge-only
 experiment: all 120 founders remain present and ecologically active, so they
@@ -217,7 +223,10 @@ genetically single-band is not ecologically isolated.
 | canopy-only-ancestry lineage → shoreline | 495 of 500 | 2 | 3.0 |
 | shoreline-only-ancestry lineage → canopy | 499 of 500 | 2 | 3.0 |
 
-Revision 2 presented these mixed-world numbers under the edge-only label. They
+Revision 2 presented these mixed-world numbers under the edge-only label.
+Revision 3 separated the sections but left the raw JSON keys generic
+(`canopyLineageReachesShoreline`), so a reader of the raw file alone could still
+read them as the traversal result. Revision 4 renames the keys themselves. They
 are retained here as a genuine additional statistic, clearly distinguished.
 
 ## §21.7 Side-by-side configuration comparison

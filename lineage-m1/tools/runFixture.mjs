@@ -20,6 +20,9 @@ import { advanceGeneration, isExtinct } from "../src/core/simulation.js";
 import { currentModelConfig, modelDefinitionFor } from "../src/config/modelConfig.js";
 import { canonicalStringify } from "../src/core/canonicalSerialize.js";
 import { ordinaryMedian } from "../src/core/math.js";
+import { survivalProbability } from "../src/core/survival.js";
+import { STANDARD_TRAIT_TEST_GENOME, STANDARD_ZONE_LOADS } from "../src/fixtures/definingFixtureV1.js";
+import { TRAIT_INDEX } from "../src/config/traits.js";
 import {
   createObserverState,
   createTracerChannel,
@@ -37,7 +40,13 @@ import {
  */
 export function runWorldWithTracer(state, focalIds, measurementGeneration, config) {
   const observer = createObserverState();
-  createTracerChannel(observer, "focal", focalIds, state.currentIndividuals.map((i) => i.id));
+  // An EMPTY focal set means "follow nothing": create no channel at all. The
+  // tracer constructor now rejects empty founder sets (revision-4 repair), and an
+  // empty channel would in any case be a different thing from following nothing.
+  const following = focalIds.length > 0;
+  if (following) {
+    createTracerChannel(observer, "focal", focalIds, state.currentIndividuals.map((i) => i.id));
+  }
   const hook = tracerBirthHook(observer);
   const prune = observerAfterGenerationHook(observer);
   let extinctAt = null;
@@ -48,10 +57,73 @@ export function runWorldWithTracer(state, focalIds, measurementGeneration, confi
   if (isExtinct(state) && extinctAt === null) extinctAt = state.generation;
   const livingIds = state.currentIndividuals.map((i) => i.id);
   return {
-    contribution: livingFounderContribution(observer, "focal", livingIds),
+    contribution: following ? livingFounderContribution(observer, "focal", livingIds) : 0,
     population: livingIds.length,
     generation: state.generation,
     extinctAt,
+  };
+}
+
+/**
+ * The §19.3 exact probability gate, emitted as raw evidence (revision-4 repair).
+ *
+ * Revision 3 asserted these six numbers inside a test and then retyped them into
+ * FINAL_REPORT.md by hand. Emitting them means the report is generated from the
+ * measurement, and `report-integrity.test.js` can compare both against a fresh
+ * computation.
+ *
+ * @param {Object} config
+ */
+export function exactProbabilityGate(config) {
+  const loads = [STANDARD_ZONE_LOADS.canopy, STANDARD_ZONE_LOADS.forest_floor, STANDARD_ZONE_LOADS.shoreline];
+  const canopyAllocation = [0.9, 0.1, 0.0];
+  const shorelineAllocation = [0.0, 0.1, 0.9];
+  const lowWebbing = 0.15;
+  const highWebbing = 0.75;
+  const requiredCanopyDelta = -0.03;
+  const requiredShorelineDelta = 0.03;
+
+  const genomeWith = (webbing) => {
+    const g = Array.from(STANDARD_TRAIT_TEST_GENOME);
+    g[TRAIT_INDEX.toe_webbing] = webbing;
+    return g;
+  };
+  const p = (webbing, allocation) =>
+    survivalProbability(
+      { bodyGenome: genomeWith(webbing), timeAllocation: allocation, ageGenerations: 1 },
+      loads,
+      config
+    ).pSurvival;
+
+  const canopyLow = p(lowWebbing, canopyAllocation);
+  const canopyHigh = p(highWebbing, canopyAllocation);
+  const shorelineLow = p(lowWebbing, shorelineAllocation);
+  const shorelineHigh = p(highWebbing, shorelineAllocation);
+  const canopyDelta = canopyHigh - canopyLow;
+  const shorelineDelta = shorelineHigh - shorelineLow;
+
+  return {
+    contractSection: "19.3",
+    probe: {
+      genome: genomeWith(lowWebbing),
+      zoneLoads: loads,
+      canopyAllocation,
+      shorelineAllocation,
+      lowWebbing,
+      highWebbing,
+      ageGenerations: 1,
+      requiredCanopyDelta,
+      requiredShorelineDelta,
+    },
+    canopyLow,
+    canopyHigh,
+    canopyDelta,
+    canopyPass: canopyDelta <= requiredCanopyDelta,
+    shorelineLow,
+    shorelineHigh,
+    shorelineDelta,
+    shorelinePass: shorelineDelta >= requiredShorelineDelta,
+    allPass: canopyDelta <= requiredCanopyDelta && shorelineDelta >= requiredShorelineDelta,
   };
 }
 
@@ -151,6 +223,7 @@ export function runFixtureExperiment(opts = {}) {
     modelDefinition,
     measurementGeneration,
     seedRange: { start: seedStart, endInclusive: seedEnd },
+    exactProbabilityGate: exactProbabilityGate(config),
     medians,
     successCounts: { canopy: canopySuccess, shoreline: shorelineSuccess },
     tieCounts: { canopy: canopyTies, shoreline: shorelineTies },

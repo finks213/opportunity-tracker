@@ -114,6 +114,7 @@ export function canonicalBiologyObject(state) {
   return {
     schemaVersion: state.schemaVersion,
     configVersion: state.configVersion,
+    modelIdentityHash: state.modelIdentityHash,
     generation: state.generation,
     nextIndividualId: state.nextIndividualId,
     nextBirthEventId: state.nextBirthEventId,

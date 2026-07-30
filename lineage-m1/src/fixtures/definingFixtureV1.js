@@ -15,7 +15,7 @@ import { makeIndividual, makeEmptyState } from "../core/individual.js";
 import { createSimRng, Rng } from "../core/rng.js";
 import { serializeCanonicalBiology } from "../core/canonicalSerialize.js";
 import { computeZoneLoads } from "../core/survival.js";
-import { currentModelConfig, SCHEMA_VERSION } from "../config/modelConfig.js";
+import { currentModelConfig, SCHEMA_VERSION, modelIdentityFor } from "../config/modelConfig.js";
 import { ZONES } from "../config/zones.js";
 import { TRAIT_INDEX } from "../config/traits.js";
 
@@ -94,6 +94,7 @@ export function hydrateDefiningFixtureV1(env, trajectorySeed, config = currentMo
   const state = makeEmptyState(createSimRng(trajectorySeed), config);
   state.schemaVersion = SCHEMA_VERSION;
   state.configVersion = config.version;
+  state.modelIdentityHash = modelIdentityFor(config);
   state.generation = env.generation;
   state.nextIndividualId = env.nextIndividualId;
   state.nextBirthEventId = env.nextBirthEventId;
@@ -149,6 +150,7 @@ export function deserializeCanonicalBiology(canonicalBytes) {
   const state = makeEmptyState(Rng.fromState(plain.simRngState));
   state.schemaVersion = plain.schemaVersion;
   state.configVersion = plain.configVersion;
+  state.modelIdentityHash = plain.modelIdentityHash;
   state.generation = plain.generation;
   state.nextIndividualId = plain.nextIndividualId;
   state.nextBirthEventId = plain.nextBirthEventId;

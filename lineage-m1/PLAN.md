@@ -35,7 +35,7 @@ and prove it.
 | §18 | Canonical biological serialization | `src/core/canonicalSerialize.js` | `observer-invariance.test.js`, `rng-integrity.test.js` |
 | §19 A/B/C | Fixture raw hash, envelope round trip, hydration | `src/fixtures/definingFixtureV1.js`, `src/fixtures/nodeFixtureIO.js` | `defining-fixture-snapshot.test.js` |
 | §19 D, 19.2–19.4 | Paired worlds + probability + trajectory gates | `src/fixtures/definingFixtureV1.js`, `tools/runFixture.mjs` | `defining-fixture.test.js` |
-| §20.1–20.13 | All build-blocking invariants | as above | the seventeen `test/*.test.js` files |
+| §20.1–20.13 | All build-blocking invariants | as above | every `test/*.test.js` file (seventeen at revision 1; thirty-one at revision 4 after three audit repair passes) |
 | §21 | Predeclared characterization | `tools/runCharacterization.mjs`, `tools/writeCharacterization.mjs` | `CHARACTERIZATION_PLAN.md` → `CHARACTERIZATION.md` |
 | §22 | Crude Canvas probe + iPad gate | `index.html`, `src/debug/*` | `IPAD_TEST_CHECKLIST.md` (human) |
 | §23 | Directory structure | repository layout | — |

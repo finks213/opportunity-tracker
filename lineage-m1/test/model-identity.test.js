@@ -22,9 +22,16 @@ import {
   currentModelConfig,
   legacyModelConfigV1,
   modelDefinitionFor,
+  modelIdentityFor,
   founderAgeForId,
   deepFreeze,
+  deepClonePlain,
 } from "../src/config/modelConfig.js";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+
+const HERE = dirname(fileURLToPath(import.meta.url));
 import { buildModelDefinition } from "../src/config/modelDefinition.js";
 import { canonicalStringify } from "../src/core/canonicalSerialize.js";
 import { createInitialState, makeEmptyState } from "../src/core/individual.js";
@@ -270,4 +277,138 @@ test("assertConfigMatchesState is exported and usable directly", () => {
   const s = makeEmptyState(createSimRng(1), currentModelConfig);
   assert.doesNotThrow(() => assertConfigMatchesState(s, currentModelConfig));
   assert.throws(() => assertConfigMatchesState(s, legacyModelConfigV1), /configuration mismatch/);
+});
+
+// ---------------------------------------------------------------------------
+// Revision-4: canonical state is bound to the COMPLETE model, not a version string
+// ---------------------------------------------------------------------------
+
+test("§18 — a modified model reusing the same version string is REJECTED", () => {
+  // Revision-3 falsifier: capacities [90,90,90] under version
+  // `lineage-m1-config-2` was accepted, producing 160 individuals against the
+  // official 132 while both states kept the same canonical label.
+  const altered = deepFreeze({ ...deepClonePlain(currentModelConfig), zoneCapacity: [90, 90, 90] });
+  assert.equal(altered.version, currentModelConfig.version, "the version string is deliberately reused");
+  assert.notEqual(modelIdentityFor(altered), modelIdentityFor(currentModelConfig));
+
+  const s = createInitialState(1, currentModelConfig);
+  assert.throws(() => advanceGeneration(s, altered), /model mismatch/);
+  assert.throws(() => runGenerations(s, 3, altered), /model mismatch/);
+});
+
+test("§18 — same-version modifications are rejected for EVERY biology-affecting field", () => {
+  const perturbations = {
+    zoneCapacity: [90, 90, 90],
+    zoneWeights: currentModelConfig.zoneWeights.map((r, i) => (i === 0 ? r.map((v) => v + 0.1) : [...r])),
+    zoneScarcity: [1.5, 1.0, 1.0],
+    selectionSlope: currentModelConfig.selectionSlope + 0.1,
+    fitnessZero: currentModelConfig.fitnessZero.map((v) => v + 0.1),
+    ageSurvivalMultiplier: [1, 1, 1, 1, 1, 1, 0],
+    minimumMatingOverlap: 0.05,
+    offspringPerPair: 3,
+    bodyDriftScale: 0.09,
+    bodyMutationProbabilityPerChild: 0.25,
+    parentalUseEpsilon: 0.03,
+    allocationDriftScale: 0.06,
+    allocationMutationProbabilityPerChild: 0.1,
+    genealogyRetentionWindow: 300,
+    ancestorBodyGenome: currentModelConfig.ancestorBodyGenome.map((v) => Math.min(1, v + 0.01)),
+    founderAgeValues: [2],
+    canopyHeavy: [0.9, 0.09, 0.01],
+  };
+  for (const [field, value] of Object.entries(perturbations)) {
+    const altered = deepFreeze({ ...deepClonePlain(currentModelConfig), [field]: value });
+    assert.equal(altered.version, currentModelConfig.version);
+    const s = createInitialState(1, currentModelConfig);
+    assert.throws(
+      () => advanceGeneration(s, altered),
+      /model mismatch/,
+      `a changed ${field} under the same version must be rejected`
+    );
+  }
+});
+
+test("§18 — model-mismatch rejection happens before ANY mutation or RNG consumption", () => {
+  const altered = deepFreeze({ ...deepClonePlain(currentModelConfig), zoneCapacity: [90, 90, 90] });
+  const s = createInitialState(9, currentModelConfig);
+  const bytes = serializeCanonicalBiology(s);
+  const rng = JSON.stringify(s.simRng.toState());
+  const counters = [
+    s.generation, s.nextIndividualId, s.nextBirthEventId, s.nextMatingEventId,
+    s.nextMutationEventId, s.nextAllocationMutationEventId,
+  ];
+  const events = [
+    s.birthEvents.length, s.deathEvents.length, s.biologicalMatingEvents.length,
+    s.bodyMutationEvents.length, s.allocationMutationEvents.length,
+  ];
+  const population = s.currentIndividuals.length;
+
+  assert.throws(() => advanceGeneration(s, altered), /model mismatch/);
+
+  assert.equal(serializeCanonicalBiology(s), bytes, "canonical bytes must be unchanged");
+  assert.equal(JSON.stringify(s.simRng.toState()), rng, "RNG must not have advanced");
+  assert.deepEqual(
+    [s.generation, s.nextIndividualId, s.nextBirthEventId, s.nextMatingEventId,
+     s.nextMutationEventId, s.nextAllocationMutationEventId],
+    counters,
+    "no counter may move"
+  );
+  assert.deepEqual(
+    [s.birthEvents.length, s.deathEvents.length, s.biologicalMatingEvents.length,
+     s.bodyMutationEvents.length, s.allocationMutationEvents.length],
+    events,
+    "no event array may change"
+  );
+  assert.equal(s.currentIndividuals.length, population, "population must be unchanged");
+});
+
+test("§18 — two materially different models cannot serialize with one canonical identity", () => {
+  const altered = deepFreeze({ ...deepClonePlain(currentModelConfig), zoneCapacity: [90, 90, 90] });
+  const a = createInitialState(1, currentModelConfig);
+  const b = createInitialState(1, altered);
+  // Each state records the identity of the model that actually produced it.
+  assert.notEqual(a.modelIdentityHash, b.modelIdentityHash);
+  // And that identity reaches the canonical bytes.
+  assert.ok(serializeCanonicalBiology(a).includes(a.modelIdentityHash));
+  assert.ok(serializeCanonicalBiology(b).includes(b.modelIdentityHash));
+  assert.notEqual(serializeCanonicalBiology(a), serializeCanonicalBiology(b));
+
+  // Advancing each under its OWN model is fine and keeps them distinguishable.
+  advanceGeneration(a, currentModelConfig);
+  advanceGeneration(b, altered);
+  assert.notEqual(a.currentIndividuals.length, b.currentIndividuals.length);
+  assert.notEqual(a.modelIdentityHash, b.modelIdentityHash);
+});
+
+test("§18 — fixture hydration and canonical cloning both carry the model identity", async () => {
+  const { envelope } = loadValidatedFixture();
+  const hydrated = hydrateDefiningFixtureV1(envelope, 1, currentModelConfig);
+  assert.equal(hydrated.modelIdentityHash, modelIdentityFor(currentModelConfig));
+
+  const { buildFourWorlds } = await import("../src/fixtures/definingFixtureV1.js");
+  const worlds = buildFourWorlds(envelope, 1, currentModelConfig);
+  for (const w of [worlds.canopyLow, worlds.canopyHigh, worlds.shorelineLow, worlds.shorelineHigh]) {
+    assert.equal(w.modelIdentityHash, modelIdentityFor(currentModelConfig), "clones must carry the identity");
+    assert.doesNotThrow(() => advanceGeneration(w, currentModelConfig));
+  }
+});
+
+test("§21.7 — the calibration sweep never reuses a production version identity", () => {
+  const src = readFileSync(join(HERE, "..", "tools", "calibrationSweep.mjs"), "utf8");
+  assert.ok(
+    /noncanonical-calibration/.test(src),
+    "calibration variants must carry a derived noncanonical version identity"
+  );
+  // And a variant built that way is accepted under its own identity.
+  const variant = deepFreeze({
+    ...deepClonePlain(currentModelConfig),
+    zoneCapacity: [45, 45, 45],
+    version: "noncanonical-calibration(lineage-m1-config-2;zoneCapacity=45/45/45)",
+  });
+  const s = createInitialState(1, variant);
+  assert.equal(s.configVersion, variant.version);
+  assert.doesNotThrow(() => advanceGeneration(s, variant));
+  // But it cannot be advanced under the production model.
+  const s2 = createInitialState(1, variant);
+  assert.throws(() => advanceGeneration(s2, currentModelConfig), /configuration mismatch/);
 });
