@@ -6,3 +6,11 @@ Thumbs.db
 .vscode/
 .idea/
 *.partial
+
+# Interim work-in-progress snapshots. These are delivered directly to the user for
+# progress inspection and are deliberately NOT auditable: they carry repaired source
+# alongside not-yet-regenerated evidence, so their own integrity tests fail by
+# design. Keeping them out of history stops an auditor who clones this branch from
+# finding a bundle that looks like a delivery but is not one. Only the numbered
+# LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV*.zip artifacts are committed.
+*_WORK_IN_PROGRESS_NOT_FOR_AUDIT.zip
