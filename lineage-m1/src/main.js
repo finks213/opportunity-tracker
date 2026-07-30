@@ -22,6 +22,10 @@ import {
   assertFixtureConsistency,
 } from "./fixtures/definingFixtureV1.js";
 import {
+  FOCAL_OUTCOME,
+  MAINTAINED_CHANNEL_PREFIX,
+  createMaintainedFocalChannels,
+  resolveFocalLineage,
   createObserverState,
   createTracerChannel,
   tracerBirthHook,
@@ -130,6 +134,16 @@ class ProbeApp {
       applyWebbingOverride(this.state, env.shorelineFocalIds, env.highWebbing);
     }
     this.observer = createObserverState();
+    // Revision-5 repair (BUG 1 / R5-1). The contract-required focal sets get
+    // maintained channels at world creation, while every founder is still alive —
+    // the only moment a generation-zero focal set can be captured exactly. They
+    // stay dormant (the UI does not show them until asked) but are propagated
+    // through every birth, so late activation never depends on the rolling
+    // genealogy window. Storage stays bounded to the living population.
+    this.maintainedFocalChannels = createMaintainedFocalChannels(this.observer, this.state, {
+      canopy: env.canopyFocalIds,
+      shoreline: env.shorelineFocalIds,
+    });
     this.probe.jitter.clear();
     this.selectedId = null;
     this.worldSource = "defining_fixture";
@@ -148,13 +162,26 @@ class ProbeApp {
    * presented a newly selected habitat group as continuation of the focal group —
    * silent focal-lineage reseeding. That fallback is removed.
    *
-   * When no living descendant remains, this returns FOCAL_LINEAGE_UNAVAILABLE.
+   * Revision-5 repair (BUG 1 / R5-1). Resolution now prefers the MAINTAINED
+   * channel created with the world, so it stays correct past the 360-generation
+   * genealogy retention window. Three outcomes are distinguished, and the
+   * revision-4 conflation of the last two is gone:
+   *
+   *   FOCAL_LINEAGE_RESOLVED      living descendants established
+   *   FOCAL_LINEAGE_EXTINCT       genuinely none, and the evidence supports that
+   *   FOCAL_ANCESTRY_UNRESOLVABLE cannot be established either way — asserts nothing
+   *
+   * Revision 4 returned `FOCAL_LINEAGE_UNAVAILABLE` for the third case, which
+   * asserted biological absence. Reproduced at generation 400: 293 living animals,
+   * all 293 with positive focal contribution, resolver 0, UI "no living descendant
+   * remains".
+   *
    * Starting a fresh group is a separate, explicitly named action
    * (`followNewHabitatGroup`).
    *
    * @param {string} channelId
    * @param {"canopy"|"shoreline"} which
-   * @returns {{created:boolean, reason?:string, founderCount?:number, resolvedFromGenealogy?:boolean}}
+   * @returns {{created:boolean, reason?:string, founderCount?:number, source?:string, detail?:Object}}
    */
   followFocalLineage(channelId, which) {
     this.meter.markInput();
@@ -166,15 +193,32 @@ class ProbeApp {
     }
     const requested =
       which === "canopy" ? this.fixtureEnvelope.canopyFocalIds : this.fixtureEnvelope.shorelineFocalIds;
-    const { descendantIds, resolvedFromGenealogy } = resolveLivingDescendants(this.state, requested);
 
-    if (descendantIds.length === 0) {
-      // Explicit unavailable state. No substitution, no plausible zero channel.
+    // Revision-5 repair (BUG 1 / R5-1). Prefer the MAINTAINED channel, which has
+    // been propagated continuously since this world was created and is therefore
+    // correct at any generation. Revision 4 reconstructed from the rolling
+    // genealogy only, so after the 360-generation retention window slid past the
+    // founders it reported FOCAL_LINEAGE_UNAVAILABLE — asserting extinction — while
+    // every living animal still carried positive focal contribution.
+    const outcome = resolveFocalLineage(this.observer, this.state, requested, { focalSetName: which });
+    const { descendantIds } = outcome;
+
+    if (outcome.outcome === FOCAL_OUTCOME.UNRESOLVABLE) {
+      // Say "cannot be established", never "no descendant remains".
       this.tracerUnavailableReason =
-        `FOCAL_LINEAGE_UNAVAILABLE — no living descendant of the ${which} focal lineage remains. ` +
-        "Following a different group is a separate choice.";
+        `FOCAL_ANCESTRY_UNRESOLVABLE — the ${which} focal lineage cannot be established at ` +
+        `generation ${this.state.generation}: the genealogy retention window no longer contains its ` +
+        "founders and no maintained channel exists for this world. This is NOT a claim that the " +
+        "lineage is extinct.";
       this.renderPanels();
-      return { created: false, reason: "FOCAL_LINEAGE_UNAVAILABLE" };
+      return { created: false, reason: FOCAL_OUTCOME.UNRESOLVABLE, detail: outcome.detail };
+    }
+    if (outcome.outcome === FOCAL_OUTCOME.EXTINCT) {
+      this.tracerUnavailableReason =
+        `FOCAL_LINEAGE_EXTINCT — no living descendant of the ${which} focal lineage remains ` +
+        `(established from the ${outcome.source}). Following a different group is a separate choice.`;
+      this.renderPanels();
+      return { created: false, reason: FOCAL_OUTCOME.EXTINCT, detail: outcome.detail };
     }
 
     this.tracerUnavailableReason = null;
@@ -187,7 +231,12 @@ class ProbeApp {
     }
     this.refreshChannelSelect();
     this.renderPanels();
-    return { created: true, founderCount: descendantIds.length, resolvedFromGenealogy };
+    return {
+      created: true,
+      founderCount: descendantIds.length,
+      source: outcome.source,
+      reason: FOCAL_OUTCOME.RESOLVED,
+    };
   }
 
   /**
