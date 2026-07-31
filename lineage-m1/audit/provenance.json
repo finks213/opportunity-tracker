@@ -4,11 +4,11 @@
   "purpose": "Bind this bundle to the source revision that produced it, without shipping .git. Every value below is recomputable from the extracted bundle except `source.commit`, which is what the binding exists to supply.",
   "source": {
     "resolved": true,
-    "commit": "f92da10ca8308bff063b8c449a9af6fe400200f1",
-    "shortCommit": "f92da10ca830",
+    "commit": "59f2c73de01c76b2d569c360f100493d7e0aba14",
+    "shortCommit": "59f2c73de01c",
     "branch": "claude/lineage-m1-implementation-1m9zpq",
-    "treeHash": "438569a8cda54027bc0ba09d0625517a5f29398e",
-    "committedAt": "2026-07-31T00:05:46+00:00",
+    "treeHash": "691a2c80c2fd442c7e3d0c15e4fa64609923a347",
+    "committedAt": "2026-07-31T00:13:25+00:00",
     "workingTreeClean": false,
     "uncommittedPaths": [
       "M lineage-m1/FINAL_REPORT.md",
@@ -29,11 +29,11 @@
   },
   "testResults": {
     "path": "audit/test-results.txt",
-    "sha256": "ddbc2069e7a690d469de213068e440092a7e1377a7555b617b63b69aa663c699",
-    "bytes": 82681,
+    "sha256": "71b941cad87fffbb1ea07c770a323ec270b50826e777790695e101a485111aef",
+    "bytes": 78429,
     "tests": 349,
-    "pass": 346,
-    "fail": 3,
+    "pass": 349,
+    "fail": 0,
     "boundBy": "counts",
     "note": "The sha256 below is of the published run at the moment this record was written. It is NOT byte-verified by tools/verifyProvenance.mjs: the suite that verifies this record publishes a new TAP whose wall-clock lines differ, so a byte comparison would fail by construction rather than by tampering. The COUNTS are verified, and every other file is verified byte for byte."
   },
@@ -41,16 +41,12 @@
     "status": "M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED",
     "mayDeclareCompletion": false,
     "blockers": [
-      "the build-blocking suite reported failures",
-      "1 automated gate(s) FAIL: fullSuite",
-      "34 automated gate(s) UNVERIFIED: fixtureIntegrity, fixtureRoundTrip, deterministicHydration, pairedWorlds, exactProbability, matchedTrajectory, meaningfulTraits, birthImmutability, observerInvariance, noObserverDeps, neutralTraits, mutationIndependence, mutationProvenance, allocationOpportunity, spatialIntegrity, lifecycle, genealogyIntegrity, genealogyBounded, survivalComposition, rngIntegrity, populationGuardrails, traversal, desktopMeasurement, modelIdentity, modelHashProvenance, legibilitySelfContained, worldLoadRaceSafety, observerTransaction, generationResultImmutable, focalLineage, referencesUnchanged, reportIntegrity, testTreeIntegrity, reportDeterminism",
-      "3 failing test(s) map to no declared gate",
       "desktopCanvasMemory: UNVERIFIED",
       "ipadGate: PENDING_HUMAN_DEVICE_TEST",
       "stageAOrder: VIOLATED — principal decision required",
       "independentClosureAudit: PENDING"
     ],
-    "automatedGatesPass": false,
+    "automatedGatesPass": true,
     "externalBlockers": [
       "desktopCanvasMemory: UNVERIFIED",
       "ipadGate: PENDING_HUMAN_DEVICE_TEST",
@@ -60,8 +56,8 @@
   },
   "generated": {
     "FINAL_REPORT.md": {
-      "sha256": "ba51053503dbe7fac8baf26e34dffb55ddc5648e8e8be634fbbae75e72627385",
-      "bytes": 39319
+      "sha256": "152b611238a06088dd109df9d8a3cb25d87612747d78c583be0a4e04f873be11",
+      "bytes": 38013
     },
     "CHARACTERIZATION.md": {
       "sha256": "01f2b6b63038669297fc7be914065845da8ea1108a2691303b5233649faef25a",
@@ -110,8 +106,8 @@
       "bytes": 184847
     },
     "audit/gate-summary.json": {
-      "sha256": "3c56e7ca2020e91006527fce7f7af98d374c8c89fe50399d45f2b8a9576739f5",
-      "bytes": 27537
+      "sha256": "00449321497fa5ebff2fc12446a5527178866620c45f6b6e6c1f2df258bb949d",
+      "bytes": 26293
     },
     "audit/meaningful-trait-gate.json": {
       "sha256": "e8a00dc832f2a1bb15cada4f159e0a92a90c7bf4c95e4b220d039c8225166519",
@@ -126,7 +122,7 @@
       "bytes": 1207
     },
     "audit/runtime-matrix.json": {
-      "sha256": "b2445207090c2e719c3ffef3bcb0f862d08432d7f7086c4204fe438912905b31",
+      "sha256": "abf6167e735f94d426c43667266506d33ebdb558f064878a8ca0998a89122292",
       "bytes": 3632
     },
     "audit/tree-integrity.json": {
