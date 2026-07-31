@@ -37,15 +37,28 @@ import { MILESTONE_STATUS } from "../src/config/milestoneStatus.js";
 const ROOT = resolve(join(dirname(fileURLToPath(import.meta.url)), ".."));
 const read = (p) => readFileSync(join(ROOT, p), "utf8");
 
-/** The committed run, which is green. */
-const GREEN = parseTap(read("audit/test-results.txt"));
+/**
+ * A fully GREEN run, synthesised from the committed one.
+ *
+ * Deliberately not "the committed TAP, which is green": during a convergence round
+ * that file legitimately carries failures — including this file's own, the first
+ * time it runs — and a truth-table test whose green row depends on the repository
+ * being green measures the repository instead of the derivation. Both earlier
+ * revisions learned this the same way.
+ */
+const COMMITTED = parseTap(read("audit/test-results.txt"));
+const GREEN = (() => {
+  const perTest = new Map();
+  for (const name of COMMITTED.perTest.keys()) perTest.set(name, true);
+  return { tests: perTest.size, pass: perTest.size, fail: 0, perTest };
+})();
 
 /** A run with one failure, built from the committed one. */
 function redRun() {
   const perTest = new Map(GREEN.perTest);
   const first = [...perTest.keys()][0];
   perTest.set(first, false);
-  return { tests: GREEN.tests, pass: (GREEN.pass ?? 0) - 1, fail: 1, perTest };
+  return { tests: GREEN.tests, pass: GREEN.pass - 1, fail: 1, perTest };
 }
 
 const ext = (over = {}) => ({
@@ -139,8 +152,10 @@ test("§26 — source no longer forbids the statuses the contract authorises", (
 });
 
 test("§26 — the shipped evidence still derives the blocked status it publishes", () => {
+  // This row uses the COMMITTED run, not the synthetic one: it is the claim about
+  // what this bundle actually publishes.
   const external = readExternalStatuses(read);
-  const m = statusFor(GREEN, external);
+  const m = statusFor(COMMITTED, external);
   assert.equal(m.status, REPAIRS_REQUIRED_STATUS, "the current state must be unchanged by this repair");
   assert.equal(m.mayDeclareCompletion, false);
   assert.ok(isContractAuthorisedStatus(m.status));

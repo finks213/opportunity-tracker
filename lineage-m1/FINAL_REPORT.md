@@ -118,7 +118,7 @@ failure produced `Full test suite: FAIL — 1 of 249` beside `Birth immutability
 
 | # | Gate | Contract § | Evidence | Result |
 |---|---|---|---|---|
-| 1 | Full test suite | §20 | `audit/test-results.txt` (TAP summary) | **PASS** — 349/349, 0 failing |
+| 1 | Full test suite | §20 | `audit/test-results.txt` (TAP summary) | **PASS** — 377/377, 0 failing |
 | 2 | Fixture raw SHA-256 integrity | §19 A | 1 named test(s) | **PASS** |
 | 3 | Fixture-envelope canonical round trip | §19 B | 1 named test(s) | **PASS** |
 | 4 | Deterministic hydration | §19 C | 1 named test(s) | **PASS** |
@@ -174,8 +174,8 @@ and in `CHARACTERIZATION.md`.
 
 | Field | Value |
 |---|---|
-| tests | 349 |
-| pass | 349 |
+| tests | 377 |
+| pass | 377 |
 | fail | 0 |
 | cancelled | 0 |
 | skipped | 0 |
@@ -457,11 +457,11 @@ it ran, which is why the memory channel is probed per run rather than assumed.
 | Measure | Normal mode | Render-stress |
 |---|---|---|
 | glyphs drawn | live world (224 animals) | 360 (declared 360, matches: true) |
-| frames sampled | 179 | 1469 |
-| median frame time | 16.70 ms | 16.70 ms |
-| 95th-percentile frame time | 18.00 ms | 17.40 ms |
-| maximum after warm-up | 37.40 ms | 88.10 ms |
-| p95 input-to-next-paint | not sampled | 13.80 ms (21 actions) |
+| frames sampled | 180 | 1472 |
+| median frame time | 16.60 ms | 16.70 ms |
+| 95th-percentile frame time | 17.20 ms | 17.50 ms |
+| maximum after warm-up | 19.30 ms | 47.50 ms |
+| p95 input-to-next-paint | not sampled | 13.20 ms (21 actions) |
 | page errors | 0 | 0 |
 
 ### Generation semantics (explicit, not inferred)
@@ -508,8 +508,8 @@ not ask is worse than an honest `UNVERIFIED`. The probe result is in the raw JSO
 |---|---|
 | channel | `node:process.memoryUsage()` |
 | measures Canvas or browser memory | **false** |
-| heapUsed before → after | 25,043,056 → 75,168,528 bytes (Δ 50,125,472) |
-| RSS before → after | 93,478,912 → 160,149,504 bytes (Δ 66,670,592) |
+| heapUsed before → after | 25,016,792 → 61,704,128 bytes (Δ 36,687,336) |
+| RSS before → after | 93,687,808 → 158,539,776 bytes (Δ 64,851,968) |
 | retained genealogy records | 22,470 |
 | living individuals | 224 |
 
@@ -598,7 +598,7 @@ file. The result column is the scan's actual output, not a remembered claim.
 | observer/debug imports in `src/core`, `src/config`, `src/fixtures` | clean |
 | observer modules referencing the simulation RNG | none |
 | bare-specifier imports in `src/` (runtime dependencies) | none; `dependencies` is empty |
-| full test suite from clean | 349/349, 0 failures |
+| full test suite from clean | 377/377, 0 failures |
 | observer strategies compared after every generation | byte-identical: true |
 | quarantined Python references unchanged | true (3 files) |
 | fixture, both characterization batches, edge-only, desktop | regenerated for this revision |
@@ -687,7 +687,7 @@ provenance — make it addable later without rewriting the biological kernel.
 | genealogy and mating cores remain coherent | met |
 | neutral traits are exactly neutral | met |
 | the difference is visible in the diagnostic probe | met on desktop; **iPad legibility pending human test** |
-| every automated result reproducible from a clean run | met — 349/349 from clean, 0 gate(s) FAIL, 0 UNVERIFIED |
+| every automated result reproducible from a clean run | met — 377/377 from clean, 0 gate(s) FAIL, 0 UNVERIFIED |
 | remaining uncertainty named rather than hidden | met — §6, §11, and the audit response in the repair record |
 
 **Completion is NOT declared** (`mayDeclareCompletion: false`). This flag is DERIVED from the
