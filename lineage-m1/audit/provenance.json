@@ -4,11 +4,11 @@
   "purpose": "Bind this bundle to the source revision that produced it, without shipping .git. EVERY shipped file is hashed — production source, tests, tools, evidence, reports and package files — and `tools/verifyProvenance.mjs` recomputes all of them from an extraction.",
   "source": {
     "resolved": true,
-    "commit": "67b9bab69f4c8a9034922261b2dfbc9a224a8853",
-    "shortCommit": "67b9bab69f4c",
+    "commit": "b781395673f6cb99d46ff7390c106693cb0ad591",
+    "shortCommit": "b781395673f6",
     "branch": "claude/lineage-m1-implementation-1m9zpq",
-    "treeHash": "f3154ecbdbbf4f9a6ce35c0668b4fd32534e8d54",
-    "committedAt": "2026-07-31T09:58:33+00:00",
+    "treeHash": "490867903a42db3f843c6ed6f81c08efc8ec127d",
+    "committedAt": "2026-07-31T10:15:43+00:00",
     "workingTreeClean": true,
     "uncommittedPaths": []
   },
@@ -24,10 +24,10 @@
   },
   "testResults": {
     "path": "audit/test-results.txt",
-    "sha256": "e7213ea34c8956cf1c5cf552c54be1b2448199130d9b5a92c0f7b3efba5f58f5",
-    "bytes": 84140,
-    "tests": 377,
-    "pass": 377,
+    "sha256": "94fd6e4a26129a5b656e33c32f92dbe119afc21968a5b7702920fea97f0e86c5",
+    "bytes": 85676,
+    "tests": 384,
+    "pass": 384,
     "fail": 0,
     "boundBy": "bytes",
     "note": "Bound by its exact SHA-256, like every other shipped file (revision-7, Finding 3). Revision 6 exempted this file and checked only its three summary counts, so a non-summary line could be rewritten without detection. The suite that republishes it necessarily makes the working tree differ from this record until `npm run audit:provenance` is re-run; that is a regeneration step, not a verification exemption, and the DELIVERED archive is built after it."
@@ -51,7 +51,7 @@
     "ipadStatus": "PENDING_HUMAN_DEVICE_TEST"
   },
   "fileCount": 134,
-  "shippedTreeDigest": "400a6f8fd8685bd41a17795654563c5c12223e800f5fa9389fba263e46d77b4a",
+  "shippedTreeDigest": "18263c18f812596c3205a350f9b89793ac1d0a4b921f761cfd37d9c8dcaf371c",
   "files": {
     "AUDIT_PACKAGE_MANIFEST.md": {
       "sha256": "cc1c5ecb20eaa4a5be87c953c0644e01e1ae464616d59e13be587f59dd5860cf",
@@ -70,7 +70,7 @@
       "bytes": 54972
     },
     "FINAL_REPORT.md": {
-      "sha256": "7cf77a388cde7f329a4c696a250b7a865a10dd89db5c7505022874a3878f07c2",
+      "sha256": "2984a5da652e52b306d0af93365644ce968e05e8d604d1a2c9a2a59f4f7ded8f",
       "bytes": 38013
     },
     "IPAD_TEST_CHECKLIST.md": {
@@ -134,7 +134,7 @@
       "bytes": 184847
     },
     "audit/gate-summary.json": {
-      "sha256": "e5664667bc6cc27015823709a435e5f4b1a6eeda9bcc0b5674b8d77c62195206",
+      "sha256": "035259017991dd2ac2ff63cf723ebe79558543d7450978864f33176619cfad5c",
       "bytes": 26762
     },
     "audit/meaningful-trait-gate.json": {
@@ -150,16 +150,16 @@
       "bytes": 1207
     },
     "audit/runtime-matrix.json": {
-      "sha256": "9726058f49c9d3c21039aa62f59a904ebac4e97a61334196d3bff28f62bd8c71",
+      "sha256": "7c1fcb1007f2bca833e47e201fac7ac1b3b594cbe6931dd92a592049dff11756",
       "bytes": 3632
     },
     "audit/test-results.txt": {
-      "sha256": "e7213ea34c8956cf1c5cf552c54be1b2448199130d9b5a92c0f7b3efba5f58f5",
-      "bytes": 84140
+      "sha256": "94fd6e4a26129a5b656e33c32f92dbe119afc21968a5b7702920fea97f0e86c5",
+      "bytes": 85676
     },
     "audit/tree-integrity.json": {
-      "sha256": "ee53f78a4164132043cf5763d586dd35a1d815e2b249eac4b7b8eaac548e2118",
-      "bytes": 975
+      "sha256": "c0a590c5921a3f5aa6e94cf398eb4a07d5002c440f6501029948d8c7f982856e",
+      "bytes": 1648
     },
     "fixtures/defining_fixture_v1.json": {
       "sha256": "c80aaa523d3b3eec2655502b4eaebdbbb4d12f71f8b3378d9d3be60797342b78",
@@ -596,8 +596,8 @@
     "note": "An archive cannot contain its own hash, so no file inside it can record one: writing the value here would require rebuilding the archive, which changes the value. The SHA-256 is published with the delivery message. Verify with `sha256sum` against that value, then verify every file below against this record from the extraction."
   },
   "archiveRelationToCommit": {
-    "describesCommit": "67b9bab69f4c8a9034922261b2dfbc9a224a8853",
-    "treeHash": "f3154ecbdbbf4f9a6ce35c0668b4fd32534e8d54",
+    "describesCommit": "b781395673f6cb99d46ff7390c106693cb0ad591",
+    "treeHash": "490867903a42db3f843c6ed6f81c08efc8ec127d",
     "identicalExcept": [
       "audit/provenance.json"
     ],
