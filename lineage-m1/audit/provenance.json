@@ -4,18 +4,13 @@
   "purpose": "Bind this bundle to the source revision that produced it, without shipping .git. Every value below is recomputable from the extracted bundle except `source.commit`, which is what the binding exists to supply.",
   "source": {
     "resolved": true,
-    "commit": "59f2c73de01c76b2d569c360f100493d7e0aba14",
-    "shortCommit": "59f2c73de01c",
+    "commit": "c10ab9c773755dd85d7dfeddd364aa1cf5a1934a",
+    "shortCommit": "c10ab9c77375",
     "branch": "claude/lineage-m1-implementation-1m9zpq",
-    "treeHash": "691a2c80c2fd442c7e3d0c15e4fa64609923a347",
-    "committedAt": "2026-07-31T00:13:25+00:00",
-    "workingTreeClean": false,
-    "uncommittedPaths": [
-      "M lineage-m1/FINAL_REPORT.md",
-      "M lineage-m1/audit/gate-summary.json",
-      "M lineage-m1/audit/runtime-matrix.json",
-      "M lineage-m1/audit/test-results.txt"
-    ]
+    "treeHash": "9afabb3c512b49b1d8bf53f267a32552c316f63b",
+    "committedAt": "2026-07-31T00:32:50+00:00",
+    "workingTreeClean": true,
+    "uncommittedPaths": []
   },
   "model": {
     "configVersion": "lineage-m1-config-2",
@@ -29,8 +24,8 @@
   },
   "testResults": {
     "path": "audit/test-results.txt",
-    "sha256": "71b941cad87fffbb1ea07c770a323ec270b50826e777790695e101a485111aef",
-    "bytes": 78429,
+    "sha256": "03a820cf2d79eed55597abdd105f40474f211b83d05fb7e135a52966ac679916",
+    "bytes": 78441,
     "tests": 349,
     "pass": 349,
     "fail": 0,
@@ -68,8 +63,8 @@
       "bytes": 31202
     },
     "REVISION_6_REPAIR_RECORD.md": {
-      "sha256": "05c9e98650ce8c4aae4fd99be2082dc9313a7b6c776d14445e7a57194a39514d",
-      "bytes": 20648
+      "sha256": "445d2672cdb1fc9f4a60d9afd1d1925186294b0960b968e4c1dcc381824e8d86",
+      "bytes": 26620
     },
     "DECISIONS.md": {
       "sha256": "1fbf8f16a435bb5f074297a52e6550deebf313474b15e50ea4b6c83f75d9dc69",
@@ -126,8 +121,8 @@
       "bytes": 3632
     },
     "audit/tree-integrity.json": {
-      "sha256": "ff7bad51d7c024e6f8b68b948cabf54a276abecdcd621fbc229815f9b243911c",
-      "bytes": 2512
+      "sha256": "7916124b32d87d9004a1304ad01badfdbb27f029df7ceba3d710b6701f9baf5b",
+      "bytes": 975
     }
   },
   "archive": {
