@@ -4,20 +4,17 @@
   "purpose": "Bind this bundle to the source revision that produced it, without shipping .git. EVERY shipped file is hashed — production source, tests, tools, evidence, reports and package files — and `tools/verifyProvenance.mjs` recomputes all of them from an extraction.",
   "source": {
     "resolved": true,
-    "commit": "16326abaa52252cb6f722f5f4ebc415e4c07c351",
-    "shortCommit": "16326abaa522",
+    "commit": "ce80be25cec73e316460791bd4c9729a53c45994",
+    "shortCommit": "ce80be25cec7",
     "branch": "claude/lineage-m1-implementation-1m9zpq",
-    "treeHash": "ec5795b4b53350b5e4b302c19568a5ff4c1e59bf",
-    "committedAt": "2026-07-31T03:35:03+00:00",
+    "treeHash": "1e01858f6971132a6fcc5e216cc7bf0a9f03d4ea",
+    "committedAt": "2026-07-31T04:23:17+00:00",
     "workingTreeClean": false,
     "uncommittedPaths": [
-      "M lineage-m1/FINAL_REPORT.md",
-      "M lineage-m1/audit/desktop-measurements.json",
-      "M lineage-m1/audit/gate-summary.json",
       "M lineage-m1/audit/provenance.json",
       "M lineage-m1/audit/runtime-matrix.json",
       "M lineage-m1/audit/test-results.txt",
-      "M lineage-m1/test/status-truth-table.test.js"
+      "M lineage-m1/audit/tree-integrity.json"
     ]
   },
   "model": {
@@ -32,11 +29,11 @@
   },
   "testResults": {
     "path": "audit/test-results.txt",
-    "sha256": "7f4a376bf4d2fe7951cdfe7e3deb42e7ad7956905493fbebfd415d91de779781",
-    "bytes": 88914,
+    "sha256": "0887b190b587e6f2e77e3e5c3622a57905c03e189d4f22a3902cb777e78cb957",
+    "bytes": 84121,
     "tests": 377,
-    "pass": 373,
-    "fail": 4,
+    "pass": 377,
+    "fail": 0,
     "boundBy": "bytes",
     "note": "Bound by its exact SHA-256, like every other shipped file (revision-7, Finding 3). Revision 6 exempted this file and checked only its three summary counts, so a non-summary line could be rewritten without detection. The suite that republishes it necessarily makes the working tree differ from this record until `npm run audit:provenance` is re-run; that is a regeneration step, not a verification exemption, and the DELIVERED archive is built after it."
   },
@@ -44,16 +41,12 @@
     "status": "M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED",
     "mayDeclareCompletion": false,
     "blockers": [
-      "the build-blocking suite reported failures",
-      "1 automated gate(s) FAIL: fullSuite",
-      "34 automated gate(s) UNVERIFIED: fixtureIntegrity, fixtureRoundTrip, deterministicHydration, pairedWorlds, exactProbability, matchedTrajectory, meaningfulTraits, birthImmutability, observerInvariance, noObserverDeps, neutralTraits, mutationIndependence, mutationProvenance, allocationOpportunity, spatialIntegrity, lifecycle, genealogyIntegrity, genealogyBounded, survivalComposition, rngIntegrity, populationGuardrails, traversal, desktopMeasurement, modelIdentity, modelHashProvenance, legibilitySelfContained, worldLoadRaceSafety, observerTransaction, generationResultImmutable, focalLineage, referencesUnchanged, reportIntegrity, testTreeIntegrity, reportDeterminism",
-      "4 failing test(s) map to no declared gate",
       "desktopCanvasMemory: UNVERIFIED",
       "stageAOrder: VIOLATED — principal decision required",
       "independentClosureAudit: PENDING",
       "ipadGate: PENDING_HUMAN_DEVICE_TEST"
     ],
-    "automatedGatesPass": false,
+    "automatedGatesPass": true,
     "externalBlockers": [
       "desktopCanvasMemory: UNVERIFIED",
       "stageAOrder: VIOLATED — principal decision required",
@@ -63,7 +56,7 @@
     "ipadStatus": "PENDING_HUMAN_DEVICE_TEST"
   },
   "fileCount": 133,
-  "shippedTreeDigest": "8265d289fe98c080522ab778117d39a77e79c186606a796f54f1856d4f62a999",
+  "shippedTreeDigest": "c76eadd02f07833dcbbc6c8366573e56df46efe39ca0a4973c3a62f0afea6d61",
   "files": {
     "AUDIT_PACKAGE_MANIFEST.md": {
       "sha256": "98576d806b2c1e7e31bb981d3cca3e1647993da622aa5513b7b2fe079e0588e8",
@@ -82,8 +75,8 @@
       "bytes": 54972
     },
     "FINAL_REPORT.md": {
-      "sha256": "71d45957a146bf87a569d49de71b9dfbde788d3453c3b248423557bcecf18109",
-      "bytes": 39381
+      "sha256": "7cf77a388cde7f329a4c696a250b7a865a10dd89db5c7505022874a3878f07c2",
+      "bytes": 38013
     },
     "IPAD_TEST_CHECKLIST.md": {
       "sha256": "43b539e8003b703b4c1ac737afaaff4ba252b92f143267ced231957bc54fff3b",
@@ -146,8 +139,8 @@
       "bytes": 184847
     },
     "audit/gate-summary.json": {
-      "sha256": "bd659154c64dfffa6edc6230cbdcdec63dfcc933c6197b7b25e3630dc19d130a",
-      "bytes": 27652
+      "sha256": "4b9bdebf6534c6a6f07e03f1006efe99cd782587dea38310e2cedfd371c97f34",
+      "bytes": 26340
     },
     "audit/meaningful-trait-gate.json": {
       "sha256": "e8a00dc832f2a1bb15cada4f159e0a92a90c7bf4c95e4b220d039c8225166519",
@@ -162,16 +155,16 @@
       "bytes": 1207
     },
     "audit/runtime-matrix.json": {
-      "sha256": "207e0025c84f18f315621813d5e6f8a721b572aa325a985091a33909ee79e2a6",
+      "sha256": "9726058f49c9d3c21039aa62f59a904ebac4e97a61334196d3bff28f62bd8c71",
       "bytes": 3632
     },
     "audit/test-results.txt": {
-      "sha256": "7f4a376bf4d2fe7951cdfe7e3deb42e7ad7956905493fbebfd415d91de779781",
-      "bytes": 88914
+      "sha256": "0887b190b587e6f2e77e3e5c3622a57905c03e189d4f22a3902cb777e78cb957",
+      "bytes": 84121
     },
     "audit/tree-integrity.json": {
-      "sha256": "7916124b32d87d9004a1304ad01badfdbb27f029df7ceba3d710b6701f9baf5b",
-      "bytes": 975
+      "sha256": "c5eb9e8038f1ee27bffc066ce8db3668b054ba25e94695644030dcd096cc6d6a",
+      "bytes": 1648
     },
     "fixtures/defining_fixture_v1.json": {
       "sha256": "c80aaa523d3b3eec2655502b4eaebdbbb4d12f71f8b3378d9d3be60797342b78",
