@@ -4,11 +4,11 @@
   "purpose": "Bind this bundle to the source revision that produced it, without shipping .git. EVERY shipped file is hashed — production source, tests, tools, evidence, reports and package files — and `tools/verifyProvenance.mjs` recomputes all of them from an extraction.",
   "source": {
     "resolved": true,
-    "commit": "b781395673f6cb99d46ff7390c106693cb0ad591",
-    "shortCommit": "b781395673f6",
+    "commit": "324017151a57e44349dee290f7bc01fac63b1297",
+    "shortCommit": "324017151a57",
     "branch": "claude/lineage-m1-implementation-1m9zpq",
-    "treeHash": "490867903a42db3f843c6ed6f81c08efc8ec127d",
-    "committedAt": "2026-07-31T10:15:43+00:00",
+    "treeHash": "21e4b1a85ef762511d72f5a160b2b18352515738",
+    "committedAt": "2026-07-31T10:19:47+00:00",
     "workingTreeClean": true,
     "uncommittedPaths": []
   },
@@ -24,8 +24,8 @@
   },
   "testResults": {
     "path": "audit/test-results.txt",
-    "sha256": "94fd6e4a26129a5b656e33c32f92dbe119afc21968a5b7702920fea97f0e86c5",
-    "bytes": 85676,
+    "sha256": "49293efee7aafa29c9392442425e5139559ab6760af2e5e8dc94d1dc619254a5",
+    "bytes": 85670,
     "tests": 384,
     "pass": 384,
     "fail": 0,
@@ -51,7 +51,7 @@
     "ipadStatus": "PENDING_HUMAN_DEVICE_TEST"
   },
   "fileCount": 134,
-  "shippedTreeDigest": "18263c18f812596c3205a350f9b89793ac1d0a4b921f761cfd37d9c8dcaf371c",
+  "shippedTreeDigest": "7c186727c20fec3e124da965a7ec977b4eb8598eff9e1a3eebe3cf1c61418126",
   "files": {
     "AUDIT_PACKAGE_MANIFEST.md": {
       "sha256": "cc1c5ecb20eaa4a5be87c953c0644e01e1ae464616d59e13be587f59dd5860cf",
@@ -154,8 +154,8 @@
       "bytes": 3632
     },
     "audit/test-results.txt": {
-      "sha256": "94fd6e4a26129a5b656e33c32f92dbe119afc21968a5b7702920fea97f0e86c5",
-      "bytes": 85676
+      "sha256": "49293efee7aafa29c9392442425e5139559ab6760af2e5e8dc94d1dc619254a5",
+      "bytes": 85670
     },
     "audit/tree-integrity.json": {
       "sha256": "c0a590c5921a3f5aa6e94cf398eb4a07d5002c440f6501029948d8c7f982856e",
@@ -596,8 +596,8 @@
     "note": "An archive cannot contain its own hash, so no file inside it can record one: writing the value here would require rebuilding the archive, which changes the value. The SHA-256 is published with the delivery message. Verify with `sha256sum` against that value, then verify every file below against this record from the extraction."
   },
   "archiveRelationToCommit": {
-    "describesCommit": "b781395673f6cb99d46ff7390c106693cb0ad591",
-    "treeHash": "490867903a42db3f843c6ed6f81c08efc8ec127d",
+    "describesCommit": "324017151a57e44349dee290f7bc01fac63b1297",
+    "treeHash": "21e4b1a85ef762511d72f5a160b2b18352515738",
     "identicalExcept": [
       "audit/provenance.json"
     ],
