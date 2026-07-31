@@ -19,6 +19,10 @@ changes it without anybody editing code.
 
 Why it reads that way — every blocker the derivation found:
 
+- the build-blocking suite reported failures
+- 1 automated gate(s) FAIL: fullSuite
+- 34 automated gate(s) UNVERIFIED: fixtureIntegrity, fixtureRoundTrip, deterministicHydration, pairedWorlds, exactProbability, matchedTrajectory, meaningfulTraits, birthImmutability, observerInvariance, noObserverDeps, neutralTraits, mutationIndependence, mutationProvenance, allocationOpportunity, spatialIntegrity, lifecycle, genealogyIntegrity, genealogyBounded, survivalComposition, rngIntegrity, populationGuardrails, traversal, desktopMeasurement, modelIdentity, modelHashProvenance, legibilitySelfContained, worldLoadRaceSafety, observerTransaction, generationResultImmutable, focalLineage, referencesUnchanged, reportIntegrity, testTreeIntegrity, reportDeterminism
+- 6 failing test(s) map to no declared gate
 - desktopCanvasMemory: UNVERIFIED
 - ipadGate: PENDING_HUMAN_DEVICE_TEST
 - stageAOrder: VIOLATED — principal decision required
@@ -118,50 +122,50 @@ failure produced `Full test suite: FAIL — 1 of 249` beside `Birth immutability
 
 | # | Gate | Contract § | Evidence | Result |
 |---|---|---|---|---|
-| 1 | Full test suite | §20 | `audit/test-results.txt` (TAP summary) | **PASS** — 300/300, 0 failing |
-| 2 | Fixture raw SHA-256 integrity | §19 A | 1 named test(s) | **PASS** |
-| 3 | Fixture-envelope canonical round trip | §19 B | 1 named test(s) | **PASS** |
-| 4 | Deterministic hydration | §19 C | 1 named test(s) | **PASS** |
-| 5 | Paired-world construction | §19 D | 2 named test(s) | **PASS** |
-| 6 | Exact probability gate | §19.3 | 1 named test(s) | **PASS** |
-| 7 | Matched trajectory gate, seeds 1..200 | §19.4 | 1 named test(s) | **PASS** |
-| 8 | Meaningful-trait contextual gate | §9 / §20.5 | 1 named test(s) | **PASS** |
-| 9 | Birth immutability | §20.1 | 2 named test(s) | **PASS** |
-| 10 | Observer-state invariance | §20.2 | 1 named test(s) | **PASS** |
-| 11 | No observer dependencies in biology | §20.3 | 1 named test(s) | **PASS** |
-| 12 | Neutral-trait integrity | §20.4 | 1 named test(s) | **PASS** |
-| 13 | Full-path body-mutation independence | §20.6 | 1 named test(s) | **PASS** |
-| 14 | Mutation provenance and counter ownership | §20.7 | 1 named test(s) | **PASS** |
-| 15 | Allocation-mutation opportunity contract | §20.8 | 1 named test(s) | **PASS** |
-| 16 | Spatial integrity and adjacency | §20.9 | 1 named test(s) | **PASS** |
-| 17 | Lifecycle and mating contract | §20.10 | 1 named test(s) | **PASS** |
-| 18 | Genealogy integrity + forced 360-boundary | §20.11 | 1 named test(s) | **PASS** |
-| 19 | Genealogy boundary records bounded | §15 | 1 named test(s) | **PASS** |
-| 20 | Exact survival composition | §20.12 | 1 named test(s) | **PASS** |
-| 21 | RNG integrity | §20.13 | 1 named test(s) | **PASS** |
-| 22 | Population guardrails, 500 seeds | §21.4 | 1 named test(s) | **PASS** |
-| 23 | §21.6 adjacency traversal, isolated edge-only worlds | §21.6 | 1 named test(s) | **PASS** — no contract threshold applies; the measurement is reported, not scored |
-| 24 | Desktop Canvas measurement, reproducible | §22 | 3 named test(s) | **PASS** — §22 states no desktop pass law; the numeric pass law belongs to the iPad gate |
+| 1 | Full test suite | §20 | `audit/test-results.txt` (TAP summary) | **FAIL** — 343/349, 6 failing |
+| 2 | Fixture raw SHA-256 integrity | §19 A | 1 named test(s) | **UNVERIFIED** |
+| 3 | Fixture-envelope canonical round trip | §19 B | 1 named test(s) | **UNVERIFIED** |
+| 4 | Deterministic hydration | §19 C | 1 named test(s) | **UNVERIFIED** |
+| 5 | Paired-world construction | §19 D | 2 named test(s) | **UNVERIFIED** |
+| 6 | Exact probability gate | §19.3 | 1 named test(s) | **UNVERIFIED** |
+| 7 | Matched trajectory gate, seeds 1..200 | §19.4 | 1 named test(s) | **UNVERIFIED** |
+| 8 | Meaningful-trait contextual gate | §9 / §20.5 | 1 named test(s) | **UNVERIFIED** |
+| 9 | Birth immutability | §20.1 | 2 named test(s) | **UNVERIFIED** |
+| 10 | Observer-state invariance | §20.2 | 1 named test(s) | **UNVERIFIED** |
+| 11 | No observer dependencies in biology | §20.3 | 1 named test(s) | **UNVERIFIED** |
+| 12 | Neutral-trait integrity | §20.4 | 1 named test(s) | **UNVERIFIED** |
+| 13 | Full-path body-mutation independence | §20.6 | 1 named test(s) | **UNVERIFIED** |
+| 14 | Mutation provenance and counter ownership | §20.7 | 1 named test(s) | **UNVERIFIED** |
+| 15 | Allocation-mutation opportunity contract | §20.8 | 1 named test(s) | **UNVERIFIED** |
+| 16 | Spatial integrity and adjacency | §20.9 | 1 named test(s) | **UNVERIFIED** |
+| 17 | Lifecycle and mating contract | §20.10 | 1 named test(s) | **UNVERIFIED** |
+| 18 | Genealogy integrity + forced 360-boundary | §20.11 | 1 named test(s) | **UNVERIFIED** |
+| 19 | Genealogy boundary records bounded | §15 | 1 named test(s) | **UNVERIFIED** |
+| 20 | Exact survival composition | §20.12 | 1 named test(s) | **UNVERIFIED** |
+| 21 | RNG integrity | §20.13 | 1 named test(s) | **UNVERIFIED** |
+| 22 | Population guardrails, 500 seeds | §21.4 | 1 named test(s) | **UNVERIFIED** |
+| 23 | §21.6 adjacency traversal, isolated edge-only worlds | §21.6 | 1 named test(s) | **UNVERIFIED** — no contract threshold applies; the measurement is reported, not scored |
+| 24 | Desktop Canvas measurement, reproducible | §22 | 3 named test(s) | **UNVERIFIED** — §22 states no desktop pass law; the numeric pass law belongs to the iPad gate |
 | 25 | Desktop **Canvas** memory growth across the 180-generation run | §22 | external — `audit/desktop-measurements.json → desktopCanvasMemory.status` | **UNVERIFIED** — the Node simulation heap is NOT a substitute and is reported separately as `NODE_SIMULATION_HEAP` |
-| 26 | Canonical model identity binds state progression | §18 / §21.7 | 3 named test(s) | **PASS** |
-| 27 | One authoritative model hash across all evidence | §9 / §18 | 2 named test(s) | **PASS** |
-| 28 | Legibility mode is self-contained | §22 | 1 named test(s) | **PASS** |
-| 29 | World loads are transactional against concurrent requests | §22 | 4 named test(s) | **PASS** |
-| 30 | Generation advancement atomic against observer failure | §4 / §16 | 2 named test(s) | **PASS** |
-| 31 | Generation result is deeply immutable | §4 | 1 named test(s) | **PASS** |
-| 32 | Focal lineage resolved, never reseeded, never falsely terminated | §16 | 2 named test(s) | **PASS** |
-| 33 | Quarantined Python references unchanged | §27 | 1 named test(s) | **PASS** |
-| 34 | Report agrees with the raw evidence | §26 / §27 | 4 named test(s) | **PASS** |
-| 35 | Tests never mutate the production source tree | §20 | 2 named test(s) | **PASS** |
-| 36 | Report bytes are runtime-independent across supported Node majors | §26 | 1 named test(s) | **PASS** |
+| 26 | Canonical model identity binds state progression | §18 / §21.7 | 3 named test(s) | **UNVERIFIED** |
+| 27 | One authoritative model hash across all evidence | §9 / §18 | 2 named test(s) | **UNVERIFIED** |
+| 28 | Legibility mode is self-contained | §22 | 1 named test(s) | **UNVERIFIED** |
+| 29 | World loads are transactional against concurrent requests | §22 | 4 named test(s) | **UNVERIFIED** |
+| 30 | Generation advancement atomic against observer failure | §4 / §16 | 2 named test(s) | **UNVERIFIED** |
+| 31 | Generation result is deeply immutable | §4 | 1 named test(s) | **UNVERIFIED** |
+| 32 | Focal lineage resolved, never reseeded, never falsely terminated | §16 | 2 named test(s) | **UNVERIFIED** |
+| 33 | Quarantined Python references unchanged | §27 | 1 named test(s) | **UNVERIFIED** |
+| 34 | Report agrees with the raw evidence | §26 / §27 | 4 named test(s) | **UNVERIFIED** |
+| 35 | Tests never mutate the production source tree | §20 | 2 named test(s) | **UNVERIFIED** |
+| 36 | Report bytes are identical across every EXECUTED Node major | §26 | 2 named test(s) | **UNVERIFIED** |
 | 37 | **Physical iPad acceptance** | §22 | external — `audit/external-gate-status.json → gates.ipadGate.status` | **PENDING_HUMAN_DEVICE_TEST** — no measurement supplied; not performed |
 | 38 | **§24 Stage A pre-code planning order** | §24 | external — `audit/external-gate-status.json → gates.stageAOrder.status` | **VIOLATED — principal decision required** — unrepairable retrospectively; DECISIONS.md D-000 and D-024 |
 
-**Gate totals:** of 38 gates, 3 are externally determined and 35 are machine-verified from named tests. Machine-verified: 35 PASS · 0 FAIL · 0 UNVERIFIED. Externally determined: `desktopCanvasMemory` UNVERIFIED · `ipadGate` PENDING_HUMAN_DEVICE_TEST · `stageAOrder` VIOLATED — principal decision required.
+**Gate totals:** of 38 gates, 3 are externally determined and 35 are machine-verified from named tests. Machine-verified: 0 PASS · 1 FAIL · 34 UNVERIFIED. Externally determined: `desktopCanvasMemory` UNVERIFIED · `ipadGate` PENDING_HUMAN_DEVICE_TEST · `stageAOrder` VIOLATED — principal decision required.
 
-The four numbers 35 + 0 + 0 + 3 sum to 38, which is the denominator 38. No gate is counted in two categories.
+The four numbers 0 + 1 + 34 + 3 sum to 38, which is the denominator 38. No gate is counted in two categories.
 
-No unattributed failures: every failing test in this run, if any, maps to a declared gate.
+**Unattributed failures present.** The run contains failing tests that no gate claims, so every gate not directly evidenced by a passing test is reported `UNVERIFIED` rather than keeping a prior PASS: §23/§27 — every hash in the record verifies against the shipped files; §23/§27 — the binding covers the model identity and the published run; §27 — a tampered file is detected; §26/§28 — a failing run regenerates a report whose gate, totals and STATUS all change; §26 — an EXTERNAL status change alone moves the milestone status, with no source edit; §26 — no artifact describes the executed subset as every supported major
 
 Machine-readable form: `audit/gate-summary.json`.
 
@@ -174,9 +178,9 @@ and in `CHARACTERIZATION.md`.
 
 | Field | Value |
 |---|---|
-| tests | 300 |
-| pass | 300 |
-| fail | 0 |
+| tests | 349 |
+| pass | 343 |
+| fail | 6 |
 | cancelled | 0 |
 | skipped | 0 |
 | todo | 0 |
@@ -457,11 +461,11 @@ it ran, which is why the memory channel is probed per run rather than assumed.
 | Measure | Normal mode | Render-stress |
 |---|---|---|
 | glyphs drawn | live world (224 animals) | 360 (declared 360, matches: true) |
-| frames sampled | 180 | 1462 |
+| frames sampled | 179 | 1469 |
 | median frame time | 16.70 ms | 16.70 ms |
-| 95th-percentile frame time | 17.50 ms | 17.40 ms |
-| maximum after warm-up | 23.30 ms | 51.00 ms |
-| p95 input-to-next-paint | not sampled | 13.20 ms (21 actions) |
+| 95th-percentile frame time | 18.00 ms | 17.40 ms |
+| maximum after warm-up | 37.40 ms | 88.10 ms |
+| p95 input-to-next-paint | not sampled | 13.80 ms (21 actions) |
 | page errors | 0 | 0 |
 
 ### Generation semantics (explicit, not inferred)
@@ -508,8 +512,8 @@ not ask is worse than an honest `UNVERIFIED`. The probe result is in the raw JSO
 |---|---|
 | channel | `node:process.memoryUsage()` |
 | measures Canvas or browser memory | **false** |
-| heapUsed before → after | 24,962,128 → 75,772,912 bytes (Δ 50,810,784) |
-| RSS before → after | 93,675,520 → 160,890,880 bytes (Δ 67,215,360) |
+| heapUsed before → after | 25,043,056 → 75,168,528 bytes (Δ 50,125,472) |
+| RSS before → after | 93,478,912 → 160,149,504 bytes (Δ 66,670,592) |
 | retained genealogy records | 22,470 |
 | living individuals | 224 |
 
@@ -598,7 +602,7 @@ file. The result column is the scan's actual output, not a remembered claim.
 | observer/debug imports in `src/core`, `src/config`, `src/fixtures` | clean |
 | observer modules referencing the simulation RNG | none |
 | bare-specifier imports in `src/` (runtime dependencies) | none; `dependencies` is empty |
-| full test suite from clean | 300/300, 0 failures |
+| full test suite from clean | 343/349, 6 failures |
 | observer strategies compared after every generation | byte-identical: true |
 | quarantined Python references unchanged | true (3 files) |
 | fixture, both characterization batches, edge-only, desktop | regenerated for this revision |
@@ -687,7 +691,7 @@ provenance — make it addable later without rewriting the biological kernel.
 | genealogy and mating cores remain coherent | met |
 | neutral traits are exactly neutral | met |
 | the difference is visible in the diagnostic probe | met on desktop; **iPad legibility pending human test** |
-| every automated result reproducible from a clean run | met — 300/300 from clean, 0 gate(s) FAIL, 0 UNVERIFIED |
+| every automated result reproducible from a clean run | NOT met — 343/349 from clean, 1 gate(s) FAIL, 34 UNVERIFIED |
 | remaining uncertainty named rather than hidden | met — §6, §11, and the audit response in the repair record |
 
 **Completion is NOT declared** (`mayDeclareCompletion: false`). This flag is DERIVED from the

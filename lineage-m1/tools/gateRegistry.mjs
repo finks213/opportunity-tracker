@@ -351,9 +351,15 @@ export const GATES = Object.freeze([
   },
   {
     id: "reportDeterminism",
-    label: "Report bytes are runtime-independent across supported Node majors",
+    // Revision-6 (M-3 / R6-I): the label named the DECLARED range while the
+    // evidence covered three majors of it. It now names what was executed, and
+    // `audit/runtime-matrix.json` lists those majors.
+    label: "Report bytes are identical across every EXECUTED Node major",
     section: "§26",
-    tests: ["§26 — the report renders identically on every recorded runtime"],
+    tests: [
+      "§26 — the report renders identically on every EXECUTED runtime",
+      "§26 — the GENERATOR exits nonzero when coverage is insufficient",
+    ],
   },
   {
     id: "ipadGate",

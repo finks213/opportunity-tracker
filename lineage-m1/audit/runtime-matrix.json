@@ -1,8 +1,15 @@
 {
-  "schema": "lineage-m1-runtime-matrix-1",
+  "schema": "lineage-m1-runtime-matrix-2",
   "contractSection": "27 (audit evidence)",
-  "claim": "Rendering FINAL_REPORT.md produces identical bytes on every Node major tested here, given unchanged committed evidence. This is what makes the byte-equality gate satisfiable on any `node >=18` install rather than only on the patch release that generated the report.",
-  "notClaimed": "That the full 200-seed suite was executed on every major. Only the determinism-critical test files listed below were run per runtime; the full suite's runtime is in audit/build-environment.json.",
+  "claim": "Rendering FINAL_REPORT.md produces identical bytes on every Node major EXERCISED BELOW, given unchanged committed evidence. This is what makes the byte-equality gate satisfiable on another install rather than only on the patch release that generated the report.",
+  "notClaimed": "That every major in the declared `>=18` compatibility range was exercised, and that the full 200-seed suite was executed on every major. Only the determinism-critical files listed below run per runtime; the full suite's runtime is in audit/build-environment.json, and the majors on which the FULL suite was run are recorded in the revision-6 repair record.",
+  "declaredCompatibility": ">=18",
+  "requiredMajors": [
+    20,
+    21,
+    22
+  ],
+  "minimumDistinctMajors": 2,
   "determinismTestFiles": [
     "test/report-integrity.test.js",
     "test/manifest-inventory.test.js",
@@ -10,18 +17,20 @@
     "test/model-identity.test.js",
     "test/model-hash-provenance.test.js"
   ],
-  "committedReportSha256": "14fc43dd9078671d3f29b45746c30e1d8b005fa30d1f1178d2cae4480144310e",
+  "probeOnly": false,
+  "committedReportSha256": "a7c6e3d65951e9c51f61444d2defaf949197365160ce36dedc26065f16eed017",
   "runtimes": [
     {
       "nodeVersion": "v20.20.2",
       "major": 20,
       "binary": "/opt/node20/bin/node",
-      "renderedReportSha256": "14fc43dd9078671d3f29b45746c30e1d8b005fa30d1f1178d2cae4480144310e",
-      "renderedReportBytes": 34288,
+      "foundVia": "/opt layout",
+      "renderedReportSha256": "a7c6e3d65951e9c51f61444d2defaf949197365160ce36dedc26065f16eed017",
+      "renderedReportBytes": 39572,
       "matchesCommittedReport": true,
       "determinismTests": {
-        "tests": 62,
-        "pass": 62,
+        "tests": 63,
+        "pass": 63,
         "fail": 0,
         "failing": [],
         "exitCode": 0,
@@ -38,12 +47,13 @@
       "nodeVersion": "v21.7.3",
       "major": 21,
       "binary": "/opt/node21/bin/node",
-      "renderedReportSha256": "14fc43dd9078671d3f29b45746c30e1d8b005fa30d1f1178d2cae4480144310e",
-      "renderedReportBytes": 34288,
+      "foundVia": "/opt layout",
+      "renderedReportSha256": "a7c6e3d65951e9c51f61444d2defaf949197365160ce36dedc26065f16eed017",
+      "renderedReportBytes": 39572,
       "matchesCommittedReport": true,
       "determinismTests": {
-        "tests": 62,
-        "pass": 62,
+        "tests": 63,
+        "pass": 63,
         "fail": 0,
         "failing": [],
         "exitCode": 0,
@@ -60,12 +70,13 @@
       "nodeVersion": "v22.22.2",
       "major": 22,
       "binary": "/opt/node22/bin/node",
-      "renderedReportSha256": "14fc43dd9078671d3f29b45746c30e1d8b005fa30d1f1178d2cae4480144310e",
-      "renderedReportBytes": 34288,
+      "foundVia": "/opt layout",
+      "renderedReportSha256": "a7c6e3d65951e9c51f61444d2defaf949197365160ce36dedc26065f16eed017",
+      "renderedReportBytes": 39572,
       "matchesCommittedReport": true,
       "determinismTests": {
-        "tests": 62,
-        "pass": 62,
+        "tests": 63,
+        "pass": 63,
         "fail": 0,
         "failing": [],
         "exitCode": 0,
@@ -80,7 +91,15 @@
     }
   ],
   "distinctRenderedHashes": 1,
-  "reportBytesAreRuntimeIndependent": true,
+  "reportBytesAreRuntimeIndependentAcrossExecutedMajors": true,
   "allRuntimesMatchCommittedReport": true,
-  "allDeterminismTestsPass": true
+  "allDeterminismTestsPass": true,
+  "executedMajors": [
+    20,
+    21,
+    22
+  ],
+  "missingRequiredMajors": [],
+  "sufficientCoverage": true,
+  "coverageProblems": []
 }

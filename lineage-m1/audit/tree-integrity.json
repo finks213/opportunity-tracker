@@ -4,34 +4,55 @@
   "claim": "The production source tree under src/ is never modified at any instant while the full suite runs at high concurrency. Sampled continuously, not merely compared before and after.",
   "concurrency": 4,
   "rounds": 3,
-  "samplesTaken": 1087683,
-  "baselineDigest": "304ef686f17b37eec59ebd8d71f28cddcd980a2601ff1ec3c3f515fc299457aa",
-  "finalDigest": "304ef686f17b37eec59ebd8d71f28cddcd980a2601ff1ec3c3f515fc299457aa",
+  "samplesTaken": 968229,
+  "baselineDigest": "d0f0b3ff7ee94c85e85443285c048a43f8a02ab4c042470d5b195228b2852506",
+  "finalDigest": "d0f0b3ff7ee94c85e85443285c048a43f8a02ab4c042470d5b195228b2852506",
   "fileCount": 31,
   "treeUnchangedThroughout": true,
   "deviations": [],
   "runs": [
     {
-      "exitCode": 0,
-      "tests": 300,
-      "pass": 300,
-      "fail": 0,
-      "failing": []
+      "exitCode": 1,
+      "tests": 349,
+      "pass": 343,
+      "fail": 6,
+      "failing": [
+        "§23/§27 — every hash in the record verifies against the shipped files",
+        "§23/§27 — the binding covers the model identity and the published run",
+        "§27 — a tampered file is detected",
+        "§26/§28 — a failing run regenerates a report whose gate, totals and STATUS all change",
+        "§26 — an EXTERNAL status change alone moves the milestone status, with no source edit",
+        "§26 — no artifact describes the executed subset as every supported major"
+      ]
     },
     {
-      "exitCode": 0,
-      "tests": 300,
-      "pass": 300,
-      "fail": 0,
-      "failing": []
+      "exitCode": 1,
+      "tests": 349,
+      "pass": 343,
+      "fail": 6,
+      "failing": [
+        "§23/§27 — every hash in the record verifies against the shipped files",
+        "§23/§27 — the binding covers the model identity and the published run",
+        "§27 — a tampered file is detected",
+        "§26/§28 — a failing run regenerates a report whose gate, totals and STATUS all change",
+        "§26 — an EXTERNAL status change alone moves the milestone status, with no source edit",
+        "§26 — no artifact describes the executed subset as every supported major"
+      ]
     },
     {
-      "exitCode": 0,
-      "tests": 300,
-      "pass": 300,
-      "fail": 0,
-      "failing": []
+      "exitCode": 1,
+      "tests": 349,
+      "pass": 343,
+      "fail": 6,
+      "failing": [
+        "§23/§27 — every hash in the record verifies against the shipped files",
+        "§23/§27 — the binding covers the model identity and the published run",
+        "§27 — a tampered file is detected",
+        "§26/§28 — a failing run regenerates a report whose gate, totals and STATUS all change",
+        "§26 — an EXTERNAL status change alone moves the milestone status, with no source edit",
+        "§26 — no artifact describes the executed subset as every supported major"
+      ]
     }
   ],
-  "allRunsGreen": true
+  "allRunsGreen": false
 }

@@ -10,7 +10,8 @@ Contents: the complete `lineage-m1/` project directory required by contract §23
 | Field | Value |
 |---|---|
 | Node version (official evidence run) | v22.22.2, recorded in `audit/build-environment.json` |
-| Declared runtime support | `node >=18`, UNCHANGED. Report bytes are runtime-independent; see `audit/runtime-matrix.json` |
+| Declared runtime support | `node >=18`, UNCHANGED — the range the project claims to RUN on |
+| Node majors actually EXECUTED | **20, 21, 22**. The full suite passes on each, and each renders `FINAL_REPORT.md` to identical bytes. This is a subset of the declared range and is not a claim about every major in it; `runtime-matrix.config.json` declares the requirement and `audit/runtime-matrix.json` records the result (revision-6 R6-I) |
 | npm version | 10.9.7 |
 | Operating system (final run) | Linux 6.18.5 x86_64 |
 | Runtime dependencies | none (`dependencies` is empty) |

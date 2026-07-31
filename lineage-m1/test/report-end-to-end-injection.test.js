@@ -29,11 +29,30 @@ import { deriveGateStatuses, deriveMilestoneStatus, readExternalStatuses, GATES,
 const ROOT = resolve(join(dirname(fileURLToPath(import.meta.url)), ".."));
 const read = (p) => readFileSync(join(ROOT, p), "utf8");
 
-/** Copy the files the report reads into a scratch tree. Nothing in ROOT is touched. */
+/**
+ * Copy the files the report reads into a scratch tree, and normalise the TAP there
+ * to a fully GREEN baseline. Nothing in ROOT is touched.
+ *
+ * The baseline is synthesised rather than assumed (the same lesson as revision 5's
+ * `syntheticGreenRun`): an injection test whose control depends on the committed run
+ * being green fails during convergence rounds, when that file legitimately carries
+ * failures — and then it is measuring the repository's state instead of the
+ * derivation's behaviour. Starting from a known-green baseline makes each injection
+ * a controlled experiment in both directions.
+ */
 function scratchTree() {
   const dir = mkdtempSync(join(tmpdir(), "lineage-report-"));
   for (const rel of ["audit", "src", "tools", "package.json", "AUDIT_PACKAGE_MANIFEST.md"]) {
     cpSync(join(ROOT, rel), join(dir, rel), { recursive: true });
+  }
+  const tapPath = join(dir, "audit", "test-results.txt");
+  const text = readFileSync(tapPath, "utf8");
+  const failures = [...text.matchAll(/^not ok \d+ - /gm)].length;
+  if (failures > 0) {
+    writeFileSync(tapPath, text
+      .replace(/^not ok (\d+) - /gm, "ok $1 - ")
+      .replace(/^# pass (\d+)$/m, (_, n) => `# pass ${Number(n) + failures}`)
+      .replace(/^# fail (\d+)$/m, () => "# fail 0"));
   }
   return dir;
 }

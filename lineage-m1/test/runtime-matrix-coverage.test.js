@@ -153,14 +153,22 @@ test("§26 — no artifact describes the executed subset as every supported majo
         `${rel}:${i + 1} claims coverage of supported majors without naming what was executed:\n  ${lines[i].trim()}`
       );
     }
-    // The exact majors must appear where the claim is made.
-    if (/runtime-independent|runtime independence/i.test(text)) {
-      assert.ok(
-        text.includes(executed) || text.includes(executed.replace(/, /g, ", ")),
-        `${rel} must name the executed majors (${executed})`
-      );
-    }
   }
+
+  // The exact majors must be named in the MANIFEST rather than in the report.
+  // `FINAL_REPORT.md` deliberately does not embed matrix figures: the matrix hashes
+  // the committed report, so a report that quoted the matrix could never converge —
+  // the same circularity that moved the runtime row into `audit/build-environment.json`
+  // in revision 5. The report points at the file; the manifest states the numbers.
+  const manifest = readFileSync(join(ROOT, "AUDIT_PACKAGE_MANIFEST.md"), "utf8");
+  assert.ok(
+    manifest.includes(executed),
+    `AUDIT_PACKAGE_MANIFEST.md must name the executed majors (${executed})`
+  );
+  assert.ok(
+    readFileSync(join(ROOT, "FINAL_REPORT.md"), "utf8").includes("audit/runtime-matrix.json"),
+    "and the report must point at the record that lists them"
+  );
 });
 
 test("§26 — discovery does not depend on one machine's private layout", () => {
