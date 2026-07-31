@@ -22,7 +22,7 @@ Why it reads that way — every blocker the derivation found:
 - the build-blocking suite reported failures
 - 1 automated gate(s) FAIL: fullSuite
 - 34 automated gate(s) UNVERIFIED: fixtureIntegrity, fixtureRoundTrip, deterministicHydration, pairedWorlds, exactProbability, matchedTrajectory, meaningfulTraits, birthImmutability, observerInvariance, noObserverDeps, neutralTraits, mutationIndependence, mutationProvenance, allocationOpportunity, spatialIntegrity, lifecycle, genealogyIntegrity, genealogyBounded, survivalComposition, rngIntegrity, populationGuardrails, traversal, desktopMeasurement, modelIdentity, modelHashProvenance, legibilitySelfContained, worldLoadRaceSafety, observerTransaction, generationResultImmutable, focalLineage, referencesUnchanged, reportIntegrity, testTreeIntegrity, reportDeterminism
-- 6 failing test(s) map to no declared gate
+- 3 failing test(s) map to no declared gate
 - desktopCanvasMemory: UNVERIFIED
 - ipadGate: PENDING_HUMAN_DEVICE_TEST
 - stageAOrder: VIOLATED — principal decision required
@@ -122,7 +122,7 @@ failure produced `Full test suite: FAIL — 1 of 249` beside `Birth immutability
 
 | # | Gate | Contract § | Evidence | Result |
 |---|---|---|---|---|
-| 1 | Full test suite | §20 | `audit/test-results.txt` (TAP summary) | **FAIL** — 343/349, 6 failing |
+| 1 | Full test suite | §20 | `audit/test-results.txt` (TAP summary) | **FAIL** — 346/349, 3 failing |
 | 2 | Fixture raw SHA-256 integrity | §19 A | 1 named test(s) | **UNVERIFIED** |
 | 3 | Fixture-envelope canonical round trip | §19 B | 1 named test(s) | **UNVERIFIED** |
 | 4 | Deterministic hydration | §19 C | 1 named test(s) | **UNVERIFIED** |
@@ -165,7 +165,7 @@ failure produced `Full test suite: FAIL — 1 of 249` beside `Birth immutability
 
 The four numbers 0 + 1 + 34 + 3 sum to 38, which is the denominator 38. No gate is counted in two categories.
 
-**Unattributed failures present.** The run contains failing tests that no gate claims, so every gate not directly evidenced by a passing test is reported `UNVERIFIED` rather than keeping a prior PASS: §23/§27 — every hash in the record verifies against the shipped files; §23/§27 — the binding covers the model identity and the published run; §27 — a tampered file is detected; §26/§28 — a failing run regenerates a report whose gate, totals and STATUS all change; §26 — an EXTERNAL status change alone moves the milestone status, with no source edit; §26 — no artifact describes the executed subset as every supported major
+**Unattributed failures present.** The run contains failing tests that no gate claims, so every gate not directly evidenced by a passing test is reported `UNVERIFIED` rather than keeping a prior PASS: §23/§27 — every hash in the record verifies against the shipped files; §23/§27 — the binding covers the model identity and the published run; §27 — a tampered file is detected
 
 Machine-readable form: `audit/gate-summary.json`.
 
@@ -179,8 +179,8 @@ and in `CHARACTERIZATION.md`.
 | Field | Value |
 |---|---|
 | tests | 349 |
-| pass | 343 |
-| fail | 6 |
+| pass | 346 |
+| fail | 3 |
 | cancelled | 0 |
 | skipped | 0 |
 | todo | 0 |
@@ -602,7 +602,7 @@ file. The result column is the scan's actual output, not a remembered claim.
 | observer/debug imports in `src/core`, `src/config`, `src/fixtures` | clean |
 | observer modules referencing the simulation RNG | none |
 | bare-specifier imports in `src/` (runtime dependencies) | none; `dependencies` is empty |
-| full test suite from clean | 343/349, 6 failures |
+| full test suite from clean | 346/349, 3 failures |
 | observer strategies compared after every generation | byte-identical: true |
 | quarantined Python references unchanged | true (3 files) |
 | fixture, both characterization batches, edge-only, desktop | regenerated for this revision |
@@ -691,7 +691,7 @@ provenance — make it addable later without rewriting the biological kernel.
 | genealogy and mating cores remain coherent | met |
 | neutral traits are exactly neutral | met |
 | the difference is visible in the diagnostic probe | met on desktop; **iPad legibility pending human test** |
-| every automated result reproducible from a clean run | NOT met — 343/349 from clean, 1 gate(s) FAIL, 34 UNVERIFIED |
+| every automated result reproducible from a clean run | NOT met — 346/349 from clean, 1 gate(s) FAIL, 34 UNVERIFIED |
 | remaining uncertainty named rather than hidden | met — §6, §11, and the audit response in the repair record |
 
 **Completion is NOT declared** (`mayDeclareCompletion: false`). This flag is DERIVED from the

@@ -4,8 +4,8 @@
   "note": "Derived from audit/test-results.txt and audit/external-gate-status.json through tools/gateRegistry.mjs. Every machine-verified gate maps to named tests; a gate whose evidencing test did not run is UNVERIFIED, never PASS. Externally determined gates are READ from their named inputs, are never machine-verified, and are counted once — as external — so the categories partition the gate set. The milestone status and completion flag below are derived from the same inputs, not written in source (revision-6, R6-J / R6-K). This file and the report's gate table are generated from the same call.",
   "suite": {
     "tests": 349,
-    "pass": 343,
-    "fail": 6
+    "pass": 346,
+    "fail": 3
   },
   "externalStatuses": {
     "desktopCanvasMemory": {
@@ -48,7 +48,7 @@
       "the build-blocking suite reported failures",
       "1 automated gate(s) FAIL: fullSuite",
       "34 automated gate(s) UNVERIFIED: fixtureIntegrity, fixtureRoundTrip, deterministicHydration, pairedWorlds, exactProbability, matchedTrajectory, meaningfulTraits, birthImmutability, observerInvariance, noObserverDeps, neutralTraits, mutationIndependence, mutationProvenance, allocationOpportunity, spatialIntegrity, lifecycle, genealogyIntegrity, genealogyBounded, survivalComposition, rngIntegrity, populationGuardrails, traversal, desktopMeasurement, modelIdentity, modelHashProvenance, legibilitySelfContained, worldLoadRaceSafety, observerTransaction, generationResultImmutable, focalLineage, referencesUnchanged, reportIntegrity, testTreeIntegrity, reportDeterminism",
-      "6 failing test(s) map to no declared gate",
+      "3 failing test(s) map to no declared gate",
       "desktopCanvasMemory: UNVERIFIED",
       "ipadGate: PENDING_HUMAN_DEVICE_TEST",
       "stageAOrder: VIOLATED — principal decision required",
@@ -88,10 +88,7 @@
   "unattributedFailures": [
     "§23/§27 — every hash in the record verifies against the shipped files",
     "§23/§27 — the binding covers the model identity and the published run",
-    "§27 — a tampered file is detected",
-    "§26/§28 — a failing run regenerates a report whose gate, totals and STATUS all change",
-    "§26 — an EXTERNAL status change alone moves the milestone status, with no source edit",
-    "§26 — no artifact describes the executed subset as every supported major"
+    "§27 — a tampered file is detected"
   ],
   "gates": [
     {
@@ -100,7 +97,7 @@
       "section": "§20",
       "status": "FAIL",
       "evidence": "suite",
-      "detail": "343/349, 6 failing",
+      "detail": "346/349, 3 failing",
       "mappedTests": []
     },
     {
