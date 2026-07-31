@@ -4,15 +4,13 @@
   "purpose": "Bind this bundle to the source revision that produced it, without shipping .git. Every value below is recomputable from the extracted bundle except `source.commit`, which is what the binding exists to supply.",
   "source": {
     "resolved": true,
-    "commit": "d4228e4b7bb1d5ccd29c3fba42c7f491681176ae",
-    "shortCommit": "d4228e4b7bb1",
+    "commit": "ce0ddfbacf3404c9d21444c8b9513e2d39194453",
+    "shortCommit": "ce0ddfbacf34",
     "branch": "claude/lineage-m1-implementation-1m9zpq",
-    "treeHash": "0a07c894f5a6c579e35fd71f63c54609c56b567f",
-    "committedAt": "2026-07-31T01:02:09+00:00",
+    "treeHash": "2ddac3e51cb881bf480439cf73b627f47512daa0",
+    "committedAt": "2026-07-31T01:09:56+00:00",
     "workingTreeClean": false,
     "uncommittedPaths": [
-      "M lineage-m1/REVISION_6_REPAIR_RECORD.md",
-      "M lineage-m1/tools/writeProvenance.mjs",
       "?? LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV6.zip"
     ]
   },
@@ -28,8 +26,8 @@
   },
   "testResults": {
     "path": "audit/test-results.txt",
-    "sha256": "be85b9a0ef213c116d6b01942425bbc81cbe5871871debe345e5b223c2a1d6ba",
-    "bytes": 78447,
+    "sha256": "2c68c85bdd95b00561ec90bf573919fdb4010bcea5e691eaf5ab9ee23cd09fbf",
+    "bytes": 78444,
     "tests": 349,
     "pass": 349,
     "fail": 0,
