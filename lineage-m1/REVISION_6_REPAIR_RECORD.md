@@ -419,7 +419,38 @@ That is a limitation of that pass, not a defect, and no repair is claimed for it
 
 ## Required clean executions
 
-*(completed in the final regeneration; see the table at the end of this record)*
+Every artifact below was regenerated **after the last production edit**. Nothing is
+carried over from revision 5, including the evidence that turned out identical.
+
+| # | Required execution | Command | Result |
+|---|---|---|---|
+| 1 | syntax checks | `node --check` over `src/`, `tools/`, `test/` | 94 files, **all parsed clean** |
+| 2 | dependency install from lockfile | `npm ci` in an empty directory from `package.json` + `package-lock.json` | **exit 0**, `playwright@1.56.1`, 0 vulnerabilities |
+| 3 | official suite under every executed Node major | `node --test test/*.test.js` under each | `v20.20.2` **349/349** · `v21.7.3` **349/349** · `v22.22.2` **349/349**. **Node 18 and 19 are not installed here and were NOT run**; the declared range stays `>=18` because nothing in the code requires more, and `runtime-matrix.config.json` records the requirement rather than a claim about the whole range |
+| 4 | long-retention focal-lineage tests | `test/focal-lineage-retention.test.js`, `test/exact-membership-underflow.test.js` | asserted at generations 12, 360, 361, 400, 800, 1000 **and 1075/1100** — past the underflow boundary revision 5 stopped short of |
+| 5 | concurrent world-load race tests | `test/world-load-race.test.js`, `test/fixture-transaction-atomicity.test.js` | 13 tests; two DIFFERENT valid envelopes in every completion order |
+| 6 | missing / malformed model-identity tests | `test/frozen-schema-identity.test.js`, `test/model-hash-provenance.test.js` | missing, `undefined`, `null`, empty, malformed and mismatched all rejected — under the restored frozen schema |
+| 7 | cross-evidence model-hash tests | `test/model-hash-provenance.test.js` | one identity across all evidence: `dc444865…` |
+| 8 | exact 200-seed fixture gate | `node tools/runFixture.mjs` | canopy **200/200**, shoreline **197/200** (floor 130), `allPass: true` |
+| 9 | current and legacy 500-seed characterization | `node tools/runCharacterization.mjs`, `--config v1` | config-2 median **256 PASS**; config-1 median **421 FAIL** |
+| 10 | edge-only 500-seed experiments | `node tools/runEdgeOnlyTraversal.mjs` | **500/500** each direction, median first generation **3**, 0 extinct |
+| 11 | observer invariance | `node tools/writeAuditEvidence.mjs` | 5 strategies × 31 generations, **byte-identical**, 0 mismatches |
+| 12 | observer memory and genealogy bounds | suite + `npm run audit:desktop` | after 180 generations: 224 living, 22,470 retained genealogy records; exact membership pruned by the same rule, so the §15 bound is unchanged |
+| 13 | browser probe | `npm run audit:desktop` (Playwright, headless Chromium) | 180 frames, 360/360 stress glyphs counted, 0 page errors, Node cross-check AGREES |
+| 14 | honest browser-memory classification | same run | `DESKTOP_CANVAS_MEMORY` **UNVERIFIED**, no number, no substitute; `NODE_SIMULATION_HEAP` separate and self-declared as not the §22 subject |
+| 15 | report failure-injection tests | `test/report-end-to-end-injection.test.js` | end-to-end: a failing TAP regenerates the real report with gate row, suite row, §28 claim, completion flag and milestone status all changed |
+| 16 | concurrent test-tree integrity checks | `npm run audit:tree-integrity` | 3 rounds at concurrency 4, **975,753 samples**, **0 deviations**, all rounds **349/349** |
+| 17 | fixture and reference hashes | suite + `node tools/writeAuditEvidence.mjs` | fixture `c80aaa52…` matches the frozen value; all 3 quarantined Python references unchanged |
+
+**Convergence.** `audit:tests` → `manifest:paths` → `report:final` →
+`audit:runtime-matrix` → `audit:provenance` → `audit:tests` reaches a fixed point:
+**349/349, 0 failures**, `FINAL_REPORT.md` byte-identical to a fresh render, all
+three majors rendering `152b611238a06088…`, and `PROVENANCE OK`.
+
+**Not run, and not claimed:** the physical iPad acceptance gate and the §24 Stage A
+process decision. Both are held per the halt condition until revision 6 survives the
+bounded closure audit, and both are recorded as unsatisfied external gates — which is
+part of why the derived status reads blocked.
 
 ---
 
@@ -427,5 +458,37 @@ That is a limitation of that pass, not a defect, and no repair is claimed for it
 
 The revision-6 repairs touch observer channel structure, world-transaction
 publication, diagnostic capture, report derivation and tooling. **None is a
-biological change.** The regenerated evidence is compared against revision 5 in the
-non-regression table at the end of this record.
+biological change**, and the fully regenerated evidence confirms it:
+
+| Measure | Revision 5 | Revision 6 |
+|---|---|---|
+| §19.3 canopy Δ | −0.383874 | −0.383874 |
+| §19.3 shoreline Δ | +0.325326 | +0.325326 |
+| §19.4 canopy successes | 200 / 200 | 200 / 200 |
+| §19.4 shoreline successes | 197 / 200 | 197 / 200 |
+| §19.4 medians (shoreline low / high) | 18.2986 / 43.7529 | 18.2986 / 43.7529 |
+| config-2 median population | 256 | 256 |
+| config-2 median concentration | 0.4686 | 0.4686 |
+| config-1 median population | 421 (FAIL) | 421 (FAIL) |
+| edge-only reaches | 500/500 both directions | 500/500 both directions |
+| edge-only median first generation | 3 | 3 |
+| observer invariance | byte-identical | byte-identical |
+| authoritative `modelDefinitionHash` | `dc444865…` | `dc444865…` |
+| runtime model identity | `69dee399…` | `69dee399…` |
+| fixture SHA-256 | frozen value | frozen value |
+| quarantined Python references | unchanged | unchanged |
+
+**Changes that DID occur, and why:**
+
+| Value | Revision 5 | Revision 6 | Reason |
+|---|---|---|---|
+| biological schema | `lineage-biological-state-2` | `lineage-biological-state-1` | R6-A: the contract-frozen identifier restored |
+| focal outcomes | RESOLVED / EXTINCT / UNRESOLVABLE | RESOLVED / UNRESOLVABLE | R6-G: §16 excludes group-ended logic |
+| channel structure | numeric `values` only | `values` + exact `members` + `founderKey` + `protectedChannel` | R6-C, R6-D, R6-F |
+| observer error records | the thrown object | an immutable primitive snapshot | R6-H |
+| external gate statuses | literals in `tools/gateRegistry.mjs` | read from `audit/external-gate-status.json` | R6-J |
+| milestone status | literal in `src/config/milestoneStatus.js` | derived from the run plus external inputs | R6-J |
+| gate totals | 35 + 0 + 1 + 3 of 38 (sum 39) | 35 + 0 + 0 + 3 of 38 (sum 38) | R6-K: the categories partition the set |
+| suite size | 300 tests | 349 tests | 49 new regression tests across the twelve findings |
+
+**Committed suite:** 349 tests, 349 passing, 0 failing — on Node 20, 21 and 22.
