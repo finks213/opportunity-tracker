@@ -118,7 +118,7 @@ failure produced `Full test suite: FAIL — 1 of 249` beside `Birth immutability
 
 | # | Gate | Contract § | Evidence | Result |
 |---|---|---|---|---|
-| 1 | Full test suite | §20 | `audit/test-results.txt` (TAP summary) | **PASS** — 377/377, 0 failing |
+| 1 | Full test suite | §20 | `audit/test-results.txt` (TAP summary) | **PASS** — 384/384, 0 failing |
 | 2 | Fixture raw SHA-256 integrity | §19 A | 1 named test(s) | **PASS** |
 | 3 | Fixture-envelope canonical round trip | §19 B | 1 named test(s) | **PASS** |
 | 4 | Deterministic hydration | §19 C | 1 named test(s) | **PASS** |
@@ -174,8 +174,8 @@ and in `CHARACTERIZATION.md`.
 
 | Field | Value |
 |---|---|
-| tests | 377 |
-| pass | 377 |
+| tests | 384 |
+| pass | 384 |
 | fail | 0 |
 | cancelled | 0 |
 | skipped | 0 |
@@ -598,7 +598,7 @@ file. The result column is the scan's actual output, not a remembered claim.
 | observer/debug imports in `src/core`, `src/config`, `src/fixtures` | clean |
 | observer modules referencing the simulation RNG | none |
 | bare-specifier imports in `src/` (runtime dependencies) | none; `dependencies` is empty |
-| full test suite from clean | 377/377, 0 failures |
+| full test suite from clean | 384/384, 0 failures |
 | observer strategies compared after every generation | byte-identical: true |
 | quarantined Python references unchanged | true (3 files) |
 | fixture, both characterization batches, edge-only, desktop | regenerated for this revision |
@@ -687,7 +687,7 @@ provenance — make it addable later without rewriting the biological kernel.
 | genealogy and mating cores remain coherent | met |
 | neutral traits are exactly neutral | met |
 | the difference is visible in the diagnostic probe | met on desktop; **iPad legibility pending human test** |
-| every automated result reproducible from a clean run | met — 377/377 from clean, 0 gate(s) FAIL, 0 UNVERIFIED |
+| every automated result reproducible from a clean run | met — 384/384 from clean, 0 gate(s) FAIL, 0 UNVERIFIED |
 | remaining uncertainty named rather than hidden | met — §6, §11, and the audit response in the repair record |
 
 **Completion is NOT declared** (`mayDeclareCompletion: false`). This flag is DERIVED from the
