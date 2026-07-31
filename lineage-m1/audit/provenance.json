@@ -4,15 +4,14 @@
   "purpose": "Bind this bundle to the source revision that produced it, without shipping .git. EVERY shipped file is hashed — production source, tests, tools, evidence, reports and package files — and `tools/verifyProvenance.mjs` recomputes all of them from an extraction.",
   "source": {
     "resolved": true,
-    "commit": "ce80be25cec73e316460791bd4c9729a53c45994",
-    "shortCommit": "ce80be25cec7",
+    "commit": "ca8cc77415e4a12e433f57586deec89f44bb2e20",
+    "shortCommit": "ca8cc77415e4",
     "branch": "claude/lineage-m1-implementation-1m9zpq",
-    "treeHash": "1e01858f6971132a6fcc5e216cc7bf0a9f03d4ea",
-    "committedAt": "2026-07-31T04:23:17+00:00",
+    "treeHash": "f8a10a162c73e0da086667692468b89cdc6486d4",
+    "committedAt": "2026-07-31T04:48:58+00:00",
     "workingTreeClean": false,
     "uncommittedPaths": [
       "M lineage-m1/audit/provenance.json",
-      "M lineage-m1/audit/runtime-matrix.json",
       "M lineage-m1/audit/test-results.txt",
       "M lineage-m1/audit/tree-integrity.json"
     ]
@@ -29,8 +28,8 @@
   },
   "testResults": {
     "path": "audit/test-results.txt",
-    "sha256": "0887b190b587e6f2e77e3e5c3622a57905c03e189d4f22a3902cb777e78cb957",
-    "bytes": 84121,
+    "sha256": "af4493bfe7aa954ba12aa5fbf2f93cea98ac474f89eb191c62cf8f993e82d04f",
+    "bytes": 84136,
     "tests": 377,
     "pass": 377,
     "fail": 0,
@@ -56,7 +55,7 @@
     "ipadStatus": "PENDING_HUMAN_DEVICE_TEST"
   },
   "fileCount": 133,
-  "shippedTreeDigest": "c76eadd02f07833dcbbc6c8366573e56df46efe39ca0a4973c3a62f0afea6d61",
+  "shippedTreeDigest": "09a50a404544213cf3c64365d0b6e84d97986658fa950be643e93b64e08a9fa2",
   "files": {
     "AUDIT_PACKAGE_MANIFEST.md": {
       "sha256": "98576d806b2c1e7e31bb981d3cca3e1647993da622aa5513b7b2fe079e0588e8",
@@ -159,12 +158,12 @@
       "bytes": 3632
     },
     "audit/test-results.txt": {
-      "sha256": "0887b190b587e6f2e77e3e5c3622a57905c03e189d4f22a3902cb777e78cb957",
-      "bytes": 84121
+      "sha256": "af4493bfe7aa954ba12aa5fbf2f93cea98ac474f89eb191c62cf8f993e82d04f",
+      "bytes": 84136
     },
     "audit/tree-integrity.json": {
-      "sha256": "c5eb9e8038f1ee27bffc066ce8db3668b054ba25e94695644030dcd096cc6d6a",
-      "bytes": 1648
+      "sha256": "ee53f78a4164132043cf5763d586dd35a1d815e2b249eac4b7b8eaac548e2118",
+      "bytes": 975
     },
     "fixtures/defining_fixture_v1.json": {
       "sha256": "c80aaa523d3b3eec2655502b4eaebdbbb4d12f71f8b3378d9d3be60797342b78",

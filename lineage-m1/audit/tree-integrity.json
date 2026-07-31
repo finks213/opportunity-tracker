@@ -4,7 +4,7 @@
   "claim": "The production source tree under src/ is never modified at any instant while the full suite runs at high concurrency. Sampled continuously, not merely compared before and after.",
   "concurrency": 4,
   "rounds": 3,
-  "samplesTaken": 827067,
+  "samplesTaken": 829951,
   "baselineDigest": "f697b6d2381d5168a946c8fff5c24f1904006f570d6ccddd63ad56c73c825d60",
   "finalDigest": "f697b6d2381d5168a946c8fff5c24f1904006f570d6ccddd63ad56c73c825d60",
   "fileCount": 31,
@@ -12,38 +12,26 @@
   "deviations": [],
   "runs": [
     {
-      "exitCode": 1,
+      "exitCode": 0,
       "tests": 377,
-      "pass": 374,
-      "fail": 3,
-      "failing": [
-        "§23/§27 — verification recomputes every recorded hash",
-        "§23/§27 — the binding covers the model identity and the published run",
-        "§27 — tampering with ANY shipped file is detected"
-      ]
+      "pass": 377,
+      "fail": 0,
+      "failing": []
     },
     {
-      "exitCode": 1,
+      "exitCode": 0,
       "tests": 377,
-      "pass": 374,
-      "fail": 3,
-      "failing": [
-        "§23/§27 — verification recomputes every recorded hash",
-        "§23/§27 — the binding covers the model identity and the published run",
-        "§27 — tampering with ANY shipped file is detected"
-      ]
+      "pass": 377,
+      "fail": 0,
+      "failing": []
     },
     {
-      "exitCode": 1,
+      "exitCode": 0,
       "tests": 377,
-      "pass": 374,
-      "fail": 3,
-      "failing": [
-        "§23/§27 — verification recomputes every recorded hash",
-        "§23/§27 — the binding covers the model identity and the published run",
-        "§27 — tampering with ANY shipped file is detected"
-      ]
+      "pass": 377,
+      "fail": 0,
+      "failing": []
     }
   ],
-  "allRunsGreen": false
+  "allRunsGreen": true
 }
