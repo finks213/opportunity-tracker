@@ -23,22 +23,43 @@
  * (`deriveMilestoneStatus`) from the published test results plus the externally
  * determined statuses in `audit/external-gate-status.json`.
  *
- * What remains here is policy that is not an evidence question: which statuses may
- * never be asserted, and which revision and date the generated artifacts carry.
+ * What remains here is policy that is not an evidence question: which statuses the
+ * contract authorises at all, and which revision and date the generated artifacts
+ * carry.
  *
- * @type {Readonly<{revision:number, reportDate:string, forbiddenStatuses:readonly string[], statusIsDerived:boolean, derivedBy:string}>}
+ * @type {Readonly<{revision:number, reportDate:string, authorisedStatuses:readonly string[], statusesRequiringDerivation:readonly string[], statusIsDerived:boolean, derivedBy:string}>}
  */
 export const MILESTONE_STATUS = Object.freeze({
   /** Revision of the implementation and of every generated report. */
-  revision: 6,
-  reportDate: "2026-07-30",
+  revision: 7,
+  reportDate: "2026-07-31",
 
   /**
-   * Statuses that must not be asserted as the present state by any artifact.
-   * `status-consistency.test.js` enforces this against the DERIVED status too, so
-   * the derivation cannot produce one of them either.
+   * The three statuses contract v3.3 §26 authorises. Nothing else may be published
+   * as the milestone status, and `tools/gateRegistry.mjs` can produce nothing else.
+   *
+   * REVISION-7 REPAIR (Finding 2). Revision 6 listed `M1_AUTOMATED_GATES_PASS` and
+   * `M1_ACCEPTED` here as PERMANENTLY forbidden, and the derivation invented
+   * `M1_ALL_GATES_SATISFIED` for the everything-passes case. The milestone could
+   * therefore never reach a contract-authorised passing state no matter what the
+   * evidence said — a policy decision baked into source, which is exactly what the
+   * derived-status architecture was supposed to remove. These two are not forbidden;
+   * they are unreachable *while the evidence does not support them*, which is a
+   * different thing and is decided by `deriveMilestoneStatus()`.
    */
-  forbiddenStatuses: Object.freeze([
+  authorisedStatuses: Object.freeze([
+    "M1_BLOCKED",
+    "M1_AUTOMATED_GATES_PASS — IPAD TEST PENDING",
+    "M1_ACCEPTED",
+  ]),
+
+  /**
+   * Statuses no artifact may ASSERT unless the derivation currently produces them.
+   * This is a claim-hygiene rule, not a ban: the check is against the derived
+   * status, so a document may state a passing status exactly when the evidence
+   * derives it.
+   */
+  statusesRequiringDerivation: Object.freeze([
     "M1_AUTOMATED_GATES_PASS",
     "M1_ACCEPTED",
   ]),

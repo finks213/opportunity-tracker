@@ -1,17 +1,32 @@
 {
-  "schema": "lineage-m1-provenance-1",
+  "schema": "lineage-m1-provenance-2",
   "contractSection": "23 / 27 (delivery and audit evidence)",
-  "purpose": "Bind this bundle to the source revision that produced it, without shipping .git. Every value below is recomputable from the extracted bundle except `source.commit`, which is what the binding exists to supply.",
+  "purpose": "Bind this bundle to the source revision that produced it, without shipping .git. EVERY shipped file is hashed — production source, tests, tools, evidence, reports and package files — and `tools/verifyProvenance.mjs` recomputes all of them from an extraction.",
   "source": {
     "resolved": true,
-    "commit": "ce0ddfbacf3404c9d21444c8b9513e2d39194453",
-    "shortCommit": "ce0ddfbacf34",
+    "commit": "68e21e73307a8eb5a96b1ab88cf6f629407c148c",
+    "shortCommit": "68e21e73307a",
     "branch": "claude/lineage-m1-implementation-1m9zpq",
-    "treeHash": "2ddac3e51cb881bf480439cf73b627f47512daa0",
-    "committedAt": "2026-07-31T01:09:56+00:00",
+    "treeHash": "e3a09c010cf0065059ed62ceb5b2c5286d4ed0d8",
+    "committedAt": "2026-07-31T01:17:36+00:00",
     "workingTreeClean": false,
     "uncommittedPaths": [
-      "?? LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV6.zip"
+      "M lineage-m1/AUDIT_PACKAGE_MANIFEST.md",
+      "M lineage-m1/FINAL_REPORT.md",
+      "M lineage-m1/IPAD_TEST_CHECKLIST.md",
+      "M lineage-m1/README.md",
+      "M lineage-m1/audit/gate-summary.json",
+      "M lineage-m1/audit/provenance.json",
+      "M lineage-m1/src/config/milestoneStatus.js",
+      "M lineage-m1/src/core/simulation.js",
+      "M lineage-m1/src/main.js",
+      "M lineage-m1/test/provenance-binding.test.js",
+      "M lineage-m1/tools/gateRegistry.mjs",
+      "M lineage-m1/tools/verifyProvenance.mjs",
+      "M lineage-m1/tools/writeFinalReport.mjs",
+      "M lineage-m1/tools/writeProvenance.mjs",
+      "?? lineage-m1/test/legibility-invariant.test.js",
+      "?? lineage-m1/test/status-truth-table.test.js"
     ]
   },
   "model": {
@@ -26,54 +41,83 @@
   },
   "testResults": {
     "path": "audit/test-results.txt",
-    "sha256": "2c68c85bdd95b00561ec90bf573919fdb4010bcea5e691eaf5ab9ee23cd09fbf",
-    "bytes": 78444,
+    "sha256": "1c5466f60968128d867bca11ce01fbd4782bd0249b5c42f53f86053af9a24f0b",
+    "bytes": 78449,
     "tests": 349,
     "pass": 349,
     "fail": 0,
-    "boundBy": "counts",
-    "note": "The sha256 below is of the published run at the moment this record was written. It is NOT byte-verified by tools/verifyProvenance.mjs: the suite that verifies this record publishes a new TAP whose wall-clock lines differ, so a byte comparison would fail by construction rather than by tampering. The COUNTS are verified, and every other file is verified byte for byte."
+    "boundBy": "bytes",
+    "note": "Bound by its exact SHA-256, like every other shipped file (revision-7, Finding 3). Revision 6 exempted this file and checked only its three summary counts, so a non-summary line could be rewritten without detection. The suite that republishes it necessarily makes the working tree differ from this record until `npm run audit:provenance` is re-run; that is a regeneration step, not a verification exemption, and the DELIVERED archive is built after it."
   },
   "milestone": {
     "status": "M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED",
     "mayDeclareCompletion": false,
     "blockers": [
       "desktopCanvasMemory: UNVERIFIED",
-      "ipadGate: PENDING_HUMAN_DEVICE_TEST",
       "stageAOrder: VIOLATED — principal decision required",
-      "independentClosureAudit: PENDING"
+      "independentClosureAudit: PENDING",
+      "ipadGate: PENDING_HUMAN_DEVICE_TEST"
     ],
     "automatedGatesPass": true,
     "externalBlockers": [
       "desktopCanvasMemory: UNVERIFIED",
-      "ipadGate: PENDING_HUMAN_DEVICE_TEST",
       "stageAOrder: VIOLATED — principal decision required",
-      "independentClosureAudit: PENDING"
-    ]
+      "independentClosureAudit: PENDING",
+      "ipadGate: PENDING_HUMAN_DEVICE_TEST"
+    ],
+    "ipadStatus": "PENDING_HUMAN_DEVICE_TEST"
   },
-  "generated": {
-    "FINAL_REPORT.md": {
-      "sha256": "152b611238a06088dd109df9d8a3cb25d87612747d78c583be0a4e04f873be11",
-      "bytes": 38013
+  "fileCount": 131,
+  "shippedTreeDigest": "2bc24b1387b088a34d1ab712dab11834557b5dfa998753d6fc912880f27eaba3",
+  "files": {
+    "AUDIT_PACKAGE_MANIFEST.md": {
+      "sha256": "c697179be0b81f0a0e2221ce7bb63dab887c72dd68a4bf841c49b84ae983537d",
+      "bytes": 31101
     },
     "CHARACTERIZATION.md": {
       "sha256": "01f2b6b63038669297fc7be914065845da8ea1108a2691303b5233649faef25a",
       "bytes": 12809
     },
-    "AUDIT_PACKAGE_MANIFEST.md": {
-      "sha256": "886926f4f411f55e5f46873705b58030fd40bb4e8540464e3641d266d5263b52",
-      "bytes": 31202
+    "CHARACTERIZATION_PLAN.md": {
+      "sha256": "0c48f4b5b144fc859fb93dfcc678c948b3b15e112a963277e755e4dd2c309d50",
+      "bytes": 12262
+    },
+    "DECISIONS.md": {
+      "sha256": "1fbf8f16a435bb5f074297a52e6550deebf313474b15e50ea4b6c83f75d9dc69",
+      "bytes": 54972
+    },
+    "FINAL_REPORT.md": {
+      "sha256": "b807793f39d1affc6752d5c709071388ddb99c462238ea9ba9c0ab64fb7be8ec",
+      "bytes": 38013
+    },
+    "IPAD_TEST_CHECKLIST.md": {
+      "sha256": "43b539e8003b703b4c1ac737afaaff4ba252b92f143267ced231957bc54fff3b",
+      "bytes": 5807
+    },
+    "PLAN.md": {
+      "sha256": "3eee92d246f79e719a97f22ed2fd99d9af3840be4700d5bce2f0678b146b10dc",
+      "bytes": 8214
+    },
+    "README.md": {
+      "sha256": "393f386117d3f572f922354536126a5dc8b34eeff7d7992c0e4c970f6ffa6f38",
+      "bytes": 8111
+    },
+    "REVISION_4_REPAIR_RECORD.md": {
+      "sha256": "0ad419458b3bbb7177d020602af5140e2422a5ceed93554b7be91ac288c2f84b",
+      "bytes": 33721
+    },
+    "REVISION_5_REPAIR_RECORD.md": {
+      "sha256": "a9d6e2c3d1b8d6d15ff8dca195a785057b04c3919fff98e016bfb03c6492292e",
+      "bytes": 37607
     },
     "REVISION_6_REPAIR_RECORD.md": {
       "sha256": "7828b225650a93b4a1faa681000f1030b6b876db58280f92753b8a1bad9c8908",
       "bytes": 27985
     },
-    "DECISIONS.md": {
-      "sha256": "1fbf8f16a435bb5f074297a52e6550deebf313474b15e50ea4b6c83f75d9dc69",
-      "bytes": 54972
-    }
-  },
-  "evidence": {
+    "STRUCTURAL_AUDIT_REPAIR_RECORD.md": {
+      "sha256": "74f4a935c73168fe8871a9133143fc3fb02f358d14c698e76f4a376f9d0be6ab",
+      "bytes": 13843
+    },
     "audit/build-environment.json": {
       "sha256": "d593f77943922a50c7182878f0532e3210b13b2c3bf9291420194c62e64bb9c2",
       "bytes": 986
@@ -103,8 +147,8 @@
       "bytes": 184847
     },
     "audit/gate-summary.json": {
-      "sha256": "00449321497fa5ebff2fc12446a5527178866620c45f6b6e6c1f2df258bb949d",
-      "bytes": 26293
+      "sha256": "b8e35890a15de7d7be8a9af06f8e1fec1563690ee9e2419e965865e24bbb6eed",
+      "bytes": 26340
     },
     "audit/meaningful-trait-gate.json": {
       "sha256": "e8a00dc832f2a1bb15cada4f159e0a92a90c7bf4c95e4b220d039c8225166519",
@@ -122,20 +166,449 @@
       "sha256": "abf6167e735f94d426c43667266506d33ebdb558f064878a8ca0998a89122292",
       "bytes": 3632
     },
+    "audit/test-results.txt": {
+      "sha256": "1c5466f60968128d867bca11ce01fbd4782bd0249b5c42f53f86053af9a24f0b",
+      "bytes": 78449
+    },
     "audit/tree-integrity.json": {
       "sha256": "7916124b32d87d9004a1304ad01badfdbb27f029df7ceba3d710b6701f9baf5b",
       "bytes": 975
+    },
+    "fixtures/defining_fixture_v1.json": {
+      "sha256": "c80aaa523d3b3eec2655502b4eaebdbbb4d12f71f8b3378d9d3be60797342b78",
+      "bytes": 61269
+    },
+    "index.html": {
+      "sha256": "9e878abc8b32ef6d0a325dc169233f745c1a520fdef65d0069e5a084a38bf0a5",
+      "bytes": 3427
+    },
+    "package-lock.json": {
+      "sha256": "b1e550a5354ca4018c57c401c0ce1e43214090c47f56de6057c628b912fbe141",
+      "bytes": 1781
+    },
+    "package.json": {
+      "sha256": "736629448cd43a45525695a6ad0922715db296b8bfc65d55c2f105ead29be246",
+      "bytes": 1244
+    },
+    "reference/analyze.py": {
+      "sha256": "d878c440eef459aa544be0b3ff19ae202e241d690b9df5264e17eabd3d5ab494",
+      "bytes": 9351
+    },
+    "reference/biology.py": {
+      "sha256": "ecc9d143a03bf3cf4ac4fab29598acd072396227f6305b212f681b0544b3a1f8",
+      "bytes": 19383
+    },
+    "reference/engine.py": {
+      "sha256": "303859044028fa4f4d67e862792090b9094b737e4a75495c338ddde50f22247c",
+      "bytes": 7882
+    },
+    "runtime-matrix.config.json": {
+      "sha256": "37e42aa329186ec039b6e1de050c83702d901e8579711fbcd2583183e9471f80",
+      "bytes": 1870
+    },
+    "src/config/milestoneStatus.js": {
+      "sha256": "fcd31bad8e91a4dcc3de7a799d174f05a63d48191b0b10ad607d4865258af549",
+      "bytes": 4101
+    },
+    "src/config/modelConfig.js": {
+      "sha256": "88018d11ca4ab41cdad357a3db708a575c4ce3c8f0564572445d72881003e8ff",
+      "bytes": 8093
+    },
+    "src/config/modelDefinition.js": {
+      "sha256": "db1455f182700e44a8fff9720edd6fc683389d19841689c7b954f14719ab3b93",
+      "bytes": 5457
+    },
+    "src/config/modelIdentity.js": {
+      "sha256": "a9d88a28e359899005cbc083cb6f298659bf28d9112678880a8e68a2d304d0a6",
+      "bytes": 5026
+    },
+    "src/config/modelIdentityNode.js": {
+      "sha256": "b197676c639bd3ae1c190addff3cf0374c36c4d00fc2caeec667e021f4d6d0e6",
+      "bytes": 2097
+    },
+    "src/config/traits.js": {
+      "sha256": "cb45ba97a2b4ac21cbd4acffcf4043f038911f57f30333df2e505a35a6596ca9",
+      "bytes": 4318
+    },
+    "src/config/zones.js": {
+      "sha256": "1ecf032add04c9d61ce0ecb1d0a98737f12e282d2dfb4435287766bfa1e57fc5",
+      "bytes": 1639
+    },
+    "src/core/canonicalSerialize.js": {
+      "sha256": "dd4c5393ab4e1aec223c2a46c5944a892530beefaabb8cf8d0a3c103b88f46e5",
+      "bytes": 6146
+    },
+    "src/core/events.js": {
+      "sha256": "fb9ea8a8e5a89d3ef86d155400d224bd8829ff8ed6a5c4483f364d0bc4915add",
+      "bytes": 4682
+    },
+    "src/core/genealogy.js": {
+      "sha256": "2749c83897146ea29a28a1c69139695c8161c8256bb224fcafe24a6bf451d747",
+      "bytes": 4255
+    },
+    "src/core/individual.js": {
+      "sha256": "f654457f05fb5d227228cbf8d321b0ce70453d2ee7f5a44d3569c74e0dd2c9c9",
+      "bytes": 5532
+    },
+    "src/core/inheritance.js": {
+      "sha256": "709d1ab70093408027e372d184cdee9f65faa2a820a935919177da02ac5bfc5d",
+      "bytes": 4379
+    },
+    "src/core/math.js": {
+      "sha256": "878e6097015fd3440f6b527e01848064ee9368f2885ca2391060575d87887d79",
+      "bytes": 1783
+    },
+    "src/core/mating.js": {
+      "sha256": "212e1c93cc562dbaf253f6ec73637af4ad91a7aa3f5d165fecc144823ac597cc",
+      "bytes": 2943
+    },
+    "src/core/mutation.js": {
+      "sha256": "5fe09ad6aa9dbace89c56ac43e0bff9cc4e1dcb9eb68c387fa8d538143a22b51",
+      "bytes": 7196
+    },
+    "src/core/performance.js": {
+      "sha256": "63b07222f9ced13cc44f59eb017604d10887b93c5b0cd9db5c65be2b5900fee8",
+      "bytes": 1721
+    },
+    "src/core/rng.js": {
+      "sha256": "07cc118b4ca1c3b1b0540a04858737cd2645fd94cbbb5b723e4fa0d1254428ae",
+      "bytes": 5529
+    },
+    "src/core/simulation.js": {
+      "sha256": "2e52dd8bb90b4db69824796b13a6cc12a0b4fdfdb73f8a5f1eb47b980de002c9",
+      "bytes": 16376
+    },
+    "src/core/survival.js": {
+      "sha256": "b1ea0c7a20e314de9fef245fac5e62fb58c7d3247602bc6e70fe73bf104dc0d2",
+      "bytes": 4248
+    },
+    "src/debug/animalGlyph.js": {
+      "sha256": "18aded68bd23a06ef88be655e5f4d4f65a89cf532572a231650ce9900786c560",
+      "bytes": 6528
+    },
+    "src/debug/canvasProbe.js": {
+      "sha256": "321ee58603a5741da39719e8d52069c284c9d04182d89de5770fc93f6c88b19c",
+      "bytes": 8369
+    },
+    "src/debug/controls.js": {
+      "sha256": "65daeba69aef2c9d49a955e0e7f4c1e40ff1efaccbcf358aeaa00e331cf688ec",
+      "bytes": 4026
+    },
+    "src/debug/desktopMeasure.js": {
+      "sha256": "88bc89a7f5422f0ca916099dd7e09e7524ceb9694a8740238ea60ba3c28e9190",
+      "bytes": 3638
+    },
+    "src/debug/inspector.js": {
+      "sha256": "16a0a685196aeae4acd3256888f5c9c1944135665dcb36e3e98be7693ce5177a",
+      "bytes": 4319
+    },
+    "src/fixtures/definingFixtureV1.js": {
+      "sha256": "d8d6a18e60f54af57372bedd2ffef7a7f76dbdf843a7bc89b4b13064be2c067c",
+      "bytes": 10541
+    },
+    "src/fixtures/edgeOnlyWorlds.js": {
+      "sha256": "061ddbcc963abfb99fa069b46036c679fd0d524ff8ee33d8f38ba220ae01e1e3",
+      "bytes": 7229
+    },
+    "src/fixtures/nodeFixtureIO.js": {
+      "sha256": "71ef81caa4c246f249b53abaa3767c1931232ba949f3c17c8592823a2136e451",
+      "bytes": 1781
+    },
+    "src/main.js": {
+      "sha256": "5f38ecddb0433fd9ccbdf86d1cbc7dc328edc90d2121a7e653f406d7a183f7ce",
+      "bytes": 34814
+    },
+    "src/observer/currentZoneBins.js": {
+      "sha256": "bdf38aee79aba2b5837e0fa6006704fa3131f04dd0ac5efd56127c49a8c10804",
+      "bytes": 1407
+    },
+    "src/observer/matingAnnotations.js": {
+      "sha256": "592c4b4148b22c4e5ad0da19a9d157b8d1617c3fc91d70403971a8ecd2c27fc5",
+      "bytes": 1253
+    },
+    "src/observer/tracerChannels.js": {
+      "sha256": "38e87eb7eddabd015fd9490b8ec16f955215cd0772e869eb5705b8efdae0557c",
+      "bytes": 26331
+    },
+    "styles.css": {
+      "sha256": "8bda22096ae122065258ba48e4d0ac8c9d9740819c4a4558e956afc052046781",
+      "bytes": 3576
+    },
+    "test/allocation-mutation-contract.test.js": {
+      "sha256": "09d0f86dec0c4da132808f60973e46609f3bb260dc89ee5633e0ff34a17b7123",
+      "bytes": 10677
+    },
+    "test/birth-immutability.test.js": {
+      "sha256": "b7256e55471c029d0a088652105261e71b8848c78d600f6c662884f3b510e521",
+      "bytes": 4076
+    },
+    "test/canvas-jitter-membership.test.js": {
+      "sha256": "70c064600ad290cca26fef8a775d03cc745a7e4ab67b49fc4d55bd59a5e197c8",
+      "bytes": 6724
+    },
+    "test/defining-fixture-snapshot.test.js": {
+      "sha256": "4e742af3d2f4423b0bb71c0d6735f14f06de780a78ac48d194bfca7dff87d91f",
+      "bytes": 9890
+    },
+    "test/defining-fixture.test.js": {
+      "sha256": "421f366d8ec3993840230c881cc318ba54472617100ac6d41fa1b02d7d4092cb",
+      "bytes": 13201
+    },
+    "test/dependency-boundary.test.js": {
+      "sha256": "99a8322926844b1f8a33efc293c205b9e68244acba55f49f5073ab89d73731c2",
+      "bytes": 6809
+    },
+    "test/desktop-measurement-reproducibility.test.js": {
+      "sha256": "449c09a7c4f211aa7cef094df0715e886a719d14bd9f3c101f81ca32cfd61570",
+      "bytes": 11737
+    },
+    "test/edge-only-traversal.test.js": {
+      "sha256": "a0e4ba3ced7728422f50fb3feb47ceda222c93251b33d7b1a4e590cace375cba",
+      "bytes": 9885
+    },
+    "test/exact-membership-underflow.test.js": {
+      "sha256": "a28fc4e3a2ea9a63cee2c7a32420fa57a31a355112ec5089615458ed2814d89f",
+      "bytes": 5725
+    },
+    "test/fixture-transaction-atomicity.test.js": {
+      "sha256": "0f0f7a91df83ed8e729bc69121e4727b91d0a91244774936d22683d9f3cae8b9",
+      "bytes": 10554
+    },
+    "test/focal-lineage-integrity.test.js": {
+      "sha256": "e9760db823f51659a5f19d4a433b657d62f3bfc21ccf0f76fe7ca6af9e502033",
+      "bytes": 17140
+    },
+    "test/focal-lineage-retention.test.js": {
+      "sha256": "4a0efa927bbc10bbfb5aec0b3416cc9f9202ccc04b006efde0425e69192f653f",
+      "bytes": 13541
+    },
+    "test/frozen-schema-identity.test.js": {
+      "sha256": "db879feff992698d4b0ef9b2e43035940402a3e045ce1c13c31d3bd50a882a16",
+      "bytes": 6275
+    },
+    "test/full-path-mutation-independence.test.js": {
+      "sha256": "b72b39b68735287fa76e2abd2c5375e7b678010ee27ff3a266114de515d2b891",
+      "bytes": 7572
+    },
+    "test/genealogy-integrity.test.js": {
+      "sha256": "7bf38681c4db573e9b29630dbb9fc54f05291988696c83e28ad149119c402193",
+      "bytes": 4760
+    },
+    "test/genealogy-retention-boundary.test.js": {
+      "sha256": "6de82c7bf7d6df9d65c2263014c941de79bfc64731fda855a70528d2bbe50cc6",
+      "bytes": 9856
+    },
+    "test/generation-result-immutable.test.js": {
+      "sha256": "0ec54d9190355f20d8a09c2b867b46584f8b4d81d96085948a06969b23f9737e",
+      "bytes": 9841
+    },
+    "test/helpers/scriptedRng.js": {
+      "sha256": "335a854a8423f4f9592c037c482dd6414e718fdb7f523cec2ea5f012a3c337df",
+      "bytes": 1576
+    },
+    "test/legibility-invariant.test.js": {
+      "sha256": "88c82d998ecfee70f9f3a07f7fd3b6cbf8750f441e479eebf4213df8cea632f5",
+      "bytes": 7560
+    },
+    "test/lifecycle-contract.test.js": {
+      "sha256": "b1719ebcc779ebe9a874cb3cf82a6d8ce94810a80afa1841cf242aa74c673fcf",
+      "bytes": 9018
+    },
+    "test/maintained-witness-protection.test.js": {
+      "sha256": "658079c7dacf38edb4ca17d2d33b2ff54cc353f016030b143076f283d501c984",
+      "bytes": 8417
+    },
+    "test/manifest-inventory.test.js": {
+      "sha256": "22e20f03c83be2e94c2e36f1af571bcae81715d48e135268067f243d5b2015df",
+      "bytes": 4937
+    },
+    "test/mating-integrity.test.js": {
+      "sha256": "ecbf40bf9407643335d8d3a9f56e4241fae56c2f7b0e1481e0557fea02e16686",
+      "bytes": 8000
+    },
+    "test/meaningful-trait-context.test.js": {
+      "sha256": "620c2cf862e5d7410ffa5d3e641a6158fe4d5b2feda45562e638c22207a7013a",
+      "bytes": 6446
+    },
+    "test/median-consistency.test.js": {
+      "sha256": "e46697a9259896d66d956fb21336129c457f2ca345bb108e2dd28ff37b0121d8",
+      "bytes": 6775
+    },
+    "test/milestone-scope-observer.test.js": {
+      "sha256": "816fc9aae698ecc98d101210d94b62cc41627110d76ba8c26def41d3826e3768",
+      "bytes": 5137
+    },
+    "test/model-hash-provenance.test.js": {
+      "sha256": "323ba60105ce37477c2402d3384bc93bcc9d16c8e27e259c26591f028e9b902b",
+      "bytes": 13242
+    },
+    "test/model-identity.test.js": {
+      "sha256": "34a48b43179cb848c20a2f25605fba4376f0ccb533081c9af8f2330b74e6ccf8",
+      "bytes": 20100
+    },
+    "test/mutation-provenance.test.js": {
+      "sha256": "79b6e693cebba8438c99fe6b33ff9666223cff4ab05e2794dedfbea79e28732f",
+      "bytes": 7481
+    },
+    "test/neutral-traits.test.js": {
+      "sha256": "a5281903a50a85b6909f4d2aaada5bc8f8cba0dcba92851f913a3e8d205ab4c4",
+      "bytes": 6664
+    },
+    "test/observer-invariance.test.js": {
+      "sha256": "64c0472c1bab1d73792c9e675d421ecb45a2d0031d61bccdfdc8991c85ab292a",
+      "bytes": 9179
+    },
+    "test/observer-memory-bounds.test.js": {
+      "sha256": "18a23c9d2918c4a852f5f6ae508c81ebaeb350726d37be695ded62e081f5b9e2",
+      "bytes": 9545
+    },
+    "test/observer-transaction-integrity.test.js": {
+      "sha256": "00c5a461ef2f23e7a50642e741ec194ecdcfeaf1897d086bbe60265ba48d06fa",
+      "bytes": 9329
+    },
+    "test/probe-world-identity.test.js": {
+      "sha256": "f2f9d669ffceb506396c8a4fa0d84f679eefc000f2bade5b2f5ddcf7c0f36e75",
+      "bytes": 18947
+    },
+    "test/provenance-binding.test.js": {
+      "sha256": "cd47c7cc788e30fe2de9ed527810fefbceca798869764a3d7823ac70886c374e",
+      "bytes": 8358
+    },
+    "test/report-determinism.test.js": {
+      "sha256": "a4a1aad30117dcb9a055d7ec5f26d9deba568c0f952397dddbd1c0863b4da926",
+      "bytes": 4951
+    },
+    "test/report-end-to-end-injection.test.js": {
+      "sha256": "acfe1127509e2e212880734b2ff4d136e21c033087c57e9d84796c0590aff59d",
+      "bytes": 10902
+    },
+    "test/report-integrity.test.js": {
+      "sha256": "0b11f15cf0ae7cc738c2bf47b80b04b49232bf1704d55e2c3f2db24afaf8aa11",
+      "bytes": 31995
+    },
+    "test/rng-integrity.test.js": {
+      "sha256": "14e23b52dd37728e8113d42f10e7f5c17e9bce9c609263fdc0cb9dc70bacc560",
+      "bytes": 8415
+    },
+    "test/runtime-matrix-coverage.test.js": {
+      "sha256": "07befdf86e48bf92807babb5cb1820f6272b5c8d0f1a7d425e52439bef9abdfc",
+      "bytes": 8778
+    },
+    "test/server-containment.test.js": {
+      "sha256": "dbc6c287a73729e23a89c44619f7ccf577907464b146019284a9cbb71a39d70b",
+      "bytes": 9508
+    },
+    "test/spatial-integrity.test.js": {
+      "sha256": "4840186a9d86d7e3c655a8edc33017c7da376964f71b101bcab6774d67131c6a",
+      "bytes": 8146
+    },
+    "test/status-consistency.test.js": {
+      "sha256": "f9aed29b656793be20fd4d2723bc8b95af0bb1f2fb96ce0bc1316c90a960d5d1",
+      "bytes": 9246
+    },
+    "test/status-truth-table.test.js": {
+      "sha256": "3d369511833420aee69413957432a8d727d5b53859ff84ef64205190332d8e2c",
+      "bytes": 7189
+    },
+    "test/survival-composition.test.js": {
+      "sha256": "191bc514ba61566d19fefd028a0cf4fc7cc97a330cf786664e8958045381f78d",
+      "bytes": 4111
+    },
+    "test/test-tree-integrity.test.js": {
+      "sha256": "b2dae84403a568f6d5c1b85d7ff86998961ed1dd844d68ddf98263e37fad6608",
+      "bytes": 7830
+    },
+    "test/traversal-label-integrity.test.js": {
+      "sha256": "656ff6acb8a03860ef0eea7e4b33e0c222989925af68569cab39b77922a8ce4a",
+      "bytes": 10271
+    },
+    "test/world-load-race.test.js": {
+      "sha256": "af674e0ad69093512caf93c4374ca81c38092c9a31bf53642d524cc0cd8632db",
+      "bytes": 8835
+    },
+    "tools/calibrationSweep.mjs": {
+      "sha256": "68f8294e622c267530c368634e3234b2f466c13a8f76fbf3c050cfd1d4bbd653",
+      "bytes": 2943
+    },
+    "tools/gateRegistry.mjs": {
+      "sha256": "9ae19da5f9e9200f80c4ecd8470478711e9b61de44baa803a2965ae44909ddc4",
+      "bytes": 26533
+    },
+    "tools/measureDesktop.mjs": {
+      "sha256": "6b141f492d92fb324b632b00bc75b33eb7c34d4d2728dac691e971874f886707",
+      "bytes": 23661
+    },
+    "tools/proveTreeIntegrity.mjs": {
+      "sha256": "e37664d359c6a8c152269a0289ac759e96613fecc66e76d9dfa9aede78e2f336",
+      "bytes": 5752
+    },
+    "tools/runCharacterization.mjs": {
+      "sha256": "c7d1c28a3d3af02c408604e1afd45b3ea634095b5fda2efb43ee447c7efbf7f0",
+      "bytes": 26149
+    },
+    "tools/runEdgeOnlyTraversal.mjs": {
+      "sha256": "0157f5ada465ce62d22e5d9c133031a4ddf98960daec103d86d14c649fa12441",
+      "bytes": 5850
+    },
+    "tools/runFixture.mjs": {
+      "sha256": "7405683daaec9dd16b62eea6f9d6744673e80b2b048a1013cbf3f8f6711dbb0e",
+      "bytes": 12057
+    },
+    "tools/runRuntimeMatrix.mjs": {
+      "sha256": "efeb4ed7badf11916a2b9675436adb2584f0c611b4a45bbd551795c2022fd5d6",
+      "bytes": 12249
+    },
+    "tools/runTests.mjs": {
+      "sha256": "67f24d609a81e30becd30f76bdfee8220382f123ef7cddcb5f9b69e9e5142e28",
+      "bytes": 3423
+    },
+    "tools/serve.mjs": {
+      "sha256": "90035c87bccddd2a7ba4ccd1bd67a7188f26f015b8069c8863a6b796e7e3c04c",
+      "bytes": 5951
+    },
+    "tools/verifyProvenance.mjs": {
+      "sha256": "27d6163c74dead1339b8cf805c220c65ba074d693188024f6a7c9d6d0506f232",
+      "bytes": 5379
+    },
+    "tools/writeAuditEvidence.mjs": {
+      "sha256": "f41e6bb3b0364946c7adcf52c2a23d360d4e65e439a4ea89e59449421f9e2b57",
+      "bytes": 13333
+    },
+    "tools/writeBuildEnvironment.mjs": {
+      "sha256": "2c318b50a892e1405f10da7b8340dd38814bd3c7456d9d423065cf956b0149d5",
+      "bytes": 3767
+    },
+    "tools/writeCharacterization.mjs": {
+      "sha256": "b927d88318261791f52b168ff595032c22262e95c17e5762a21d16e406be1e29",
+      "bytes": 22167
+    },
+    "tools/writeFinalReport.mjs": {
+      "sha256": "3468250c97ebdbfc96b91a8666a3d6d87628952bb800cbb12729516a6c945660",
+      "bytes": 64411
+    },
+    "tools/writeManifestPaths.mjs": {
+      "sha256": "a83e912c2601ab32c12cbcd5bda5d8760bf5f6bae2ee44f078a1982749d7ad3e",
+      "bytes": 4649
+    },
+    "tools/writeProvenance.mjs": {
+      "sha256": "34408ff513c04389f7e00f3d58583ee8eeefaf2d24a1cde7165dfd9707ed5419",
+      "bytes": 8893
     }
   },
   "archive": {
-    "name": "LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV6.zip",
+    "name": "LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV7.zip",
     "sha256": null,
     "note": "An archive cannot contain its own hash, so no file inside it can record one: writing the value here would require rebuilding the archive, which changes the value. The SHA-256 is published with the delivery message. Verify with `sha256sum` against that value, then verify every file below against this record from the extraction."
   },
+  "commitBinding": {
+    "claim": "The commit and tree hash below identify the revision this bundle was built from. The BYTE binding above is self-contained and complete; verifying that the recorded commit's git tree equals this extraction additionally requires a clone, because .git is not shipped (§27).",
+    "notClaimed": "That the existence of the commit object proves the extracted files equal its tree. Revision 6 suggested `git cat-file -t <commit>`, which proves only that the object exists. Use the command below instead, from a clone.",
+    "verifyFromAClone": "git -C <clone> ls-tree -r <source.commit> --format='%(objectname) %(path)' | sed 's|^\\([0-9a-f]*\\) lineage-m1/|\\1 |' | sort > /tmp/recorded.txt && (cd <extraction>/lineage-m1 && git hash-object $(node -e \"…list files…\") ) # compare"
+  },
   "verification": [
-    "sha256sum LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV6.zip   # compare with the published value",
-    "unzip -q LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV6.zip && cd lineage-m1",
-    "node tools/verifyProvenance.mjs                             # recomputes every hash below",
-    "git -C <clone> cat-file -t <source.commit>                  # binds the extraction to branch history"
+    "sha256sum LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV*.zip   # compare with the published value",
+    "unzip -q LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV*.zip && cd lineage-m1",
+    "node tools/verifyProvenance.mjs      # recomputes every shipped file's hash, strictly",
+    "npm test                             # the suite, from the extraction, with no install"
   ]
 }

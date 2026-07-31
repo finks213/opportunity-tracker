@@ -46,17 +46,18 @@
     "mayDeclareCompletion": false,
     "blockers": [
       "desktopCanvasMemory: UNVERIFIED",
-      "ipadGate: PENDING_HUMAN_DEVICE_TEST",
       "stageAOrder: VIOLATED — principal decision required",
-      "independentClosureAudit: PENDING"
+      "independentClosureAudit: PENDING",
+      "ipadGate: PENDING_HUMAN_DEVICE_TEST"
     ],
     "automatedGatesPass": true,
     "externalBlockers": [
       "desktopCanvasMemory: UNVERIFIED",
-      "ipadGate: PENDING_HUMAN_DEVICE_TEST",
       "stageAOrder: VIOLATED — principal decision required",
-      "independentClosureAudit: PENDING"
-    ]
+      "independentClosureAudit: PENDING",
+      "ipadGate: PENDING_HUMAN_DEVICE_TEST"
+    ],
+    "ipadStatus": "PENDING_HUMAN_DEVICE_TEST"
   },
   "summary": {
     "total": 38,

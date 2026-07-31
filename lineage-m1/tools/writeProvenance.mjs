@@ -25,6 +25,9 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, join, resolve } from "node:path";
+import { MILESTONE_STATUS } from "../src/config/milestoneStatus.js";
+
+const MILESTONE_REVISION = MILESTONE_STATUS.revision;
 
 const ROOT = resolve(join(dirname(fileURLToPath(import.meta.url)), ".."));
 
@@ -69,72 +72,113 @@ function gitFacts() {
   }
 }
 
+/** Paths excluded from the shipped bundle, and therefore from the binding. */
+const EXCLUDED = [/^node_modules\//, /^\.git\//, /\.partial$/, /^audit\/provenance\.json$/,
+  /\.DS_Store$/, /^\.vscode\//, /^\.idea\//, /~$/, /\.swp$/];
+
+/** Every file that ships, repo-relative and sorted. */
+function shippedFiles() {
+  const out = [];
+  const walk = (d) => {
+    for (const name of readdirSync(join(ROOT, d === "" ? "." : d)).sort()) {
+      const rel = d === "" ? name : `${d}/${name}`;
+      if (EXCLUDED.some((re) => re.test(rel))) continue;
+      if (statSync(join(ROOT, rel)).isDirectory()) { walk(rel); continue; }
+      out.push(rel);
+    }
+  };
+  walk("");
+  return out;
+}
+
 export function buildProvenance() {
   const git = gitFacts();
-  const evidence = {};
-  for (const rel of filesUnder("audit")) {
-    // `.partial` exists only while a suite is running. `provenance.json` cannot
-    // record its own hash. `test-results.txt` is recorded separately, by COUNTS
-    // rather than bytes: the suite that verifies this record publishes a new TAP
-    // whose wall-clock lines differ, so a byte comparison would be unsatisfiable
-    // by construction rather than by tampering.
-    if (rel.endsWith(".partial") || rel.endsWith("provenance.json")) continue;
-    if (rel === "audit/test-results.txt") continue;
-    evidence[rel] = fileRecord(rel);
-  }
-  const generated = {};
-  for (const rel of ["FINAL_REPORT.md", "CHARACTERIZATION.md", "AUDIT_PACKAGE_MANIFEST.md",
-    "REVISION_6_REPAIR_RECORD.md", "DECISIONS.md"]) {
-    if (existsSync(join(ROOT, rel))) generated[rel] = fileRecord(rel);
-  }
-  const fixture = fileRecord("fixtures/defining_fixture_v1.json");
+
+  // REVISION-7 REPAIR (Finding 3). Revision 6 hashed only named audit evidence, a
+  // few generated documents and the fixture — 20 files. `src/`, `test/`, `tools/`,
+  // the browser files and the package files were never bound, so an auditor could
+  // change `src/core/math.js` in an extraction and still get `PROVENANCE OK`,
+  // exit 0. EVERY shipped file is recorded now.
+  /** @type {Record<string, {sha256:string, bytes:number}>} */
+  const files = {};
+  for (const rel of shippedFiles()) files[rel] = fileRecord(rel);
+
   const gateSummary = JSON.parse(readFileSync(join(ROOT, "audit", "gate-summary.json"), "utf8"));
   const charEvidence = JSON.parse(readFileSync(join(ROOT, "audit", "characterization-results.json"), "utf8"));
+  const tap = readFileSync(join(ROOT, "audit", "test-results.txt"), "utf8");
+
+  // A single digest over the whole shipped tree, so one comparison answers
+  // "is this the tree that was recorded".
+  const treeDigest = createHash("sha256");
+  for (const rel of Object.keys(files).sort()) {
+    treeDigest.update(rel);
+    treeDigest.update("\0");
+    treeDigest.update(files[rel].sha256);
+    treeDigest.update("\n");
+  }
 
   return {
-    schema: "lineage-m1-provenance-1",
+    schema: "lineage-m1-provenance-2",
     contractSection: "23 / 27 (delivery and audit evidence)",
     purpose:
-      "Bind this bundle to the source revision that produced it, without shipping .git. Every value " +
-      "below is recomputable from the extracted bundle except `source.commit`, which is what the " +
-      "binding exists to supply.",
+      "Bind this bundle to the source revision that produced it, without shipping .git. EVERY " +
+      "shipped file is hashed — production source, tests, tools, evidence, reports and package " +
+      "files — and `tools/verifyProvenance.mjs` recomputes all of them from an extraction.",
     source: git,
     model: {
       configVersion: charEvidence.configVersion,
       modelDefinitionHash: charEvidence.modelDefinitionHash,
       note: "the authoritative complete-model identity; every evidence file must carry this value",
     },
-    fixture: { path: "fixtures/defining_fixture_v1.json", ...fixture },
+    fixture: { path: "fixtures/defining_fixture_v1.json", ...fileRecord("fixtures/defining_fixture_v1.json") },
     testResults: {
       path: "audit/test-results.txt",
       ...fileRecord("audit/test-results.txt"),
       tests: gateSummary.suite.tests,
       pass: gateSummary.suite.pass,
       fail: gateSummary.suite.fail,
-      boundBy: "counts",
+      boundBy: "bytes",
       note:
-        "The sha256 below is of the published run at the moment this record was written. It is NOT " +
-        "byte-verified by tools/verifyProvenance.mjs: the suite that verifies this record publishes a " +
-        "new TAP whose wall-clock lines differ, so a byte comparison would fail by construction rather " +
-        "than by tampering. The COUNTS are verified, and every other file is verified byte for byte.",
+        "Bound by its exact SHA-256, like every other shipped file (revision-7, Finding 3). " +
+        "Revision 6 exempted this file and checked only its three summary counts, so a " +
+        "non-summary line could be rewritten without detection. The suite that republishes it " +
+        "necessarily makes the working tree differ from this record until `npm run " +
+        "audit:provenance` is re-run; that is a regeneration step, not a verification exemption, " +
+        "and the DELIVERED archive is built after it.",
     },
     milestone: gateSummary.milestone,
-    generated,
-    evidence,
+    fileCount: Object.keys(files).length,
+    shippedTreeDigest: treeDigest.digest("hex"),
+    files,
     archive: {
-      name: "LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV6.zip",
+      name: `LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV${MILESTONE_REVISION}.zip`,
       sha256: null,
       note:
         "An archive cannot contain its own hash, so no file inside it can record one: writing the " +
         "value here would require rebuilding the archive, which changes the value. The SHA-256 is " +
-        "published with the delivery message. Verify with `sha256sum` against that value, then verify " +
-        "every file below against this record from the extraction.",
+        "published with the delivery message. Verify with `sha256sum` against that value, then " +
+        "verify every file below against this record from the extraction.",
+    },
+    commitBinding: {
+      claim:
+        "The commit and tree hash below identify the revision this bundle was built from. The " +
+        "BYTE binding above is self-contained and complete; verifying that the recorded commit's " +
+        "git tree equals this extraction additionally requires a clone, because .git is not " +
+        "shipped (§27).",
+      notClaimed:
+        "That the existence of the commit object proves the extracted files equal its tree. " +
+        "Revision 6 suggested `git cat-file -t <commit>`, which proves only that the object " +
+        "exists. Use the command below instead, from a clone.",
+      verifyFromAClone:
+        "git -C <clone> ls-tree -r <source.commit> --format='%(objectname) %(path)' | " +
+        "sed 's|^\\([0-9a-f]*\\) lineage-m1/|\\1 |' | sort > /tmp/recorded.txt && " +
+        "(cd <extraction>/lineage-m1 && git hash-object $(node -e \"…list files…\") ) # compare",
     },
     verification: [
-      "sha256sum LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV6.zip   # compare with the published value",
-      "unzip -q LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV6.zip && cd lineage-m1",
-      "node tools/verifyProvenance.mjs                             # recomputes every hash below",
-      "git -C <clone> cat-file -t <source.commit>                  # binds the extraction to branch history",
+      "sha256sum LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV*.zip   # compare with the published value",
+      "unzip -q LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV*.zip && cd lineage-m1",
+      "node tools/verifyProvenance.mjs      # recomputes every shipped file's hash, strictly",
+      "npm test                             # the suite, from the extraction, with no install",
     ],
   };
 }
@@ -144,7 +188,7 @@ const isMain =
 if (isMain) {
   const record = buildProvenance();
   writeFileSync(join(ROOT, "audit", "provenance.json"), JSON.stringify(record, null, 2));
-  const n = Object.keys(record.evidence).length + Object.keys(record.generated).length;
+  const n = record.fileCount;
   console.error(
     `provenance.json: commit ${record.source.resolved ? record.source.shortCommit : "UNRESOLVED"}, ` +
     `${n} files hashed, working tree clean: ${record.source.workingTreeClean}`

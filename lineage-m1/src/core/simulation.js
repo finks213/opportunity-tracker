@@ -226,20 +226,48 @@ export function advanceGeneration(state, config = currentModelConfig, hooks = {}
  * @returns {Readonly<{name:string, message:string|null, stack:string|null, text:string, wasError:boolean}>}
  */
 export function diagnosticSnapshot(err) {
-  const isError = err instanceof Error;
-  const str = (v) => (typeof v === "string" ? v : null);
-  let text;
+  // REVISION-7 REPAIR (Finding 4). Revision 6 guarded only the `text` computation
+  // and then read `err.name`, `err.message` and `err.stack` outside that guard. An
+  // Error may legally expose any of them through an accessor, and an accessor may
+  // throw. Reproduced with an `Error` whose `message` getter throws:
+  //
+  //   {"escaped":"hostile message getter","generation":1,"hasResult":false}
+  //
+  // Biology had already committed, so the caller saw a thrown transition AFTER the
+  // transition succeeded, with no `lastGenerationResult` published — ambiguous retry
+  // behaviour, which is the failure mode the observer boundary exists to prevent.
+  //
+  // Every property is now read through one individually guarded helper, including
+  // the `instanceof` classification. Nothing about an arbitrary thrown value —
+  // Error subclass, proxy, revoked proxy, hostile accessor — can escape this
+  // function.
+  const safe = (read, fallback = null) => {
+    try {
+      const v = read();
+      return typeof v === "string" ? v : fallback;
+    } catch {
+      return fallback;
+    }
+  };
+  let isError;
   try {
-    text = isError ? `${err.name}: ${err.message}` : String(err);
+    isError = err instanceof Error;
   } catch {
-    // A thrown object with a hostile toString must not break the transaction.
-    text = "[unrepresentable thrown value]";
+    // A proxy may throw from its `getPrototypeOf` trap.
+    isError = false;
   }
+  const name = safe(() => (isError ? err.name : typeof err), isError ? "Error" : "unknown");
+  const message = isError ? safe(() => err.message) : null;
+  const stack = isError ? safe(() => err.stack) : null;
+  const text = safe(
+    () => (isError ? `${name}: ${message ?? "[unreadable message]"}` : String(err)),
+    "[unrepresentable thrown value]"
+  );
   return Object.freeze({
-    name: isError ? String(err.name) : typeof err,
-    message: isError ? str(err.message) : null,
-    stack: isError ? str(err.stack) : null,
-    text,
+    name: name ?? "unknown",
+    message,
+    stack,
+    text: text ?? "[unrepresentable thrown value]",
     wasError: isError,
   });
 }

@@ -129,8 +129,60 @@ class ProbeApp {
   }
 
   // ---- controls ----
-  setRunning(v) { this.running = v; this.meter.markInput(); this.updateStatus(); }
-  stepOnce() { this.meter.markInput(); this.advance(); this.renderPanels(); }
+  //
+  // REVISION-7 REPAIR (Finding 1). §22 defines legibility mode as the DEFINING
+  // FIXTURE at generation zero with no override. Revision 6 verified that only while
+  // ENTERING the mode, so ordinary controls silently invalidated it while the label
+  // stayed on screen. Reproduced:
+  //
+  //   enter legibility          mode=legibility generation=0 baseline=true
+  //   press Step                mode=legibility generation=1 baseline=false
+  //   load fixture + webbing    mode=legibility variant=high_webbing baseline=false
+  //
+  // The invariant is continuous now: any control that advances or replaces biology
+  // LEAVES legibility mode before committing, and `renderPanels()` re-checks the
+  // invariant on every frame, so no frame can be rendered under a legibility label
+  // against a world that is not the baseline fixture.
+
+  /**
+   * Leave legibility mode because the world is about to change under it.
+   * @param {string} reason shown to the user, so the mode does not vanish silently
+   * @returns {boolean} whether the mode was active and has been left
+   */
+  leaveLegibilityMode(reason) {
+    if (this.manualTestMode !== "legibility") return false;
+    this.manualTestMode = null;
+    this.legibilityExitReason = reason;
+    return true;
+  }
+
+  /**
+   * The §22 invariant, checked at render time: if legibility mode is active, the
+   * ACTIVE world must still be the exact baseline fixture. This is a backstop for
+   * any path that changes the world without going through a control.
+   */
+  enforceLegibilityInvariant() {
+    if (this.manualTestMode !== "legibility") return;
+    if (this.isBaselineFixtureActive()) return;
+    this.leaveLegibilityMode(
+      "legibility mode ended: the active world is no longer the unmodified defining " +
+      "fixture at generation 0, which §22 requires"
+    );
+  }
+
+  setRunning(v) {
+    // Running advances biology, so it cannot coexist with the mode.
+    if (v) this.leaveLegibilityMode("legibility mode ended: running advances the world past generation 0");
+    this.running = v;
+    this.meter.markInput();
+    this.updateStatus();
+  }
+  stepOnce() {
+    this.leaveLegibilityMode("legibility mode ended: stepping advances the world past generation 0");
+    this.meter.markInput();
+    this.advance();
+    this.renderPanels();
+  }
   setShowRawValues(v) { this.showRawValues = v; this.renderPanels(); }
   setActiveChannel(id) { this.observer.activeChannel = id; this.renderPanels(); }
   /**
@@ -149,6 +201,22 @@ class ProbeApp {
     this.refreshChannelSelect();
   }
 
+  /**
+   * Replace the world with a fresh random one.
+   *
+   * REVISION-7 REPAIR (Finding 5). Revision 6 replaced biology, observer channels,
+   * source, selection and the fixture error, but left three fields describing the
+   * PREVIOUS fixture world in place. Reproduced after loading the high-webbing
+   * fixture and resetting:
+   *
+   *   {"worldSource":"random","fixtureVariant":"high_webbing",
+   *    "maintainedFocalChannels":{"created":["maintained:canopy","maintained:shoreline"]},
+   *    "tracerUnavailableReason":"old fixture tracer failure"}
+   *
+   * The biology was right and everything describing it was stale. A reset is now
+   * the same COMPLETE world transaction a fixture load is: every field that names
+   * the world is republished, and fixture-only fields go back to null.
+   */
   resetRandomWorld(seed) {
     this.meter.markInput();
     // Synchronous, but it must still supersede any in-flight fixture load —
@@ -163,6 +231,12 @@ class ProbeApp {
     this.manualTestMode = null;
     this.worldSource = "random";
     this.fixtureLoadError = null;
+    // ---- fixture-only identity and registry fields ----
+    this.fixtureVariant = null;
+    this.maintainedFocalChannels = null;
+    // ---- stale user-visible notices from the previous world ----
+    this.tracerUnavailableReason = null;
+    this.legibilityExitReason = null;
     this.refreshChannelSelect();
     this.renderPanels();
   }
@@ -225,6 +299,16 @@ class ProbeApp {
     // `await` never appears between the first assignment and the last, so no
     // other request can observe a half-committed world.
     const env = envelope;
+    // A load that installs anything other than the pristine baseline invalidates
+    // legibility mode, so the mode is left BEFORE the world is published
+    // (revision-7, Finding 1). A load performed BY mode entry passes its own token
+    // and is establishing that baseline, so it must not clear the mode it is for.
+    if (opts.highWebbing && opts.worldChangeToken === undefined) {
+      this.leaveLegibilityMode(
+        "legibility mode ended: the experimental webbing override is not the baseline " +
+        "fixture §22 requires"
+      );
+    }
     const nextState = hydrateDefiningFixtureV1(env, this.seed, currentModelConfig);
     if (opts.highWebbing) {
       // Fixture construction operation, before generation 1 (§19.2).
@@ -636,6 +720,9 @@ class ProbeApp {
   }
 
   renderPanels() {
+    // §22 backstop (revision-7, Finding 1): no frame may be rendered under a
+    // legibility label against a world that is not the baseline fixture.
+    this.enforceLegibilityInvariant();
     const doc = this.doc;
     const counts = zoneBinCounts(this.state.currentIndividuals);
     const statusEl = doc.getElementById("status");

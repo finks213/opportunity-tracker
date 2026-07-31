@@ -461,20 +461,44 @@ export function readExternalStatuses(readText) {
 /** Statuses that count as an external gate being satisfied. Nothing else does. */
 const EXTERNAL_SATISFIED = Object.freeze(["PASS", "SATISFIED", "MEASURED"]);
 
+/** iPad statuses that mean the device test was performed and FAILED. */
+const IPAD_FAILED = Object.freeze(["FAIL", "FAILED", "REJECTED"]);
+
 /**
- * Derive the milestone status from machine-readable evidence (revision-6 repair,
- * M-2 / R6-J).
+ * The three statuses contract v3.3 §26 authorises, and nothing else.
  *
- * Revision 5 kept the overall status and the completion flag as literals in
- * `src/config/milestoneStatus.js`, so no execution result could move them: a
- * controlled failing run changed gate rows but the milestone verdict still read
- * whatever a human had typed. It is computed here from the derived gate statuses
- * plus the external inputs, and the reasons are returned so the report can print
- * WHY rather than assert.
+ * REVISION-7 REPAIR (Finding 2). Revision 6 invented `M1_ALL_GATES_SATISFIED` for
+ * the everything-passes case and selected a blocked string when only the iPad gate
+ * was outstanding — so no accumulation of evidence could ever reach a
+ * contract-authorised passing state, which is the opposite of an evidence-derived
+ * status. It also listed the two passing statuses as permanently forbidden. Both are
+ * corrected: the statuses below are the only ones this function can produce, and the
+ * passing ones are reachable exactly when the contract says they are.
+ */
+export const CONTRACT_STATUS = Object.freeze({
+  BLOCKED: "M1_BLOCKED",
+  GATES_PASS_IPAD_PENDING: "M1_AUTOMATED_GATES_PASS — IPAD TEST PENDING",
+  ACCEPTED: "M1_ACCEPTED",
+});
+
+/**
+ * Derive the milestone status from machine-readable evidence, following the §26
+ * truth table exactly:
+ *
+ *   automated        iPad       other binding decisions   status
+ *   ---------------  ---------  ------------------------  ------------------------------
+ *   any failure      any        any                       M1_BLOCKED — <reason>
+ *   pass             pending    satisfied                 M1_AUTOMATED_GATES_PASS — IPAD TEST PENDING
+ *   pass             failed     satisfied                 M1_BLOCKED — <reason>
+ *   pass             pass       satisfied                 M1_ACCEPTED
+ *   pass             any        any unsatisfied           M1_BLOCKED — <reason>
+ *
+ * The blocked reason is chosen by the evidence too: the unsatisfied external gate
+ * with the lowest priority number names it, from `audit/external-gate-status.json`.
  *
  * @param {{summary:Object, gates:Array<Object>, unattributedFailures:string[]}} derived
  * @param {Record<string, {status:string}>} external
- * @returns {{status:string, mayDeclareCompletion:boolean, blockers:string[], automatedGatesPass:boolean}}
+ * @returns {{status:string, mayDeclareCompletion:boolean, blockers:string[], automatedGatesPass:boolean, externalBlockers:string[], ipadStatus:string}}
  */
 export function deriveMilestoneStatus(derived, external) {
   const blockers = [];
@@ -490,44 +514,68 @@ export function deriveMilestoneStatus(derived, external) {
   }
   const automatedGatesPass = blockers.length === 0;
 
-  const externalBlockers = [];
-  for (const [id, rec] of Object.entries(external)) {
-    if (!EXTERNAL_SATISFIED.includes(rec.status)) externalBlockers.push(`${id}: ${rec.status}`);
-  }
+  const ipadStatus = external.ipadGate?.status ?? "UNVERIFIED";
+  const ipadSatisfied = EXTERNAL_SATISFIED.includes(ipadStatus);
+  const ipadFailed = IPAD_FAILED.some((f) => ipadStatus.toUpperCase().startsWith(f));
 
-  const all = [...blockers, ...externalBlockers];
+  // "Other binding decisions" is every external input except the iPad gate: the
+  // Stage A process decision, the desktop Canvas measurement, the standing
+  // independent closure audit.
+  const otherUnsatisfied = Object.entries(external)
+    .filter(([id]) => id !== "ipadGate")
+    .filter(([, rec]) => !EXTERNAL_SATISFIED.includes(rec.status))
+    .map(([id, rec]) => ({ id, ...rec }));
+  const externalBlockers = [
+    ...otherUnsatisfied.map((r) => `${r.id}: ${r.status}`),
+    ...(ipadSatisfied ? [] : [`ipadGate: ${ipadStatus}`]),
+  ];
 
-  // The status STRING is chosen by the evidence, never written here. When the
-  // automated gates are not all passing, the repair-required status applies; when
-  // they are, the unsatisfied external gate with the lowest priority number names
-  // the status, from `audit/external-gate-status.json`.
+  /** The blocked reason, named by the unsatisfied gate with the lowest priority. */
+  const blockedStatus = () => {
+    const ranked = [...otherUnsatisfied, ...(ipadSatisfied ? [] : [{ id: "ipadGate", ...(external.ipadGate ?? {}) }])]
+      .sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99));
+    const named = ranked.find((r) => typeof r.milestoneStatusWhenUnsatisfied === "string");
+    if (!automatedGatesPass || !named) return REPAIRS_REQUIRED_STATUS;
+    return named.milestoneStatusWhenUnsatisfied;
+  };
+
   let status;
   if (!automatedGatesPass) {
     status = REPAIRS_REQUIRED_STATUS;
-  } else if (externalBlockers.length > 0) {
-    const unsatisfied = Object.entries(external)
-      .filter(([, rec]) => !EXTERNAL_SATISFIED.includes(rec.status))
-      .map(([id, rec]) => ({ id, ...rec }))
-      .sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99));
-    status = unsatisfied[0]?.milestoneStatusWhenUnsatisfied ?? REPAIRS_REQUIRED_STATUS;
+  } else if (otherUnsatisfied.length > 0 || ipadFailed) {
+    status = ipadFailed && otherUnsatisfied.length === 0
+      ? `${CONTRACT_STATUS.BLOCKED} — PHYSICAL IPAD ACCEPTANCE FAILED (${ipadStatus})`
+      : blockedStatus();
+  } else if (ipadSatisfied) {
+    status = CONTRACT_STATUS.ACCEPTED;
   } else {
-    status = "M1_ALL_GATES_SATISFIED";
+    // Automated gates pass, every other binding decision is satisfied, and the
+    // device test has simply not been performed. This is the state §26 names.
+    status = CONTRACT_STATUS.GATES_PASS_IPAD_PENDING;
   }
+
   return {
     status,
-    mayDeclareCompletion: all.length === 0,
-    blockers: all,
+    mayDeclareCompletion: status === CONTRACT_STATUS.ACCEPTED,
+    blockers: [...blockers, ...externalBlockers],
     automatedGatesPass,
     externalBlockers,
+    ipadStatus,
   };
 }
 
 /**
- * The status that applies whenever the automated gates are not all passing. Kept
- * as a named constant so a reader can see there is exactly one, and so
- * `test/status-consistency.test.js` can assert the documents match what the
- * evidence derives rather than what a source file asserts.
+ * Every status this function can produce must begin with one of the three the
+ * contract authorises. A blocked status may carry a reason suffix; the two passing
+ * statuses are verbatim.
+ * @param {string} status
  */
+export function isContractAuthorisedStatus(status) {
+  if (status === CONTRACT_STATUS.ACCEPTED) return true;
+  if (status === CONTRACT_STATUS.GATES_PASS_IPAD_PENDING) return true;
+  return status === CONTRACT_STATUS.BLOCKED || status.startsWith(`${CONTRACT_STATUS.BLOCKED} — `);
+}
+
 export const REPAIRS_REQUIRED_STATUS = "M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED";
 
 /**

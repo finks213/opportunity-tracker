@@ -36,13 +36,33 @@ test("§23/§27 — the bundle carries a resolved source commit", () => {
   assert.ok(p.source.committedAt, "and when it was committed");
 });
 
-test("§23/§27 — every hash in the record verifies against the shipped files", () => {
-  const r = verifyProvenance(ROOT);
+test("§23/§27 — every SHIPPED file is bound, not a selected subset", () => {
+  // REVISION-7 (Finding 3). Revision 6 recorded 20 files: named audit evidence, a
+  // few generated documents and the fixture. src/, test/, tools/, the browser files
+  // and the package files were never bound.
+  const p = readJson("audit/provenance.json");
+  assert.ok(p.files, "the record must carry a per-file map of everything shipped");
+  assert.ok(p.fileCount >= 100, `far too few files recorded (${p.fileCount})`);
+  for (const rel of ["src/main.js", "src/core/math.js", "src/core/simulation.js",
+    "test/report-integrity.test.js", "tools/writeFinalReport.mjs", "package.json",
+    "package-lock.json", "index.html", "fixtures/defining_fixture_v1.json",
+    "audit/test-results.txt", "FINAL_REPORT.md"]) {
+    assert.ok(p.files[rel], `${rel} must be bound by the provenance record`);
+    assert.match(p.files[rel].sha256, /^[0-9a-f]{64}$/);
+  }
+  assert.match(p.shippedTreeDigest, /^[0-9a-f]{64}$/, "one digest must identify the whole tree");
+});
+
+test("§23/§27 — verification recomputes every recorded hash", () => {
+  // The suite republishes audit/test-results.txt before this can be re-recorded, so
+  // the TAP is allowed to differ HERE — and its recorded counts are still checked.
+  // The delivered archive is verified strictly; see the tamper tests below.
+  const r = verifyProvenance(ROOT, { tapMayDiffer: true });
   assert.deepEqual(r.mismatches, [], "a recorded hash disagrees with the shipped file");
   assert.deepEqual(r.missing, [], "the record names a file that is not here");
-  assert.deepEqual(r.unrecorded, [], "a shipped evidence file is not recorded — no undisclosed evidence");
-  assert.ok(r.checked >= 12, `too few files verified (${r.checked})`);
-  assert.equal(r.ok, true);
+  assert.deepEqual(r.unrecorded, [], "a shipped file is not recorded — no undisclosed bytes");
+  assert.equal(r.treeDigestMatches, true);
+  assert.ok(r.checked >= 100, `too few files verified (${r.checked})`);
 });
 
 test("§23/§27 — the binding covers the model identity and the published run", () => {
@@ -53,44 +73,88 @@ test("§23/§27 — the binding covers the model identity and the published run"
   assert.equal(p.testResults.tests, summary.suite.tests);
   assert.equal(p.testResults.pass, summary.suite.pass);
   assert.equal(p.testResults.fail, summary.suite.fail);
-  assert.deepEqual(p.milestone, summary.milestone, "and the derived milestone status it was built under");
+  assert.equal(p.testResults.boundBy, "bytes", "revision 6 bound it by counts only");
+  assert.deepEqual(p.milestone, summary.milestone);
 });
 
-test("§27 — every audit file is covered, and the archive hash is honestly absent", () => {
+test("§27 — the archive hash is honestly absent and the commit claim is honest", () => {
   const p = readJson("audit/provenance.json");
-  for (const name of readdirSync(join(ROOT, "audit"))) {
-    if (name.endsWith(".partial") || name === "provenance.json") continue;
-    if (`audit/${name}` === p.testResults.path) {
-      // Bound by counts rather than bytes, and the record says why.
-      assert.equal(p.testResults.boundBy, "counts");
-      assert.match(p.testResults.note, /wall-clock lines differ/);
-      continue;
-    }
-    assert.ok(`audit/${name}` in p.evidence, `audit/${name} must be bound by the provenance record`);
-  }
-  // An archive cannot contain its own hash; the record must say so rather than
-  // carry a value that could not have been computed.
   assert.equal(p.archive.sha256, null);
   assert.match(p.archive.note, /cannot contain its own hash/);
-  assert.match(p.archive.name, /REV6\.zip$/);
-  assert.ok(p.verification.length >= 3, "and it must tell the auditor how to check all of it");
+  // Revision 6 suggested `git cat-file -t <commit>`, which proves only that the
+  // object exists. The record must not claim that proves tree equality.
+  assert.ok(p.commitBinding, "the commit claim must be stated explicitly");
+  assert.match(p.commitBinding.notClaimed, /existence of the commit object/i);
+  assert.ok(!/cat-file -t/.test(JSON.stringify(p.verification)), "the misleading command must be gone");
 });
 
-test("§27 — a tampered file is detected", () => {
-  // The record is only worth shipping if it fails when it should. Verified against a
-  // scratch copy; nothing in the repository is modified.
+/** Copy the shipped tree to a scratch directory. Nothing in ROOT is touched. */
+function scratchCopy() {
   const dir = mkdtempSync(join(tmpdir(), "lineage-prov-"));
-  try {
-    for (const rel of ["audit", "tools", "src", "fixtures", "FINAL_REPORT.md", "CHARACTERIZATION.md",
-      "AUDIT_PACKAGE_MANIFEST.md", "DECISIONS.md", "REVISION_6_REPAIR_RECORD.md", "package.json"]) {
-      if (existsSync(join(ROOT, rel))) cpSync(join(ROOT, rel), join(dir, rel), { recursive: true });
+  for (const name of readdirSync(ROOT)) {
+    if (name === "node_modules" || name === ".git") continue;
+    cpSync(join(ROOT, name), join(dir, name), { recursive: true });
+  }
+  return dir;
+}
+
+test("§27 — tampering with ANY shipped file is detected", () => {
+  // The four the audit named, each on its own copy: a production file, a test file,
+  // a tool file, and a non-summary line of the raw TAP. Revision 6 detected none of
+  // them and printed PROVENANCE OK, exit 0.
+  const cases = [
+    ["production source", "src/core/math.js", (t) => t + "\n// tampered\n"],
+    ["test file", "test/report-integrity.test.js", (t) => t + "\n// tampered\n"],
+    ["tool file", "tools/writeFinalReport.mjs", (t) => t + "\n// tampered\n"],
+    ["a non-summary TAP line", "audit/test-results.txt", (t) => t.replace(/^ok 1 - .*$/m, "ok 1 - FABRICATED")],
+    ["evidence", "audit/fixture-results.json", (t) => t.replace(/\}\s*$/, ', "tampered": true}')],
+  ];
+  for (const [label, rel, mutate] of cases) {
+    const dir = scratchCopy();
+    try {
+      assert.equal(verifyProvenance(dir).ok, true, `${label}: the untampered copy must verify`);
+      const target = join(dir, rel);
+      writeFileSync(target, mutate(readFileSync(target, "utf8")));
+      const after = verifyProvenance(dir);
+      assert.equal(after.ok, false, `${label}: tampering with ${rel} must be detected`);
+      assert.match(after.mismatches.join(" "), new RegExp(rel.replace(/[/.]/g, "\\$&")));
+      assert.equal(after.treeDigestMatches, true, "the digest covers recorded hashes, not the tree on disk");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
     }
-    assert.equal(verifyProvenance(dir).ok, true, "the untampered copy must verify");
-    const target = join(dir, "audit", "fixture-results.json");
-    writeFileSync(target, readFileSync(target, "utf8").replace(/\}\s*$/, ', "tampered": true}'));
-    const after = verifyProvenance(dir);
-    assert.equal(after.ok, false, "a modified evidence file must be detected");
-    assert.match(after.mismatches.join(" "), /fixture-results\.json/);
+  }
+});
+
+test("§27 — an ADDED or REMOVED file is detected too", () => {
+  const dir = scratchCopy();
+  try {
+    writeFileSync(join(dir, "src", "planted.js"), "// not in the record\n");
+    const added = verifyProvenance(dir);
+    assert.equal(added.ok, false, "an unrecorded file must fail verification");
+    assert.ok(added.unrecorded.includes("src/planted.js"));
+    rmSync(join(dir, "src", "planted.js"));
+
+    rmSync(join(dir, "src", "core", "math.js"));
+    const removed = verifyProvenance(dir);
+    assert.equal(removed.ok, false, "a missing file must fail verification");
+    assert.ok(removed.missing.includes("src/core/math.js"));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("§27 — the strict path is the default; leniency is opt-in and still checks counts", () => {
+  const dir = scratchCopy();
+  try {
+    const tapPath = join(dir, "audit", "test-results.txt");
+    const original = readFileSync(tapPath, "utf8");
+    writeFileSync(tapPath, original.replace(/^ok 1 - .*$/m, "ok 1 - FABRICATED"));
+    assert.equal(verifyProvenance(dir).ok, false, "strict is the default");
+    // Even the lenient path rejects a TAP whose COUNTS were changed.
+    writeFileSync(tapPath, original.replace(/^# pass (\d+)$/m, "# pass 1"));
+    const lenient = verifyProvenance(dir, { tapMayDiffer: true });
+    assert.equal(lenient.ok, false, "leniency must not extend to the counts");
+    assert.match(lenient.mismatches.join(" "), /recorded pass/);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

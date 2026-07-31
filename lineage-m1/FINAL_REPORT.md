@@ -20,13 +20,13 @@ changes it without anybody editing code.
 Why it reads that way — every blocker the derivation found:
 
 - desktopCanvasMemory: UNVERIFIED
-- ipadGate: PENDING_HUMAN_DEVICE_TEST
 - stageAOrder: VIOLATED — principal decision required
 - independentClosureAudit: PENDING
+- ipadGate: PENDING_HUMAN_DEVICE_TEST
 
-**This report is revision 6** (generated 2026-07-30). Revisions 1, 2, 3, 4
+**This report is revision 7** (generated 2026-07-31). Revisions 1, 2, 3, 4
 and 5 were each audited and each returned `BREAKS-FOUND`. The status above may not
-advance until revision 6 survives independent re-audit by both the structural code
+advance until revision 7 survives independent re-audit by both the structural code
 audit and the AFE-Δ evidence and claim audit — that requirement is itself one of the
 externally determined gates, so it is visible in the list above rather than asserted
 here.
@@ -546,7 +546,7 @@ different world.
 **No measurement is supplied. No threshold is claimed as met.** Per §22 the gate stays
 `PENDING_HUMAN_DEVICE_TEST` until a human performs the test on an A14-class or newer
 iPad in current Safari. Per the standing instruction, the physical test has not been
-performed and is not being requested until revision 4 survives both audits.
+performed and is not being requested until revision 7 survives both audits.
 
 ---
 

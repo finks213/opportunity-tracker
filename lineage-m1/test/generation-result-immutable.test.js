@@ -182,6 +182,102 @@ test("§4 — a hostile thrown value cannot break the transaction or leak a muta
   assert.equal(record.error.wasError, false);
 });
 
+// ---------------------------------------------------------------------------
+// REVISION-7 REPAIR (revision-6 structural audit, Finding 4).
+//
+// The test above covers a NON-Error with a hostile `toString`. Revision 6 guarded
+// only the `text` computation and then read `err.name`, `err.message` and
+// `err.stack` outside that guard — and an `Error` may legally expose any of them
+// through an accessor. Reproduced with an Error whose `message` getter throws:
+//
+//   {"escaped":"hostile message getter","generation":1,"hasResult":false}
+//
+// Biology had already committed, so the caller saw a thrown transition after the
+// transition succeeded and no result was published: ambiguous retry behaviour,
+// which is precisely what the observer boundary exists to prevent.
+// ---------------------------------------------------------------------------
+
+/** Every requirement the audit named, for one hostile thrown value. */
+function assertContained(thrown, label) {
+  const clean = createInitialState(1, C);
+  advanceGeneration(clean, C);
+  const cleanBytes = serializeCanonicalBiology(clean);
+
+  const s = createInitialState(1, C);
+  assert.doesNotThrow(
+    () => advanceGeneration(s, C, { onBirth: () => { throw thrown; } }),
+    `${label}: advanceGeneration must not throw`
+  );
+  assert.equal(s.generation, 1, `${label}: the generation must have committed`);
+  assert.equal(
+    serializeCanonicalBiology(s), cleanBytes,
+    `${label}: biology must equal the clean committed generation`
+  );
+  const r = s.lastGenerationResult;
+  assert.ok(r, `${label}: lastGenerationResult must be published`);
+  assert.ok(r.observerErrors.length > 0, `${label}: the failure must be recorded`);
+  const d = r.observerErrors[0].error;
+  assert.ok(Object.isFrozen(d), `${label}: the diagnostic must be frozen`);
+  assert.equal(typeof d.text, "string", `${label}: a safe fallback text is required`);
+  assert.ok(d.text.length > 0);
+  assert.ok(
+    typeof d.name === "string" && (d.message === null || typeof d.message === "string"),
+    `${label}: every field must be a primitive or null`
+  );
+  return d;
+}
+
+test("§4 — an Error with a hostile message getter is contained", () => {
+  const thrown = new Error("x");
+  Object.defineProperty(thrown, "message", { get() { throw new Error("hostile message getter"); } });
+  const d = assertContained(thrown, "hostile message");
+  assert.equal(d.wasError, true);
+  assert.equal(d.message, null, "an unreadable message is null, not an escape");
+  assert.match(d.text, /unreadable message|Error/);
+});
+
+test("§4 — hostile name and stack accessors are contained", () => {
+  for (const prop of ["name", "stack"]) {
+    const thrown = new Error("boom");
+    Object.defineProperty(thrown, prop, { get() { throw new Error(`hostile ${prop} getter`); } });
+    const d = assertContained(thrown, `hostile ${prop}`);
+    assert.ok(d[prop] === null || typeof d[prop] === "string");
+  }
+});
+
+test("§4 — an Error subclass and a proxy are contained", () => {
+  class Weird extends Error {
+    get message() { throw new Error("subclass getter"); }
+    get stack() { throw new Error("subclass stack"); }
+  }
+  assertContained(new Weird("x"), "Error subclass with hostile getters");
+
+  const proxied = new Proxy(new Error("p"), {
+    get() { throw new Error("proxy trap"); },
+    getPrototypeOf() { throw new Error("prototype trap"); },
+  });
+  const d = assertContained(proxied, "hostile proxy");
+  assert.equal(typeof d.text, "string");
+});
+
+test("§4 — a revoked proxy is contained", () => {
+  const { proxy, revoke } = Proxy.revocable(new Error("r"), {});
+  revoke();
+  assertContained(proxy, "revoked proxy");
+});
+
+test("§4 — every thrown value, hostile or not, yields the same result shape", () => {
+  const shapes = [];
+  for (const thrown of [new Error("plain"), "a string", 42, null, undefined, { a: 1 }, Symbol("s")]) {
+    const s = createInitialState(1, C);
+    assert.doesNotThrow(() => advanceGeneration(s, C, { onBirth: () => { throw thrown; } }));
+    const d = s.lastGenerationResult.observerErrors[0].error;
+    shapes.push(Object.keys(d).sort().join(","));
+    assert.ok(Object.isFrozen(d));
+  }
+  assert.equal(new Set(shapes).size, 1, `every diagnostic must have one shape, saw ${new Set(shapes).size}`);
+});
+
 test("§4 — the state-attached record cannot be altered through the returned one", () => {
   const s = withObserverErrors();
   const returned = s.lastGenerationResult;

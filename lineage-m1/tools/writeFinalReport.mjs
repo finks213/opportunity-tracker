@@ -341,7 +341,7 @@ export function renderFinalReport(opts = {}) {
     "",
     `**This report is revision ${S.revision}** (generated ${S.reportDate}). Revisions 1, 2, 3, 4`,
     "and 5 were each audited and each returned `BREAKS-FOUND`. The status above may not",
-    "advance until revision 6 survives independent re-audit by both the structural code",
+    `advance until revision ${S.revision} survives independent re-audit by both the structural code`,
     "audit and the AFE-Δ evidence and claim audit — that requirement is itself one of the",
     "externally determined gates, so it is visible in the list above rather than asserted",
     "here.",
@@ -1002,7 +1002,7 @@ export function renderFinalReport(opts = {}) {
     "**No measurement is supplied. No threshold is claimed as met.** Per §22 the gate stays",
     "`PENDING_HUMAN_DEVICE_TEST` until a human performs the test on an A14-class or newer",
     "iPad in current Safari. Per the standing instruction, the physical test has not been",
-    "performed and is not being requested until revision 4 survives both audits.",
+    `performed and is not being requested until revision ${S.revision} survives both audits.`,
     "",
     "---",
     ""

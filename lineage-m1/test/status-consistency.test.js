@@ -51,8 +51,12 @@ test("every official status artifact states the required status", () => {
 });
 
 test("no artifact asserts M1_AUTOMATED_GATES_PASS as the current status", () => {
-  // The string may appear only in a withdrawal, prohibition, or history note.
-  const allowedContext = /withdraw|must not|not return|no longer|was false|previously|revision 1|revision 2|history|do not/i;
+  // The string may appear only in a withdrawal, a prohibition, a history note, or —
+  // revision 7 — a description of WHEN the contract authorises it. §26 authorises
+  // this status under future evidence, so documenting the condition is required;
+  // asserting it as the present state is what must not happen.
+  const allowedContext =
+    /withdraw|must not|not return|no longer|was false|previously|revision 1|revision 2|history|do not|reachable|authoris|truth table|when the evidence|permits/i;
   for (const rel of STATUS_ARTIFACTS) {
     const lines = read(rel).split("\n");
     for (let i = 0; i < lines.length; i++) {
@@ -77,7 +81,7 @@ test("no artifact claims M1_ACCEPTED", () => {
       if (!lines[i].includes("M1_ACCEPTED")) continue;
       const context = [lines[i - 1], lines[i], lines[i + 1]].filter(Boolean).join(" ");
       assert.ok(
-        /not claimed|never|only if|only after|not be reported|would additionally|may then be reported/i.test(context),
+        /not claimed|never|only if|only after|not be reported|would additionally|may then be reported|reachable|authoris|truth table|when the evidence|permits/i.test(context),
         `${rel}:${i + 1} must not claim M1_ACCEPTED:\n  ${lines[i].trim()}`
       );
     }
@@ -182,16 +186,50 @@ test("the DERIVED status agrees with the literal this test enforces", () => {
   assert.ok(milestone.blockers.length > 0, "and it must name why");
 
   // The derivation may never produce a forbidden status, whatever the inputs.
-  for (const forbidden of MILESTONE_STATUS.forbiddenStatuses) {
-    assert.ok(!milestone.status.includes(forbidden), `the derivation emitted ${forbidden}`);
+  for (const forbidden of MILESTONE_STATUS.statusesRequiringDerivation) {
+    assert.ok(!milestone.status.includes(forbidden), `the derivation emitted ${forbidden} without evidence`);
   }
 
   // The policy file keeps policy, and asserts no status of its own.
   assert.equal(MILESTONE_STATUS.statusIsDerived, true);
   assert.equal(MILESTONE_STATUS.status, undefined, "no status literal may return to this file");
   assert.equal(MILESTONE_STATUS.mayDeclareCompletion, undefined);
-  assert.deepEqual([...MILESTONE_STATUS.forbiddenStatuses], ["M1_AUTOMATED_GATES_PASS", "M1_ACCEPTED"]);
+  // REVISION-7 (Finding 2): the two contract-authorised passing statuses are no
+  // longer permanently forbidden — they are simply not derivable from evidence that
+  // does not support them.
+  assert.equal(MILESTONE_STATUS.forbiddenStatuses, undefined);
+  assert.deepEqual(
+    [...MILESTONE_STATUS.authorisedStatuses],
+    ["M1_BLOCKED", "M1_AUTOMATED_GATES_PASS — IPAD TEST PENDING", "M1_ACCEPTED"]
+  );
   assert.ok(Object.isFrozen(MILESTONE_STATUS), "the policy object must be frozen");
+});
+
+test("§26 — no current-gating statement names an earlier revision", () => {
+  // REVISION-7 (Finding 6). Revision 6's report still said the device test waited
+  // for revision 4, and the manifest said no pass is self-certified until revision 5
+  // — while both documents elsewhere said revision 6 was awaiting closure audit.
+  // Every current-revision reference is generated from MILESTONE_STATUS.revision;
+  // this finds any that is not.
+  const rev = MILESTONE_STATUS.revision;
+  const GATING = /(survives?|surviving|self-certified|is not being requested|gated behind|awaiting)/i;
+  const HISTORICAL = /withdraw|history|revision history|earlier|previous|retained|was |were |audited and|returned/i;
+  for (const rel of ["FINAL_REPORT.md", "AUDIT_PACKAGE_MANIFEST.md", "README.md", "IPAD_TEST_CHECKLIST.md"]) {
+    const lines = read(rel).split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (!GATING.test(line)) continue;
+      const m = line.match(/revision[- ](\d+)/i);
+      if (!m) continue;
+      const named = Number(m[1]);
+      if (named === rev) continue;
+      const context = lines.slice(Math.max(0, i - 3), i + 2).join(" ");
+      assert.ok(
+        HISTORICAL.test(context),
+        `${rel}:${i + 1} gates current work on revision ${named}, but this is revision ${rev}:\n  ${line.trim()}`
+      );
+    }
+  }
 });
 
 test("the two contract-named conditions are rendered from the external inputs", () => {
