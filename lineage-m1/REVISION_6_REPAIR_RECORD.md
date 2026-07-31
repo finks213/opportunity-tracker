@@ -492,3 +492,31 @@ biological change**, and the fully regenerated evidence confirms it:
 | suite size | 300 tests | 349 tests | 49 new regression tests across the twelve findings |
 
 **Committed suite:** 349 tests, 349 passing, 0 failing — on Node 20, 21 and 22.
+
+---
+
+## Delivery and how to verify it
+
+The bundle is proved by running its complete suite from a **fresh extraction of the
+archive itself**, not from the working tree, with no install step.
+
+| Field | Value |
+|---|---|
+| Archive | `LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV6.zip` |
+| Archive SHA-256 | published with the delivery message — see below for why it is not written here |
+| Source commit bound in `audit/provenance.json` | recorded there, and printed by `npm run audit:verify-provenance` |
+| Suite from the extraction | **349 / 349, 0 failures** |
+| Provenance from the extraction | `PROVENANCE OK`, 20 files verified |
+
+**Why the archive hash is not in this file.** Any file inside the archive that
+recorded the archive's SHA-256 would change the archive, and therefore the hash.
+Nothing inside a bundle can state its own digest. `audit/provenance.json` says so
+explicitly and carries `archive.sha256: null` rather than a number it could not have
+computed; the value is published with the delivery instead.
+
+```bash
+sha256sum LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV6.zip   # compare with the published value
+unzip -q LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV6.zip && cd lineage-m1
+node tools/verifyProvenance.mjs      # commit, model identity, every evidence hash
+npm test                             # 349/349 with no install step (~4 min)
+```

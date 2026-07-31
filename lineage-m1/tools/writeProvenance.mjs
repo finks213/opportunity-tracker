@@ -12,9 +12,9 @@
  * evidence instead: the resolved commit, the tree hash, the authoritative model
  * identity, and a hash and byte count for every generated report and raw evidence
  * file. Anything an auditor can recompute from the extracted bundle is recorded
- * here; the one value that cannot live inside the archive is the archive's own
- * SHA-256, which is published with the delivery and recorded in
- * REVISION_6_REPAIR_RECORD.md.
+ * here. The one value that cannot live inside the archive is the archive's own
+ * SHA-256 — recording it anywhere inside would change it — so it is published with
+ * the delivery message instead.
  *
  * Usage: node tools/writeProvenance.mjs
  * Writes audit/provenance.json
@@ -125,9 +125,10 @@ export function buildProvenance() {
       name: "LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV6.zip",
       sha256: null,
       note:
-        "An archive cannot contain its own hash. The SHA-256 is published with the delivery and " +
-        "recorded in REVISION_6_REPAIR_RECORD.md; verify with `sha256sum` against that value, then " +
-        "verify every file below against this record from the extraction.",
+        "An archive cannot contain its own hash, so no file inside it can record one: writing the " +
+        "value here would require rebuilding the archive, which changes the value. The SHA-256 is " +
+        "published with the delivery message. Verify with `sha256sum` against that value, then verify " +
+        "every file below against this record from the extraction.",
     },
     verification: [
       "sha256sum LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV6.zip   # compare with the published value",

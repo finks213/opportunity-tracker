@@ -4,13 +4,17 @@
   "purpose": "Bind this bundle to the source revision that produced it, without shipping .git. Every value below is recomputable from the extracted bundle except `source.commit`, which is what the binding exists to supply.",
   "source": {
     "resolved": true,
-    "commit": "71f7bec41038a9b096a59c2563c231485ab06822",
-    "shortCommit": "71f7bec41038",
+    "commit": "d4228e4b7bb1d5ccd29c3fba42c7f491681176ae",
+    "shortCommit": "d4228e4b7bb1",
     "branch": "claude/lineage-m1-implementation-1m9zpq",
-    "treeHash": "2d2c47437e9e3ea6995b29ce7de212a99c4cbaa6",
-    "committedAt": "2026-07-31T00:58:19+00:00",
-    "workingTreeClean": true,
-    "uncommittedPaths": []
+    "treeHash": "0a07c894f5a6c579e35fd71f63c54609c56b567f",
+    "committedAt": "2026-07-31T01:02:09+00:00",
+    "workingTreeClean": false,
+    "uncommittedPaths": [
+      "M lineage-m1/REVISION_6_REPAIR_RECORD.md",
+      "M lineage-m1/tools/writeProvenance.mjs",
+      "?? LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV6.zip"
+    ]
   },
   "model": {
     "configVersion": "lineage-m1-config-2",
@@ -24,8 +28,8 @@
   },
   "testResults": {
     "path": "audit/test-results.txt",
-    "sha256": "eef6be8d261737ff445e5c6757c14a086c92f248fab701629c362e5d2f3992d7",
-    "bytes": 78456,
+    "sha256": "be85b9a0ef213c116d6b01942425bbc81cbe5871871debe345e5b223c2a1d6ba",
+    "bytes": 78447,
     "tests": 349,
     "pass": 349,
     "fail": 0,
@@ -63,8 +67,8 @@
       "bytes": 31202
     },
     "REVISION_6_REPAIR_RECORD.md": {
-      "sha256": "445d2672cdb1fc9f4a60d9afd1d1925186294b0960b968e4c1dcc381824e8d86",
-      "bytes": 26620
+      "sha256": "7828b225650a93b4a1faa681000f1030b6b876db58280f92753b8a1bad9c8908",
+      "bytes": 27985
     },
     "DECISIONS.md": {
       "sha256": "1fbf8f16a435bb5f074297a52e6550deebf313474b15e50ea4b6c83f75d9dc69",
@@ -128,7 +132,7 @@
   "archive": {
     "name": "LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV6.zip",
     "sha256": null,
-    "note": "An archive cannot contain its own hash. The SHA-256 is published with the delivery and recorded in REVISION_6_REPAIR_RECORD.md; verify with `sha256sum` against that value, then verify every file below against this record from the extraction."
+    "note": "An archive cannot contain its own hash, so no file inside it can record one: writing the value here would require rebuilding the archive, which changes the value. The SHA-256 is published with the delivery message. Verify with `sha256sum` against that value, then verify every file below against this record from the extraction."
   },
   "verification": [
     "sha256sum LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV6.zip   # compare with the published value",
