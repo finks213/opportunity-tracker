@@ -4,29 +4,17 @@
   "purpose": "Bind this bundle to the source revision that produced it, without shipping .git. EVERY shipped file is hashed — production source, tests, tools, evidence, reports and package files — and `tools/verifyProvenance.mjs` recomputes all of them from an extraction.",
   "source": {
     "resolved": true,
-    "commit": "68e21e73307a8eb5a96b1ab88cf6f629407c148c",
-    "shortCommit": "68e21e73307a",
+    "commit": "df4dd21284ca5ab092e92fea44ce266c884eaea2",
+    "shortCommit": "df4dd21284ca",
     "branch": "claude/lineage-m1-implementation-1m9zpq",
-    "treeHash": "e3a09c010cf0065059ed62ceb5b2c5286d4ed0d8",
-    "committedAt": "2026-07-31T01:17:36+00:00",
+    "treeHash": "e35216ae1094804f8d1da826b2ece46a7fb68bf3",
+    "committedAt": "2026-07-31T03:29:37+00:00",
     "workingTreeClean": false,
     "uncommittedPaths": [
       "M lineage-m1/AUDIT_PACKAGE_MANIFEST.md",
-      "M lineage-m1/FINAL_REPORT.md",
-      "M lineage-m1/IPAD_TEST_CHECKLIST.md",
-      "M lineage-m1/README.md",
-      "M lineage-m1/audit/gate-summary.json",
-      "M lineage-m1/audit/provenance.json",
-      "M lineage-m1/src/config/milestoneStatus.js",
-      "M lineage-m1/src/core/simulation.js",
-      "M lineage-m1/src/main.js",
-      "M lineage-m1/test/provenance-binding.test.js",
-      "M lineage-m1/tools/gateRegistry.mjs",
-      "M lineage-m1/tools/verifyProvenance.mjs",
-      "M lineage-m1/tools/writeFinalReport.mjs",
-      "M lineage-m1/tools/writeProvenance.mjs",
-      "?? lineage-m1/test/legibility-invariant.test.js",
-      "?? lineage-m1/test/status-truth-table.test.js"
+      "M lineage-m1/test/report-end-to-end-injection.test.js",
+      "M lineage-m1/test/report-integrity.test.js",
+      "?? lineage-m1/REVISION_7_REPAIR_RECORD.md"
     ]
   },
   "model": {
@@ -67,12 +55,12 @@
     ],
     "ipadStatus": "PENDING_HUMAN_DEVICE_TEST"
   },
-  "fileCount": 131,
-  "shippedTreeDigest": "2bc24b1387b088a34d1ab712dab11834557b5dfa998753d6fc912880f27eaba3",
+  "fileCount": 133,
+  "shippedTreeDigest": "c6bcdbb063dc9af79abb1b242b070bf32587a4a14ede45736473c77bf2134325",
   "files": {
     "AUDIT_PACKAGE_MANIFEST.md": {
-      "sha256": "c697179be0b81f0a0e2221ce7bb63dab887c72dd68a4bf841c49b84ae983537d",
-      "bytes": 31101
+      "sha256": "98576d806b2c1e7e31bb981d3cca3e1647993da622aa5513b7b2fe079e0588e8",
+      "bytes": 33397
     },
     "CHARACTERIZATION.md": {
       "sha256": "01f2b6b63038669297fc7be914065845da8ea1108a2691303b5233649faef25a",
@@ -113,6 +101,10 @@
     "REVISION_6_REPAIR_RECORD.md": {
       "sha256": "7828b225650a93b4a1faa681000f1030b6b876db58280f92753b8a1bad9c8908",
       "bytes": 27985
+    },
+    "REVISION_7_REPAIR_RECORD.md": {
+      "sha256": "1c84aa6fed11129aa18463e2a088121cac795461d7a3efcfdf53e474609278a1",
+      "bytes": 14889
     },
     "STRUCTURAL_AUDIT_REPAIR_RECORD.md": {
       "sha256": "74f4a935c73168fe8871a9133143fc3fb02f358d14c698e76f4a376f9d0be6ab",
@@ -399,8 +391,8 @@
       "bytes": 9856
     },
     "test/generation-result-immutable.test.js": {
-      "sha256": "0ec54d9190355f20d8a09c2b867b46584f8b4d81d96085948a06969b23f9737e",
-      "bytes": 9841
+      "sha256": "06054ce0d43249abbbd8c6196f1ca75555f119aa8b3885ccf4901ddf05ce1d72",
+      "bytes": 14105
     },
     "test/helpers/scriptedRng.js": {
       "sha256": "335a854a8423f4f9592c037c482dd6414e718fdb7f523cec2ea5f012a3c337df",
@@ -479,12 +471,12 @@
       "bytes": 4951
     },
     "test/report-end-to-end-injection.test.js": {
-      "sha256": "acfe1127509e2e212880734b2ff4d136e21c033087c57e9d84796c0590aff59d",
-      "bytes": 10902
+      "sha256": "4d335d83f76c29a8b97f4857cbbad19a040f4e705fe3e7e0fac8ddb16c4e0a2f",
+      "bytes": 11731
     },
     "test/report-integrity.test.js": {
-      "sha256": "0b11f15cf0ae7cc738c2bf47b80b04b49232bf1704d55e2c3f2db24afaf8aa11",
-      "bytes": 31995
+      "sha256": "61a488b5d9c54857cdb4556e68ced44105f4c30b910132b3d1d74ac93215ae27",
+      "bytes": 32005
     },
     "test/rng-integrity.test.js": {
       "sha256": "14e23b52dd37728e8113d42f10e7f5c17e9bce9c609263fdc0cb9dc70bacc560",
@@ -503,8 +495,8 @@
       "bytes": 8146
     },
     "test/status-consistency.test.js": {
-      "sha256": "f9aed29b656793be20fd4d2723bc8b95af0bb1f2fb96ce0bc1316c90a960d5d1",
-      "bytes": 9246
+      "sha256": "8192cbd94322a37ed71ef6b9c76b30da06742372df199776095e82457c9bc609",
+      "bytes": 11318
     },
     "test/status-truth-table.test.js": {
       "sha256": "3d369511833420aee69413957432a8d727d5b53859ff84ef64205190332d8e2c",
@@ -525,6 +517,10 @@
     "test/world-load-race.test.js": {
       "sha256": "af674e0ad69093512caf93c4374ca81c38092c9a31bf53642d524cc0cd8632db",
       "bytes": 8835
+    },
+    "test/world-reset-completeness.test.js": {
+      "sha256": "11bf0504a39a60e51c4e8329551ad4ba025046a354a7a51e945b11362ed01cb6",
+      "bytes": 6625
     },
     "tools/calibrationSweep.mjs": {
       "sha256": "68f8294e622c267530c368634e3234b2f466c13a8f76fbf3c050cfd1d4bbd653",

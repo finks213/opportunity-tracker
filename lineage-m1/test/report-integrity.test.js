@@ -186,7 +186,7 @@ test("§26 — the report's status is the one the evidence derives", () => {
     assert.ok(REPORT.includes(`- ${b}`), `the report must print the blocker "${b}"`);
   }
   // Forbidden statuses may appear only inside an explicit withdrawal.
-  for (const forbidden of MILESTONE_STATUS.forbiddenStatuses) {
+  for (const forbidden of MILESTONE_STATUS.statusesRequiringDerivation) {
     for (const line of REPORT.split("\n")) {
       if (!line.includes(forbidden)) continue;
       assert.match(

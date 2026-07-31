@@ -23,8 +23,8 @@ import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 import { renderFinalReport, parseTap, stripCommentsAndStrings } from "../tools/writeFinalReport.mjs";
-import { deriveGateStatuses, deriveMilestoneStatus, readExternalStatuses, GATES, REPAIRS_REQUIRED_STATUS }
-  from "../tools/gateRegistry.mjs";
+import { deriveGateStatuses, deriveMilestoneStatus, readExternalStatuses, GATES, REPAIRS_REQUIRED_STATUS,
+  isContractAuthorisedStatus } from "../tools/gateRegistry.mjs";
 
 const ROOT = resolve(join(dirname(fileURLToPath(import.meta.url)), ".."));
 const read = (p) => readFileSync(join(ROOT, p), "utf8");
@@ -132,7 +132,10 @@ test("§26 — an EXTERNAL status change alone moves the milestone status, with 
     writeFileSync(extPath, JSON.stringify(ext, null, 2));
     const partly = renderFinalReport({ root: dir });
     assert.ok(!partly.includes(REPAIRS_REQUIRED_STATUS), "the status must have moved");
-    assert.match(partly, /M1_BLOCKED — PHYSICAL IPAD ACCEPTANCE NOT PERFORMED/);
+    // Revision 7 (Finding 2): with the closure audit satisfied, the remaining
+    // blockers are the Canvas measurement and the Stage A decision, so the status
+    // is still blocked — but by a §26-authorised string naming the real reason.
+    assert.match(partly, /M1_BLOCKED — /);
     assert.match(partly, /mayDeclareCompletion: false/);
 
     // Satisfy everything external: only then may completion be declared — and the
@@ -147,17 +150,29 @@ test("§26 — an EXTERNAL status change alone moves the milestone status, with 
     writeFileSync(deskPath, JSON.stringify(desk, null, 2));
 
     const all = renderFinalReport({ root: dir });
-    assert.match(all, /M1_ALL_GATES_SATISFIED/);
+    // Revision 7: the contract's own accepted status, not an invented one.
+    assert.match(all, /M1_ACCEPTED/);
     assert.match(all, /mayDeclareCompletion: true/);
+
+    // ...and with the device test merely PENDING rather than passed, the contract's
+    // intermediate status — which revision 6 could never reach.
+    ext.gates.ipadGate.status = "PENDING_HUMAN_DEVICE_TEST";
+    writeFileSync(extPath, JSON.stringify(ext, null, 2));
+    const pending = renderFinalReport({ root: dir });
+    assert.match(pending, /M1_AUTOMATED_GATES_PASS — IPAD TEST PENDING/);
+    assert.match(pending, /mayDeclareCompletion: false/);
+    ext.gates.ipadGate.status = "PASS";
+    writeFileSync(extPath, JSON.stringify(ext, null, 2));
     // ...and even then the external gates are still labelled external, never
     // presented as machine-verified.
     assert.match(all, /None of these is machine-verified/);
 
-    // A forbidden status may never be produced by the derivation.
-    for (const forbidden of ["M1_AUTOMATED_GATES_PASS", "M1_ACCEPTED"]) {
-      const statusBlock = all.slice(all.indexOf("## Status"), all.indexOf("**This status is DERIVED"));
-      assert.ok(!statusBlock.includes(forbidden), `the derivation must never emit ${forbidden}`);
-    }
+    // Only a §26-authorised status may ever be published.
+    const statusBlock = all.slice(all.indexOf("## Status"), all.indexOf("**This status is DERIVED"));
+    assert.ok(
+      isContractAuthorisedStatus(statusBlock.split("```")[1].trim()),
+      "the published status must be one the contract authorises"
+    );
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
