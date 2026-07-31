@@ -159,6 +159,25 @@ export function buildProvenance() {
         "published with the delivery message. Verify with `sha256sum` against that value, then " +
         "verify every file below against this record from the extraction.",
     },
+    archiveRelationToCommit: {
+      // REVISION-7 DELIVERY CORRECTION. The revision-7 bundle recorded commit
+      // a942a5b… here while the delivery message named 13d1e75…, because this file
+      // is written after the commit it describes and was then committed again. The
+      // relationship is now stated exactly, and `test/provenance-binding.test.js`
+      // fails if this record is written against a tree that is dirty for any reason
+      // other than this file itself.
+      describesCommit: git.resolved ? git.commit : null,
+      treeHash: git.resolved ? git.treeHash : null,
+      identicalExcept: ["audit/provenance.json"],
+      why:
+        "This record hashes the tree of the commit named above. It cannot contain its own hash, " +
+        "so it is written after that commit and is the only file in the archive whose bytes are not " +
+        "part of it. Every other shipped file is byte-identical to that commit. The delivery message " +
+        "names this same commit.",
+      howToCheck:
+        "git -C <clone> checkout <describesCommit> && diff -r --exclude=.git --exclude=node_modules " +
+        "<clone>/lineage-m1 <extraction>/lineage-m1   # expect exactly one difference: audit/provenance.json",
+    },
     commitBinding: {
       claim:
         "The commit and tree hash below identify the revision this bundle was built from. The " +

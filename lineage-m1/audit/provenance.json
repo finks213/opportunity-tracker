@@ -4,15 +4,17 @@
   "purpose": "Bind this bundle to the source revision that produced it, without shipping .git. EVERY shipped file is hashed — production source, tests, tools, evidence, reports and package files — and `tools/verifyProvenance.mjs` recomputes all of them from an extraction.",
   "source": {
     "resolved": true,
-    "commit": "a942a5b260f577b642022069421a2357869d4ec0",
-    "shortCommit": "a942a5b260f5",
+    "commit": "5c2bf1f340b688085c0018a26cbf03fbc449f5cd",
+    "shortCommit": "5c2bf1f340b6",
     "branch": "claude/lineage-m1-implementation-1m9zpq",
-    "treeHash": "47374d9141e6a1fdecae13b66202afa00a4c4998",
-    "committedAt": "2026-07-31T04:58:49+00:00",
+    "treeHash": "4bc95f47df6866ebdb173e80c208b234b7eee931",
+    "committedAt": "2026-07-31T05:06:24+00:00",
     "workingTreeClean": false,
     "uncommittedPaths": [
-      "M lineage-m1/audit/provenance.json",
-      "M lineage-m1/audit/test-results.txt"
+      "M lineage-m1/audit/external-gate-status.json",
+      "M lineage-m1/test/provenance-binding.test.js",
+      "M lineage-m1/tools/writeProvenance.mjs",
+      "?? lineage-m1/test/external-gate-status-currency.test.js"
     ]
   },
   "model": {
@@ -53,8 +55,8 @@
     ],
     "ipadStatus": "PENDING_HUMAN_DEVICE_TEST"
   },
-  "fileCount": 133,
-  "shippedTreeDigest": "b6ebbea52c37812c04df5c064e4811ce882700d1a3b206bc8d1a31f28c06815e",
+  "fileCount": 134,
+  "shippedTreeDigest": "c10c69b8a8366c8dbdcacec7881ae5f4dab2d3c7adb33f432587727b1dbb3535",
   "files": {
     "AUDIT_PACKAGE_MANIFEST.md": {
       "sha256": "98576d806b2c1e7e31bb981d3cca3e1647993da622aa5513b7b2fe079e0588e8",
@@ -129,8 +131,8 @@
       "bytes": 256588
     },
     "audit/external-gate-status.json": {
-      "sha256": "afc1ec80bbfe56727b067c13bf18d68da4d9aac0ace169d1f0fa5a180b29427a",
-      "bytes": 2938
+      "sha256": "5140b22043c9b0498bf330afbda356fc48678ae0eb7168ea2a19b4ccf612b2ef",
+      "bytes": 4079
     },
     "audit/fixture-results.json": {
       "sha256": "d5a40817ed3458aff2a068927ea2621895a1bcfdb357dba20dfd77db1abb4c01",
@@ -360,6 +362,10 @@
       "sha256": "a28fc4e3a2ea9a63cee2c7a32420fa57a31a355112ec5089615458ed2814d89f",
       "bytes": 5725
     },
+    "test/external-gate-status-currency.test.js": {
+      "sha256": "01f871119c74f879a9330e9b0a6e8b01f2e2f5f076350b81067b23103d3a0e45",
+      "bytes": 5367
+    },
     "test/fixture-transaction-atomicity.test.js": {
       "sha256": "0f0f7a91df83ed8e729bc69121e4727b91d0a91244774936d22683d9f3cae8b9",
       "bytes": 10554
@@ -461,8 +467,8 @@
       "bytes": 18947
     },
     "test/provenance-binding.test.js": {
-      "sha256": "cd47c7cc788e30fe2de9ed527810fefbceca798869764a3d7823ac70886c374e",
-      "bytes": 8358
+      "sha256": "b3b43974532721662bad376efba8321eadc6b84f17eb3953c3df18daea45297a",
+      "bytes": 10995
     },
     "test/report-determinism.test.js": {
       "sha256": "a4a1aad30117dcb9a055d7ec5f26d9deba568c0f952397dddbd1c0863b4da926",
@@ -585,14 +591,23 @@
       "bytes": 4649
     },
     "tools/writeProvenance.mjs": {
-      "sha256": "34408ff513c04389f7e00f3d58583ee8eeefaf2d24a1cde7165dfd9707ed5419",
-      "bytes": 8893
+      "sha256": "8081c03ad177cb5e591e06c1fca2f9a91bd0e246b0df042f21a0a65d0a5d7fb2",
+      "bytes": 10135
     }
   },
   "archive": {
     "name": "LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV7.zip",
     "sha256": null,
     "note": "An archive cannot contain its own hash, so no file inside it can record one: writing the value here would require rebuilding the archive, which changes the value. The SHA-256 is published with the delivery message. Verify with `sha256sum` against that value, then verify every file below against this record from the extraction."
+  },
+  "archiveRelationToCommit": {
+    "describesCommit": "5c2bf1f340b688085c0018a26cbf03fbc449f5cd",
+    "treeHash": "4bc95f47df6866ebdb173e80c208b234b7eee931",
+    "identicalExcept": [
+      "audit/provenance.json"
+    ],
+    "why": "This record hashes the tree of the commit named above. It cannot contain its own hash, so it is written after that commit and is the only file in the archive whose bytes are not part of it. Every other shipped file is byte-identical to that commit. The delivery message names this same commit.",
+    "howToCheck": "git -C <clone> checkout <describesCommit> && diff -r --exclude=.git --exclude=node_modules <clone>/lineage-m1 <extraction>/lineage-m1   # expect exactly one difference: audit/provenance.json"
   },
   "commitBinding": {
     "claim": "The commit and tree hash below identify the revision this bundle was built from. The BYTE binding above is self-contained and complete; verifying that the recorded commit's git tree equals this extraction additionally requires a clone, because .git is not shipped (§27).",

@@ -19,7 +19,7 @@
     "ipadGate": {
       "status": "PENDING_HUMAN_DEVICE_TEST",
       "source": "audit/external-gate-status.json → gates.ipadGate.status",
-      "note": "Not performed. IPAD_TEST_CHECKLIST.md ships unfilled; no physical-device measurement is supplied and no threshold is claimed as met.",
+      "note": "Not performed. IPAD_TEST_CHECKLIST.md ships unfilled; no physical-device measurement is supplied and no threshold is claimed as met. When this reads PASS and every other gate is satisfied the derivation produces M1_ACCEPTED; while it is merely pending and everything else is satisfied it produces M1_AUTOMATED_GATES_PASS — IPAD TEST PENDING.",
       "determinedBy": "a human operating a physical iPad",
       "priority": 2,
       "milestoneStatusWhenUnsatisfied": "M1_BLOCKED — PHYSICAL IPAD ACCEPTANCE NOT PERFORMED"
@@ -27,7 +27,7 @@
     "stageAOrder": {
       "status": "VIOLATED — principal decision required",
       "source": "audit/external-gate-status.json → gates.stageAOrder.status",
-      "note": "§24 Stage A pre-code planning order was violated and cannot be repaired retrospectively. DECISIONS.md D-000 and D-024. The waiver has not been requested; it is held until revision 6 survives the bounded closure audit.",
+      "note": "§24 Stage A pre-code planning order was violated and cannot be repaired retrospectively. DECISIONS.md D-000 and D-024. The waiver has not been requested; it is held until revision 7 survives the bounded closure audit.",
       "determinedBy": "the principal",
       "priority": 3,
       "milestoneStatusWhenUnsatisfied": "M1_BLOCKED — §24 STAGE A PROCESS DECISION OUTSTANDING"
@@ -35,7 +35,7 @@
     "independentClosureAudit": {
       "status": "PENDING",
       "source": "audit/external-gate-status.json → gates.independentClosureAudit.status",
-      "note": "Revisions 1 through 5 each returned BREAKS-FOUND, and in every case a green in-house suite coexisted with real defects. No automated pass is self-certified: until an independent closure audit of revision 6 says otherwise, the milestone stays blocked for implementation and evidence repairs. This gate is why a green suite does not by itself move the status.",
+      "note": "Revisions 1 through 6 each returned BREAKS-FOUND, and in every case a green in-house suite coexisted with real defects. No automated pass is self-certified: until an independent closure audit of revision 7 says otherwise, the milestone stays blocked for implementation and evidence repairs. This gate is why a green suite does not by itself move the status.",
       "determinedBy": "two independent audits: a structural code audit and an AFE-Δ evidence and claim audit",
       "priority": 1,
       "milestoneStatusWhenUnsatisfied": "M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED"
@@ -694,7 +694,7 @@
       "evidenceSource": "audit/external-gate-status.json → gates.ipadGate.status",
       "determinedBy": "a human operating a physical device; no automated run can supply it",
       "detail": "no measurement supplied; not performed",
-      "externalNote": "Not performed. IPAD_TEST_CHECKLIST.md ships unfilled; no physical-device measurement is supplied and no threshold is claimed as met.",
+      "externalNote": "Not performed. IPAD_TEST_CHECKLIST.md ships unfilled; no physical-device measurement is supplied and no threshold is claimed as met. When this reads PASS and every other gate is satisfied the derivation produces M1_ACCEPTED; while it is merely pending and everything else is satisfied it produces M1_AUTOMATED_GATES_PASS — IPAD TEST PENDING.",
       "mappedTests": []
     },
     {
@@ -707,7 +707,7 @@
       "evidenceSource": "audit/external-gate-status.json → gates.stageAOrder.status",
       "determinedBy": "the principal; a process decision no implementation can make for itself",
       "detail": "unrepairable retrospectively; DECISIONS.md D-000 and D-024",
-      "externalNote": "§24 Stage A pre-code planning order was violated and cannot be repaired retrospectively. DECISIONS.md D-000 and D-024. The waiver has not been requested; it is held until revision 6 survives the bounded closure audit.",
+      "externalNote": "§24 Stage A pre-code planning order was violated and cannot be repaired retrospectively. DECISIONS.md D-000 and D-024. The waiver has not been requested; it is held until revision 7 survives the bounded closure audit.",
       "mappedTests": []
     }
   ]

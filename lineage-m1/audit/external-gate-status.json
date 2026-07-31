@@ -1,35 +1,36 @@
 {
-  "schema": "lineage-m1-external-gate-status-2",
+  "schema": "lineage-m1-external-gate-status-3",
   "purpose": "Machine-readable statuses for the gates NO automated run can decide. FINAL_REPORT.md and the derived milestone status read this file; nothing in the report or in source hardcodes these values (revision-6 repair, M-2 / R6-J).",
   "rule": "A gate here counts as satisfied only when its status is PASS, SATISFIED or MEASURED. Any other value — including a missing or unreadable file — leaves the milestone blocked. No value in this file may be set by an automated run: each is recorded by the party named in determinedBy, and the recorder is stated.",
-  "statusPolicy": "When the automated gates are not all passing the milestone status is `M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED`. When they are, the status is the `milestoneStatusWhenUnsatisfied` of the unsatisfied external gate with the lowest priority number. When every gate of both kinds is satisfied the status is `M1_ALL_GATES_SATISFIED`. The implementation never selects the string itself.",
+  "statusPolicy": "The §26 truth table, implemented by deriveMilestoneStatus() in tools/gateRegistry.mjs. Contract v3.3 authorises exactly three statuses and this file may describe no others. (1) Any automated gate failing or unverified -> `M1_BLOCKED — <reason>`. (2) Automated gates pass, every non-device decision satisfied, device test not performed -> `M1_AUTOMATED_GATES_PASS — IPAD TEST PENDING`. (3) Automated gates pass, device test FAILED -> `M1_BLOCKED — <reason>`. (4) Automated gates pass and every gate of both kinds satisfied -> `M1_ACCEPTED`. (5) Any non-device decision unsatisfied -> `M1_BLOCKED — <reason>`, named by the unsatisfied gate with the lowest priority number. The implementation never selects the string itself.",
+  "statusPolicyNote": "REVISION-7 DELIVERY CORRECTION. Revision 6 and the first revision-7 build of this file described a fourth status, `M1_ALL_GATES_SATISFIED`, which the contract does not authorise. Revision 7 removed that status from the derivation (structural-audit Finding 2), but this machine-readable input still published the obsolete rule and still gated on revision 6, leaving the evidence package internally contradictory while the generated status was correct. The policy above is the one the code implements; test/external-gate-status-currency.test.js fails if they diverge again.",
   "gates": {
     "independentClosureAudit": {
       "status": "PENDING",
       "priority": 1,
       "milestoneStatusWhenUnsatisfied": "M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED",
       "determinedBy": "two independent audits: a structural code audit and an AFE-Δ evidence and claim audit",
-      "note": "Revisions 1 through 5 each returned BREAKS-FOUND, and in every case a green in-house suite coexisted with real defects. No automated pass is self-certified: until an independent closure audit of revision 6 says otherwise, the milestone stays blocked for implementation and evidence repairs. This gate is why a green suite does not by itself move the status.",
+      "note": "Revisions 1 through 6 each returned BREAKS-FOUND, and in every case a green in-house suite coexisted with real defects. No automated pass is self-certified: until an independent closure audit of revision 7 says otherwise, the milestone stays blocked for implementation and evidence repairs. This gate is why a green suite does not by itself move the status.",
       "recordedBy": "implementation, stating that the audit has not been performed",
-      "recordedOn": "2026-07-30"
+      "recordedOn": "2026-07-31"
     },
     "ipadGate": {
       "status": "PENDING_HUMAN_DEVICE_TEST",
       "priority": 2,
       "milestoneStatusWhenUnsatisfied": "M1_BLOCKED — PHYSICAL IPAD ACCEPTANCE NOT PERFORMED",
       "determinedBy": "a human operating a physical iPad",
-      "note": "Not performed. IPAD_TEST_CHECKLIST.md ships unfilled; no physical-device measurement is supplied and no threshold is claimed as met.",
+      "note": "Not performed. IPAD_TEST_CHECKLIST.md ships unfilled; no physical-device measurement is supplied and no threshold is claimed as met. When this reads PASS and every other gate is satisfied the derivation produces M1_ACCEPTED; while it is merely pending and everything else is satisfied it produces M1_AUTOMATED_GATES_PASS — IPAD TEST PENDING.",
       "recordedBy": "implementation, stating the absence of the measurement",
-      "recordedOn": "2026-07-30"
+      "recordedOn": "2026-07-31"
     },
     "stageAOrder": {
       "status": "VIOLATED — principal decision required",
       "priority": 3,
       "milestoneStatusWhenUnsatisfied": "M1_BLOCKED — §24 STAGE A PROCESS DECISION OUTSTANDING",
       "determinedBy": "the principal",
-      "note": "§24 Stage A pre-code planning order was violated and cannot be repaired retrospectively. DECISIONS.md D-000 and D-024. The waiver has not been requested; it is held until revision 6 survives the bounded closure audit.",
+      "note": "§24 Stage A pre-code planning order was violated and cannot be repaired retrospectively. DECISIONS.md D-000 and D-024. The waiver has not been requested; it is held until revision 7 survives the bounded closure audit.",
       "recordedBy": "implementation, stating the violation",
-      "recordedOn": "2026-07-30"
+      "recordedOn": "2026-07-31"
     }
   }
 }

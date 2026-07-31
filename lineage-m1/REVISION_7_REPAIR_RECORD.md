@@ -142,8 +142,10 @@ recorded SHA-256 in favour of three summary counts. My revision-6 record disclos
 the weaker TAP binding but also claimed the bundle was bound to a source commit; as
 the audit says, that broader claim was not true.
 
-**Repair.** `audit/provenance.json` now records **every shipped file** — 129 of them
-— with SHA-256 and byte count, plus one `shippedTreeDigest` over the whole set.
+**Repair.** `audit/provenance.json` records **every shipped file except itself**,
+with SHA-256 and byte count, plus one `shippedTreeDigest` over the whole set. The
+exclusion is structural, not a gap: a file cannot contain its own hash. The archive
+as a whole is bound externally, by the ZIP SHA-256 published with the delivery.
 `tools/verifyProvenance.mjs` recomputes all of it, rejects any unrecorded or missing
 file, and binds the raw TAP by its exact bytes. The commit claim is stated honestly:
 the byte binding is self-contained and complete, and verifying that the recorded
@@ -297,7 +299,68 @@ directions at median generation 3, observer invariance byte-identical, and
 | status when everything is satisfied | `M1_ALL_GATES_SATISFIED` | `M1_ACCEPTED` | Finding 2: the contract's own status |
 | status when only the device test is outstanding | a blocked string | `M1_AUTOMATED_GATES_PASS — IPAD TEST PENDING` | Finding 2 |
 | source status policy | two statuses permanently forbidden | the three the contract authorises | Finding 2 |
-| files bound by provenance | 20 | 129 (every shipped file) | Finding 3 |
+| files bound by provenance | 20 | every shipped file except the record itself | Finding 3 |
 | raw TAP binding | three summary counts | exact bytes | Finding 3 |
 | legibility mode | verified on entry | invariant while active | Finding 1 |
 | reset | biology and channels | every world-identity field | Finding 5 |
+
+
+---
+
+## Delivery correction (after the revision-7 structural audit)
+
+The revision-7 structural audit found no surviving functional defect in the six
+repaired areas, and three delivery defects. All three were reproduced against the
+delivered artifact
+(`7cae9566df99585aff5684d48974237074dce9afe2326c9654aeefbf210d71dd`).
+
+**D-1 — the stated commit and the recorded commit disagreed.** The delivery message
+named `13d1e75dbbf1b36cf2e2c0657516567029721632`; `audit/provenance.json` inside the
+archive recorded `a942a5b260f577b642022069421a2357869d4ec0`, with
+`workingTreeClean: false` and two uncommitted paths. The byte-level binding was real
+— every recorded hash verified — but the archive was bound to a repository state no
+single commit described, and my two statements about the source revision did not
+match. The cause was the ordering: provenance is written after the commit it
+describes, that write was then committed, and I named the later commit.
+
+Repaired by stating the relationship exactly rather than hoping the two coincide.
+`audit/provenance.json` now carries `archiveRelationToCommit`, which names the
+commit it describes, that commit's tree hash, the single file that may differ
+(itself, since no file can contain its own hash) and a `diff -r` command that proves
+it. `test/provenance-binding.test.js` fails if the record is ever written against a
+tree that is dirty for any other reason, so a half-committed delivery cannot recur.
+
+**D-2 — the active external-gate evidence carried the obsolete status law.**
+`audit/external-gate-status.json` still said the everything-satisfied status is
+`M1_ALL_GATES_SATISFIED` — removed from the derivation by Finding 2 — and still
+gated on revision 6. That prose does not drive the calculation, so the generated
+status was correct, but an evidence package that contradicts itself is not truthful.
+The file now states the implemented §26 truth table and gates on revision 7;
+`test/external-gate-status-currency.test.js` fails if the file and the code diverge
+again, or if it gates on a superseded revision.
+
+**D-3 — the file-count language was wrong.** The repair record said "129 files" while
+the record held 133 and the extraction held one more than that. The correct statement
+is: the record covers every shipped file **except itself**, and the archive as a whole
+is bound externally by its published ZIP SHA-256. The regression now computes the
+shipped count and requires the recorded count to be exactly one less.
+
+**On the fragility the audit identified.** The observation is fair: the evidence
+pipeline is self-referential — tests publish the TAP, the report reads the TAP,
+provenance hashes both, tree-integrity runs the tests again. Most of my convergence
+trouble came from that shape, not from the simulation. Two structural changes in this
+correction reduce it: provenance now refuses to be written against a half-committed
+tree, and the delivery procedure below is a fixed sequence ending with provenance and
+the archive, with nothing running in between. I have not redesigned the pipeline
+further, because that is outside a narrow delivery correction.
+
+### Delivery procedure, in order
+
+```
+1. every evidence generator, and the full suite, until the committed pair is green
+2. commit everything                       -> one authoritative commit X
+3. npm run audit:provenance                -> records X against a clean tree
+4. build the archive                       -> equals X's tree plus audit/provenance.json
+5. verify the archive from a fresh extraction: strict provenance + the full suite
+6. commit the provenance record and push; the delivery names X, as provenance does
+```

@@ -16,7 +16,7 @@
 
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, writeFileSync, existsSync, readdirSync, mkdtempSync, cpSync, rmSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, mkdtempSync, cpSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
@@ -43,6 +43,24 @@ test("§23/§27 — every SHIPPED file is bound, not a selected subset", () => {
   const p = readJson("audit/provenance.json");
   assert.ok(p.files, "the record must carry a per-file map of everything shipped");
   assert.ok(p.fileCount >= 100, `far too few files recorded (${p.fileCount})`);
+  // The count language must be exact: the record covers every shipped file EXCEPT
+  // itself. The delivered revision-7 record said "every shipped file" while the
+  // extraction held one more file than it recorded.
+  const shipped = [];
+  const walk = (d) => {
+    for (const name of readdirSync(join(ROOT, d === "" ? "." : d)).sort()) {
+      const rel = d === "" ? name : `${d}/${name}`;
+      if (/^node_modules$|^\.git$|\.partial$/.test(name)) continue;
+      if (statSync(join(ROOT, rel)).isDirectory()) { walk(rel); continue; }
+      shipped.push(rel);
+    }
+  };
+  walk("");
+  assert.equal(
+    p.fileCount, shipped.length - 1,
+    `the record must cover every shipped file except itself: ${shipped.length} shipped, ${p.fileCount} recorded`
+  );
+  assert.equal(p.files["audit/provenance.json"], undefined, "and it cannot record itself");
   for (const rel of ["src/main.js", "src/core/math.js", "src/core/simulation.js",
     "test/report-integrity.test.js", "tools/writeFinalReport.mjs", "package.json",
     "package-lock.json", "index.html", "fixtures/defining_fixture_v1.json",
@@ -75,6 +93,41 @@ test("§23/§27 — the binding covers the model identity and the published run"
   assert.equal(p.testResults.fail, summary.suite.fail);
   assert.equal(p.testResults.boundBy, "bytes", "revision 6 bound it by counts only");
   assert.deepEqual(p.milestone, summary.milestone);
+});
+
+test("§23/§27 — the record is written against a tree clean except for itself", () => {
+  // REVISION-7 DELIVERY CORRECTION. The delivered revision-7 bundle recorded
+  //
+  //   commit a942a5b…  workingTreeClean false
+  //   uncommittedPaths ["audit/provenance.json", "audit/test-results.txt"]
+  //
+  // while the delivery message named 13d1e75…. The archive was therefore bound to a
+  // repository state that no single commit described, and the two statements about
+  // the source revision disagreed. The only file that may legitimately differ from
+  // the described commit is this record itself, which cannot contain its own hash.
+  const p = readJson("audit/provenance.json");
+  const dirty = (p.source.uncommittedPaths ?? []).map((l) => l.replace(/^\s*[A-Z?]+\s+/, ""));
+  const allowed = /audit\/provenance\.json$/;
+  const disallowed = dirty.filter((path) => !allowed.test(path));
+  assert.deepEqual(
+    disallowed, [],
+    "the provenance record must be written against a commit, not a half-committed tree:\n  " +
+    disallowed.join("\n  ")
+  );
+});
+
+test("§23/§27 — the archive's relationship to the named commit is stated exactly", () => {
+  const p = readJson("audit/provenance.json");
+  const rel = p.archiveRelationToCommit;
+  assert.ok(rel, "the record must say how the archive relates to the commit it names");
+  assert.equal(rel.describesCommit, p.source.commit, "one commit, named once");
+  assert.match(rel.treeHash, /^[0-9a-f]{40}$/);
+  assert.deepEqual(
+    rel.identicalExcept, ["audit/provenance.json"],
+    "exactly one file may differ from the commit, and it is this record"
+  );
+  assert.match(rel.why, /cannot contain its own hash/);
+  assert.match(rel.howToCheck, /diff -r/, "and it must give the auditor a command that proves it");
 });
 
 test("§27 — the archive hash is honestly absent and the commit claim is honest", () => {
