@@ -4,11 +4,11 @@
   "purpose": "Bind this bundle to the source revision that produced it, without shipping .git. Every value below is recomputable from the extracted bundle except `source.commit`, which is what the binding exists to supply.",
   "source": {
     "resolved": true,
-    "commit": "c10ab9c773755dd85d7dfeddd364aa1cf5a1934a",
-    "shortCommit": "c10ab9c77375",
+    "commit": "71f7bec41038a9b096a59c2563c231485ab06822",
+    "shortCommit": "71f7bec41038",
     "branch": "claude/lineage-m1-implementation-1m9zpq",
-    "treeHash": "9afabb3c512b49b1d8bf53f267a32552c316f63b",
-    "committedAt": "2026-07-31T00:32:50+00:00",
+    "treeHash": "2d2c47437e9e3ea6995b29ce7de212a99c4cbaa6",
+    "committedAt": "2026-07-31T00:58:19+00:00",
     "workingTreeClean": true,
     "uncommittedPaths": []
   },
@@ -24,8 +24,8 @@
   },
   "testResults": {
     "path": "audit/test-results.txt",
-    "sha256": "03a820cf2d79eed55597abdd105f40474f211b83d05fb7e135a52966ac679916",
-    "bytes": 78441,
+    "sha256": "eef6be8d261737ff445e5c6757c14a086c92f248fab701629c362e5d2f3992d7",
+    "bytes": 78456,
     "tests": 349,
     "pass": 349,
     "fail": 0,
