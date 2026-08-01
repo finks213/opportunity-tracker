@@ -4,11 +4,11 @@
   "purpose": "Bind this bundle to the source revision that produced it, without shipping .git. EVERY shipped file is hashed — production source, tests, tools, evidence, reports and package files — and `tools/verifyProvenance.mjs` recomputes all of them from an extraction.",
   "source": {
     "resolved": true,
-    "commit": "03fa2a0e278aeae5c3c3bf1635acea6afc85f770",
-    "shortCommit": "03fa2a0e278a",
+    "commit": "e2748bf8f7c3459b4dd42e5d715621216143a351",
+    "shortCommit": "e2748bf8f7c3",
     "branch": "claude/lineage-m1-implementation-1m9zpq",
-    "treeHash": "30fdf3d06ffa5d534ef35cad725e49926c9e8021",
-    "committedAt": "2026-08-01T04:54:36+00:00",
+    "treeHash": "d67fb549d36cfaba3e7d87cbfd0e72186d0286e4",
+    "committedAt": "2026-08-01T05:01:33+00:00",
     "workingTreeClean": true,
     "uncommittedPaths": []
   },
@@ -53,7 +53,7 @@
     "rejectedStatusStrings": []
   },
   "fileCount": 136,
-  "shippedTreeDigest": "61b3a5e657aac838eda2349dd3c28a80a85d086b525ce1e1e88916e84efb0b28",
+  "shippedTreeDigest": "e583ddf2194f704467557401c00696cb4e581a7fbcb06a568d136cf8e7a48239",
   "files": {
     "AUDIT_PACKAGE_MANIFEST.md": {
       "sha256": "fb4ca8a18ec3f5ede307f19137ba8de38c3996fd41b750dd901eb129b5e2aeb3",
@@ -156,7 +156,7 @@
       "bytes": 1207
     },
     "audit/runtime-matrix.json": {
-      "sha256": "c40ff1d4a7ea299b392333c7c549d412e1203e7f96895e8e3a56924f27624b52",
+      "sha256": "f3f70456073bdca5bae61c8153e8bca601e96fc49d346490cc336c98023eb3bb",
       "bytes": 3632
     },
     "audit/test-results.txt": {
@@ -488,8 +488,8 @@
       "bytes": 8415
     },
     "test/runtime-matrix-coverage.test.js": {
-      "sha256": "07befdf86e48bf92807babb5cb1820f6272b5c8d0f1a7d425e52439bef9abdfc",
-      "bytes": 8778
+      "sha256": "f2f81e935ab79d7b7db2a2ead305ff75c1cbd885031729a923298a985721e173",
+      "bytes": 9946
     },
     "test/server-containment.test.js": {
       "sha256": "dbc6c287a73729e23a89c44619f7ccf577907464b146019284a9cbb71a39d70b",
@@ -606,8 +606,8 @@
     "note": "An archive cannot contain its own hash, so no file inside it can record one: writing the value here would require rebuilding the archive, which changes the value. The SHA-256 is published with the delivery message. Verify with `sha256sum` against that value, then verify every file below against this record from the extraction."
   },
   "archiveRelationToCommit": {
-    "describesCommit": "03fa2a0e278aeae5c3c3bf1635acea6afc85f770",
-    "treeHash": "30fdf3d06ffa5d534ef35cad725e49926c9e8021",
+    "describesCommit": "e2748bf8f7c3459b4dd42e5d715621216143a351",
+    "treeHash": "d67fb549d36cfaba3e7d87cbfd0e72186d0286e4",
     "identicalExcept": [
       "audit/provenance.json"
     ],
