@@ -18,15 +18,15 @@
     "test/model-hash-provenance.test.js"
   ],
   "probeOnly": false,
-  "committedReportSha256": "5146dea256ef474c437e02f9eed4e42d5509d12ea6fe40c7061e3c0bcdeb5166",
+  "committedReportSha256": "e418000c0af56a48e80d7057f0ef02f7987fb19cc2229a90da5077a02014dc13",
   "runtimes": [
     {
       "nodeVersion": "v20.20.2",
       "major": 20,
       "binary": "/opt/node20/bin/node",
       "foundVia": "/opt layout",
-      "renderedReportSha256": "5146dea256ef474c437e02f9eed4e42d5509d12ea6fe40c7061e3c0bcdeb5166",
-      "renderedReportBytes": 37768,
+      "renderedReportSha256": "e418000c0af56a48e80d7057f0ef02f7987fb19cc2229a90da5077a02014dc13",
+      "renderedReportBytes": 39045,
       "matchesCommittedReport": true,
       "determinismTests": {
         "tests": 64,
@@ -48,8 +48,8 @@
       "major": 21,
       "binary": "/opt/node21/bin/node",
       "foundVia": "/opt layout",
-      "renderedReportSha256": "5146dea256ef474c437e02f9eed4e42d5509d12ea6fe40c7061e3c0bcdeb5166",
-      "renderedReportBytes": 37768,
+      "renderedReportSha256": "e418000c0af56a48e80d7057f0ef02f7987fb19cc2229a90da5077a02014dc13",
+      "renderedReportBytes": 39045,
       "matchesCommittedReport": true,
       "determinismTests": {
         "tests": 64,
@@ -71,8 +71,8 @@
       "major": 22,
       "binary": "/opt/node22/bin/node",
       "foundVia": "/opt layout",
-      "renderedReportSha256": "5146dea256ef474c437e02f9eed4e42d5509d12ea6fe40c7061e3c0bcdeb5166",
-      "renderedReportBytes": 37768,
+      "renderedReportSha256": "e418000c0af56a48e80d7057f0ef02f7987fb19cc2229a90da5077a02014dc13",
+      "renderedReportBytes": 39045,
       "matchesCommittedReport": true,
       "determinismTests": {
         "tests": 64,
