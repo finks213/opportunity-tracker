@@ -4,11 +4,11 @@
   "purpose": "Bind this bundle to the source revision that produced it, without shipping .git. EVERY shipped file is hashed — production source, tests, tools, evidence, reports and package files — and `tools/verifyProvenance.mjs` recomputes all of them from an extraction.",
   "source": {
     "resolved": true,
-    "commit": "c1b5c81612abbe90933a5f602083d02fb8d10c9d",
-    "shortCommit": "c1b5c81612ab",
+    "commit": "047fb96b5126158565c419e2bebed3f14b519462",
+    "shortCommit": "047fb96b5126",
     "branch": "claude/lineage-m1-implementation-1m9zpq",
-    "treeHash": "f1667371b974f4787a0c4edd5aebb1b391aceaf9",
-    "committedAt": "2026-08-01T04:21:07+00:00",
+    "treeHash": "42438c5aeb33e929a8cca571c7508475f35cf886",
+    "committedAt": "2026-08-01T04:35:22+00:00",
     "workingTreeClean": true,
     "uncommittedPaths": []
   },
@@ -57,7 +57,7 @@
     "rejectedStatusStrings": []
   },
   "fileCount": 136,
-  "shippedTreeDigest": "75285a681af944f96a34c6a13a00afa185ab12bfc56d5bf18d54e2789d01bfcb",
+  "shippedTreeDigest": "0f30357c04871df239b4cbf53f45cecaffe1dfee2ea28840d7a06c561208b6e7",
   "files": {
     "AUDIT_PACKAGE_MANIFEST.md": {
       "sha256": "fb4ca8a18ec3f5ede307f19137ba8de38c3996fd41b750dd901eb129b5e2aeb3",
@@ -168,8 +168,8 @@
       "bytes": 89943
     },
     "audit/tree-integrity.json": {
-      "sha256": "1f28479261512be1a1f2966ef4a1570f2731d3f873d0a7f896a68c4531a998c1",
-      "bytes": 1582
+      "sha256": "fde770b8fab97c4abd170859c8671035784bb81aef8951273642a2f811e2c846",
+      "bytes": 1163
     },
     "fixtures/defining_fixture_v1.json": {
       "sha256": "c80aaa523d3b3eec2655502b4eaebdbbb4d12f71f8b3378d9d3be60797342b78",
@@ -610,8 +610,8 @@
     "note": "An archive cannot contain its own hash, so no file inside it can record one: writing the value here would require rebuilding the archive, which changes the value. The SHA-256 is published with the delivery message. Verify with `sha256sum` against that value, then verify every file below against this record from the extraction."
   },
   "archiveRelationToCommit": {
-    "describesCommit": "c1b5c81612abbe90933a5f602083d02fb8d10c9d",
-    "treeHash": "f1667371b974f4787a0c4edd5aebb1b391aceaf9",
+    "describesCommit": "047fb96b5126158565c419e2bebed3f14b519462",
+    "treeHash": "42438c5aeb33e929a8cca571c7508475f35cf886",
     "identicalExcept": [
       "audit/provenance.json"
     ],
