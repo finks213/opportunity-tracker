@@ -21,6 +21,7 @@ change**. All six reproduced as reported; I disputed none of them.
 | 4 | the provenance writer does not refuse a dirty source tree | Medium | `tools/writeProvenance.mjs` | `test/provenance-binding.test.js` (+1) |
 | 5 | the delivery repeated the file-count error in its headline claim | Medium-Minor | delivery message + record | `test/provenance-binding.test.js` |
 | 6 | the generated revision history omits the failed revision-6 audit | Medium-Minor | `tools/writeFinalReport.mjs` | `test/status-consistency.test.js` |
+| 7 | **not from the audit** — the runtime matrix certified a report that no longer shipped | Medium | evidence only (`audit/runtime-matrix.json` regenerated) | `test/runtime-matrix-coverage.test.js` (+1) |
 
 ---
 
@@ -175,6 +176,46 @@ also been audited and returned six defects.
 **Repair.** The sentence is generated from the revision value: *"Revisions 1 through
 N−1 were each independently audited and each returned BREAKS-FOUND."* It cannot fall
 behind again without the revision value being wrong, which other tests catch.
+
+---
+
+## Finding 7 — found by me, not by the audit: the runtime matrix certified a stale report
+
+Not one of the six. Found while assembling this delivery, disclosed rather than
+quietly regenerated.
+
+`audit/runtime-matrix.json` exists to support one claim: *these Node majors render
+**the committed report** to identical bytes*. The shipped record said
+
+```
+committedReportSha256: f2487caa83e57b22815302292946f16664a7f2737d09a90dc971d8134a5484ca
+```
+
+while `FINAL_REPORT.md` hashed `bee593df16fa5130708c3986b940ea92e128078b7ad19a9e0dd95a0fa85d8f46`.
+The matrix was certifying a report that no longer shipped, so its claim was vacuous
+for the bytes actually delivered — and the full suite was green over it, because no
+test compared the two.
+
+**Reproduction, against the shipped state:**
+
+```
+✖ §26/§27 — the committed matrix certifies the committed report, not an older one
+  AssertionError: the matrix certifies a stale report —
+    re-run `npm run audit:runtime-matrix` after the report changes
+    actual:   'f2487caa83e57b22815302292946f16664a7f2737d09a90dc971d8134a5484ca'
+    expected: 'bee593df16fa5130708c3986b940ea92e128078b7ad19a9e0dd95a0fa85d8f46'
+```
+
+**Repair.** No production code changed; this is an evidence-integrity gap. The new
+regression in `test/runtime-matrix-coverage.test.js` recomputes the shipped report's
+hash and requires the matrix to name it, together with the matrix's own verdict flags
+(`allRuntimesMatchCommittedReport`, `allDeterminismTestsPass`, `sufficientCoverage`,
+empty `coverageProblems`). The matrix was then regenerated: majors 20, 21 and 22 all
+render the delivered report, 1 distinct hash, 64/64 determinism tests per runtime.
+
+The binding cannot loop. `FINAL_REPORT.md` deliberately embeds no matrix figures —
+the report points at the file and the manifest states the numbers — so regenerating
+the matrix never moves the report that the matrix hashes.
 
 ---
 

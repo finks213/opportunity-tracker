@@ -3,8 +3,8 @@
   "contractSection": "20 / 26 / 28",
   "note": "Derived from audit/test-results.txt and audit/external-gate-status.json through tools/gateRegistry.mjs. Every machine-verified gate maps to named tests; a gate whose evidencing test did not run is UNVERIFIED, never PASS. Externally determined gates are READ from their named inputs, are never machine-verified, and are counted once — as external — so the categories partition the gate set. The milestone status and completion flag below are derived from the same inputs, not written in source (revision-6, R6-J / R6-K). This file and the report's gate table are generated from the same call.",
   "suite": {
-    "tests": 398,
-    "pass": 398,
+    "tests": 399,
+    "pass": 399,
     "fail": 0
   },
   "externalStatuses": {
@@ -92,7 +92,7 @@
       "section": "§20",
       "status": "PASS",
       "evidence": "suite",
-      "detail": "398/398, 0 failing",
+      "detail": "399/399, 0 failing",
       "mappedTests": []
     },
     {
