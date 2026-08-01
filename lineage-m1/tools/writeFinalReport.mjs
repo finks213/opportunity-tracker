@@ -339,8 +339,8 @@ export function renderFinalReport(opts = {}) {
       ? ["- none; every automated and externally determined gate is satisfied"]
       : milestone.blockers.map((b) => `- ${b}`)),
     "",
-    `**This report is revision ${S.revision}** (generated ${S.reportDate}). Revisions 1, 2, 3, 4`,
-    "and 5 were each audited and each returned `BREAKS-FOUND`. The status above may not",
+    `**This report is revision ${S.revision}** (generated ${S.reportDate}). Revisions 1 through`,
+    `${S.revision - 1} were each independently audited and each returned \`BREAKS-FOUND\`. The status above may not`,
     `advance until revision ${S.revision} survives independent re-audit by both the structural code`,
     "audit and the AFE-Δ evidence and claim audit — that requirement is itself one of the",
     "externally determined gates, so it is visible in the list above rather than asserted",

@@ -147,17 +147,18 @@ an acceptance target here.**
 M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED
 ```
 
-Revision 7. The revision-6 structural audit returned `BREAKS-FOUND` with six
-findings — a legibility mode that stopped being the defining fixture once active,
-a status state machine that could never reach a contract-authorised passing state,
-a provenance record that bound 20 files instead of the shipped tree, a hostile
-`Error` accessor escaping observer isolation, a random reset leaving fixture
-metadata visible, and stale revision wording. All six were reproduced against the
-delivered artifact before any production change, and each carries a committed
-regression test. **No automated-gate pass is self-certified**: the status is
-derived from the published run plus `audit/external-gate-status.json`, and the
-standing `independentClosureAudit` condition keeps it blocked until revision 7
-survives independent re-audit.
+Revision 8. The revision-7 structural audit returned `BREAKS-FOUND` with six
+findings — a status derivation that could false-accept from a merely *measured*
+device test, read unknown evidence as "pending" and publish an unauthorised status
+string; a tree-integrity command that succeeded with red or unparseable rounds; a
+legibility backstop that was not in the animation-frame path; a provenance writer
+that recorded a dirty tree and exited 0; a delivery message with the wrong file
+count; and a generated history that omitted the revision-6 audit. All six were
+reproduced against the delivered artifact before any production change, and each
+carries a committed regression test. **No automated-gate pass is self-certified**:
+the status is derived from the published run plus `audit/external-gate-status.json`,
+and the standing `independentClosureAudit` condition keeps it blocked until revision
+8 survives independent re-audit.
 
 The status is no longer written in source. `deriveMilestoneStatus()` computes it,
 and `FINAL_REPORT.md` prints every blocker the derivation found.

@@ -31,7 +31,7 @@
  */
 export const MILESTONE_STATUS = Object.freeze({
   /** Revision of the implementation and of every generated report. */
-  revision: 7,
+  revision: 8,
   reportDate: "2026-07-31",
 
   /**

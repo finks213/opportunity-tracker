@@ -7,7 +7,7 @@ device.
 
 > **DO NOT PERFORM THIS TEST YET.** The overall milestone status is
 > `M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED`.
-> The device test is gated behind revision 7 surviving independent re-audit
+> The device test is gated behind revision 8 surviving independent re-audit
 > (structural code audit and AFE-Δ evidence audit). Running it earlier measures a
 > build that is not yet accepted for device testing.
 

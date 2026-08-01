@@ -91,11 +91,26 @@ if (isMain) {
   };
   setImmediate(sample);
 
-  /** Run the suite once. */
+  /**
+   * Run the suite once.
+   *
+   * REVISION-8 REPAIR (revision-7 structural audit, Finding 2, second half). The
+   * parser recognised only `# tests`-style TAP summary lines. Under Node 24 the
+   * default reporter emitted a different form, so a fresh one-round run recorded
+   *
+   *   round 1: null/null, null failing, exit 0
+   *   allRunsGreen: false        process exit: 0
+   *
+   * and the command still succeeded. The reporter is pinned to TAP so the output
+   * form is not the runtime's choice, and an unparseable round is recorded as such
+   * and fails the command.
+   */
   const runSuite = () => new Promise((res) => {
     const child = spawn(
       "sh",
-      ["-c", `node --test --test-timeout=3600000 --test-concurrency=${concurrency} test/*.test.js`],
+      ["-c",
+        `node --test --test-reporter=tap --test-timeout=3600000 ` +
+        `--test-concurrency=${concurrency} test/*.test.js`],
       { cwd: ROOT }
     );
     let out = "";
@@ -103,14 +118,18 @@ if (isMain) {
     child.stderr.on("data", (d) => { out += d; });
     child.on("close", (code) => {
       const grab = (k) => {
-        const m = out.match(new RegExp(`^# ${k} (\\d+)$`, "m"));
+        const m = out.match(new RegExp(`^[#\\s]*${k}\\s+(\\d+)$`, "m"));
         return m ? Number(m[1]) : null;
       };
+      const tests = grab("tests");
+      const pass = grab("pass");
+      const fail = grab("fail");
+      const parsed = tests !== null && pass !== null && fail !== null;
       res({
         exitCode: code,
-        tests: grab("tests"),
-        pass: grab("pass"),
-        fail: grab("fail"),
+        tests, pass, fail,
+        parsed,
+        parseNote: parsed ? null : "the suite summary could not be parsed from this run's output",
         failing: [...out.matchAll(/^not ok \d+ - (.+)$/gm)].map((m) => m[1]),
       });
     });
@@ -128,8 +147,10 @@ if (isMain) {
   running = false;
 
   const final = treeSnapshot();
+  const allRunsParsed = runs.every((r) => r.parsed);
+  const allRunsGreen = runs.every((r) => r.parsed && r.fail === 0 && r.exitCode === 0);
   const record = {
-    schema: "lineage-m1-tree-integrity-1",
+    schema: "lineage-m1-tree-integrity-2",
     contractSection: "20 (build-blocking suite integrity)",
     claim:
       "The production source tree under src/ is never modified at any instant while the full suite " +
@@ -143,13 +164,27 @@ if (isMain) {
     treeUnchangedThroughout: deviations.length === 0 && final.digest === baseline.digest,
     deviations,
     runs,
-    allRunsGreen: runs.every((r) => r.fail === 0 && r.exitCode === 0),
+    allRunsParsed,
+    allRunsGreen,
+    // REVISION-8 (Finding 2): a proof whose own rounds were red or unparseable is
+    // not a proof. This one field is what the build-blocking test reads.
+    proofValid: deviations.length === 0 && final.digest === baseline.digest && allRunsGreen,
   };
   writeFileSync(join(ROOT, "audit", "tree-integrity.json"), JSON.stringify(record, null, 2));
   console.error(
     `\ntree-integrity.json: ${samples} samples across ${rounds} run(s), ` +
     `deviations ${deviations.length}, unchanged throughout: ${record.treeUnchangedThroughout}, ` +
-    `all runs green: ${record.allRunsGreen}`
+    `all runs parsed: ${allRunsParsed}, all runs green: ${allRunsGreen}, ` +
+    `proof valid: ${record.proofValid}`
   );
-  if (!record.treeUnchangedThroughout) process.exitCode = 1;
+  if (!record.proofValid) {
+    if (!record.treeUnchangedThroughout) console.error("  PROBLEM: the source tree changed during the runs");
+    if (!allRunsParsed) console.error("  PROBLEM: at least one round's suite summary could not be parsed");
+    else if (!allRunsGreen) console.error("  PROBLEM: at least one round's suite run was not green");
+    console.error(
+      "\nThis evidence does NOT prove the claim, so the command exits nonzero rather than " +
+      "recording a proof it did not obtain."
+    );
+    process.exitCode = 1;
+  }
 }

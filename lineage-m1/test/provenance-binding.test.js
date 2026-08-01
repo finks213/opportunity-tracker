@@ -18,6 +18,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, mkdtempSync, cpSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
+import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 import { verifyProvenance } from "../tools/verifyProvenance.mjs";
@@ -208,6 +209,73 @@ test("§27 — the strict path is the default; leniency is opt-in and still chec
     const lenient = verifyProvenance(dir, { tapMayDiffer: true });
     assert.equal(lenient.ok, false, "leniency must not extend to the counts");
     assert.match(lenient.mismatches.join(" "), /recorded pass/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// REVISION-8 REPAIR (revision-7 structural audit, Finding 4).
+//
+// Revision 7 stated that the writer "refuses to be written against a half-committed
+// tree". It did not — it recorded the dirty state and exited 0:
+//
+//   provenance.json: commit f49972a19093, 134 files hashed, working tree clean: false
+//   uncommittedPaths: ["M lineage-m1/src/core/math.js"]   exit=0
+//
+// A later suite would have caught the record, but the generator itself was
+// fail-open, so an interrupted delivery could leave a confident-looking record of a
+// tree no commit describes. This exercises the actual command in a real repository.
+// ---------------------------------------------------------------------------
+
+test("§23/§27 — the writer REFUSES a tree that is dirty beyond the record itself", () => {
+  const dir = mkdtempSync(join(tmpdir(), "lineage-prov-git-"));
+  const repo = join(dir, "lineage-m1");
+  const git = (...args) => execFileSync("git", args, { cwd: dir, encoding: "utf8" });
+  try {
+    for (const name of readdirSync(ROOT)) {
+      if (name === "node_modules" || name === ".git") continue;
+      cpSync(join(ROOT, name), join(repo, name), { recursive: true });
+    }
+    git("init", "-q");
+    git("config", "user.email", "test@example.invalid");
+    git("config", "user.name", "test");
+    git("add", "-A");
+    git("commit", "-qm", "baseline");
+
+    // A clean tree writes normally.
+    const clean = execFileSync(process.execPath, [join(repo, "tools", "writeProvenance.mjs")],
+      { cwd: repo, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+    assert.ok(existsSync(join(repo, "audit", "provenance.json")), "a clean tree must produce a record");
+
+    // Now dirty a tracked production file and run the command again.
+    const target = join(repo, "src", "core", "math.js");
+    writeFileSync(target, readFileSync(target, "utf8") + "\n// dirty\n");
+    const before = readFileSync(join(repo, "audit", "provenance.json"), "utf8");
+    let status = 0;
+    let stderr = "";
+    try {
+      execFileSync(process.execPath, [join(repo, "tools", "writeProvenance.mjs")],
+        { cwd: repo, encoding: "utf8" });
+    } catch (err) {
+      status = err.status ?? 1;
+      stderr = String(err.stderr ?? "");
+    }
+    assert.notEqual(status, 0, "the writer must exit nonzero on a dirty tree — revision 7 exited 0");
+    assert.match(stderr, /REFUSING to write/);
+    assert.match(stderr, /src\/core\/math\.js/, "and it must name what is dirty");
+    assert.equal(
+      readFileSync(join(repo, "audit", "provenance.json"), "utf8"), before,
+      "and it must not have overwritten the previous record"
+    );
+
+    // The escape hatch exists, is explicit, and marks the record unusable.
+    execFileSync(process.execPath, [join(repo, "tools", "writeProvenance.mjs"), "--allow-dirty"],
+      { cwd: repo, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+    const provisional = JSON.parse(readFileSync(join(repo, "audit", "provenance.json"), "utf8"));
+    assert.ok(provisional.provisional, "--allow-dirty must mark the record provisional");
+    assert.match(provisional.provisional.note, /NOT a delivery record/);
+    assert.ok(provisional.provisional.dirtyPaths.some((p) => p.includes("math.js")));
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

@@ -597,6 +597,19 @@ class ProbeApp {
       this.lastAdvance = timestamp;
       this.renderPanels();
     }
+    // REVISION-8 REPAIR (revision-7 structural audit, Finding 3). The §22 backstop
+    // was in `renderPanels()`, which this path does not always call. `advance()` is
+    // exported and the live app is published as `globalThis.lineageProbe` for manual
+    // measurement, so:
+    //
+    //   enter legibility; lineageProbe.advance()
+    //   before frame: mode=legibility generation=1 baseline=false
+    //   after  frame: mode=legibility generation=1 baseline=false
+    //
+    // A frame rendered under the legibility label over a world that was not the
+    // baseline fixture. The invariant is checked HERE, in the actual render path,
+    // immediately before the mode decides what to draw.
+    this.enforceLegibilityInvariant();
     if (this.manualTestMode === "render-stress") this.renderStress();
     else if (this.manualTestMode === "legibility") this.renderLegibility();
     else this.probe.render(this.state, { observer: this.observer, selectedId: this.selectedId });
@@ -659,6 +672,13 @@ class ProbeApp {
    * order comes from uiRng seed 32001 and never touches biological state.
    */
   renderLegibility() {
+    // Defence in depth: whatever calls this, it may not paint a legibility frame
+    // over a non-baseline world (revision-8, Finding 3).
+    this.enforceLegibilityInvariant();
+    if (this.manualTestMode !== "legibility") {
+      this.probe.render(this.state, { observer: this.observer, selectedId: this.selectedId });
+      return;
+    }
     const ctx = this.probe.ctx;
     const W = this.probe.cssWidth;
     const H = this.probe.cssHeight;

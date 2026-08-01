@@ -179,3 +179,64 @@ test("§22 — the whole control surface preserves the invariant, in sequence", 
   assert.equal(app.manualTestMode, "legibility");
   assert.equal(app.isBaselineFixtureActive(), true);
 });
+
+// ---------------------------------------------------------------------------
+// REVISION-8 REPAIR (revision-7 structural audit, Finding 3).
+//
+// The tests above drive the CONTROLS and then call `renderPanels()`. The animation
+// loop does not go through `renderPanels()` on every frame: `frame()` calls
+// `renderLegibility()` directly. `advance()` is exported and the live app is
+// published as `globalThis.lineageProbe` for manual measurement, so:
+//
+//   enter legibility; lineageProbe.advance()
+//   before frame: mode=legibility generation=1 baseline=false
+//   after  frame: mode=legibility generation=1 baseline=false
+//
+// A legibility frame was rendered over a non-baseline world. These tests drive the
+// REAL frame path.
+// ---------------------------------------------------------------------------
+
+test("§22 — the animation frame itself enforces the invariant", async (t) => {
+  const { app, restore } = harness();
+  t.after(restore);
+  await app.setManualTestMode("legibility");
+
+  // The exposed operation the probe publishes for manual measurement.
+  app.advance();
+  assert.equal(app.state.generation, 1, "the advance must really have happened");
+  assert.equal(app.isBaselineFixtureActive(), false);
+
+  // One frame through the actual loop entry point.
+  app.frame(0);
+
+  assert.notEqual(
+    app.manualTestMode, "legibility",
+    "a frame may not be rendered under the legibility label over a non-baseline world"
+  );
+  assertInvariant(app, "after frame()");
+});
+
+test("§22 — renderLegibility refuses to paint a legibility frame off-baseline", async (t) => {
+  // Defence in depth: called directly, it must not draw the legibility layout over
+  // a world that is not the baseline.
+  const { app, restore } = harness();
+  t.after(restore);
+  await app.setManualTestMode("legibility");
+  app.advance();
+  app.renderLegibility();
+  assert.notEqual(app.manualTestMode, "legibility");
+  assertInvariant(app, "after renderLegibility()");
+});
+
+test("§22 — a running world never renders a legibility frame", async (t) => {
+  const { app, restore } = harness();
+  t.after(restore);
+  await app.setManualTestMode("legibility");
+  // Force the running path without going through setRunning(), the way a stale
+  // caller or a restored session might.
+  app.running = true;
+  app.lastAdvance = -100000;
+  app.frame(1000);
+  assertInvariant(app, "after a running frame");
+  assert.notEqual(app.manualTestMode, "legibility");
+});

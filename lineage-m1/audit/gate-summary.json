@@ -27,7 +27,7 @@
     "stageAOrder": {
       "status": "VIOLATED — principal decision required",
       "source": "audit/external-gate-status.json → gates.stageAOrder.status",
-      "note": "§24 Stage A pre-code planning order was violated and cannot be repaired retrospectively. DECISIONS.md D-000 and D-024. The waiver has not been requested; it is held until revision 7 survives the bounded closure audit.",
+      "note": "§24 Stage A pre-code planning order was violated and cannot be repaired retrospectively. DECISIONS.md D-000 and D-024. The waiver has not been requested; it is held until revision 8 survives the bounded closure audit.",
       "determinedBy": "the principal",
       "priority": 3,
       "milestoneStatusWhenUnsatisfied": "M1_BLOCKED — §24 STAGE A PROCESS DECISION OUTSTANDING"
@@ -35,7 +35,7 @@
     "independentClosureAudit": {
       "status": "PENDING",
       "source": "audit/external-gate-status.json → gates.independentClosureAudit.status",
-      "note": "Revisions 1 through 6 each returned BREAKS-FOUND, and in every case a green in-house suite coexisted with real defects. No automated pass is self-certified: until an independent closure audit of revision 7 says otherwise, the milestone stays blocked for implementation and evidence repairs. This gate is why a green suite does not by itself move the status.",
+      "note": "Revisions 1 through 7 each returned BREAKS-FOUND, and in every case a green in-house suite coexisted with real defects. No automated pass is self-certified: until an independent closure audit of revision 8 says otherwise, the milestone stays blocked for implementation and evidence repairs. This gate is why a green suite does not by itself move the status.",
       "determinedBy": "two independent audits: a structural code audit and an AFE-Δ evidence and claim audit",
       "priority": 1,
       "milestoneStatusWhenUnsatisfied": "M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED"
@@ -48,16 +48,18 @@
       "desktopCanvasMemory: UNVERIFIED",
       "stageAOrder: VIOLATED — principal decision required",
       "independentClosureAudit: PENDING",
-      "ipadGate: PENDING_HUMAN_DEVICE_TEST"
+      "ipadGate: PENDING_HUMAN_DEVICE_TEST [pending]"
     ],
     "automatedGatesPass": true,
     "externalBlockers": [
       "desktopCanvasMemory: UNVERIFIED",
       "stageAOrder: VIOLATED — principal decision required",
       "independentClosureAudit: PENDING",
-      "ipadGate: PENDING_HUMAN_DEVICE_TEST"
+      "ipadGate: PENDING_HUMAN_DEVICE_TEST [pending]"
     ],
-    "ipadStatus": "PENDING_HUMAN_DEVICE_TEST"
+    "ipadStatus": "PENDING_HUMAN_DEVICE_TEST",
+    "ipadClass": "pending",
+    "rejectedStatusStrings": []
   },
   "summary": {
     "total": 38,
@@ -707,7 +709,7 @@
       "evidenceSource": "audit/external-gate-status.json → gates.stageAOrder.status",
       "determinedBy": "the principal; a process decision no implementation can make for itself",
       "detail": "unrepairable retrospectively; DECISIONS.md D-000 and D-024",
-      "externalNote": "§24 Stage A pre-code planning order was violated and cannot be repaired retrospectively. DECISIONS.md D-000 and D-024. The waiver has not been requested; it is held until revision 7 survives the bounded closure audit.",
+      "externalNote": "§24 Stage A pre-code planning order was violated and cannot be repaired retrospectively. DECISIONS.md D-000 and D-024. The waiver has not been requested; it is held until revision 8 survives the bounded closure audit.",
       "mappedTests": []
     }
   ]

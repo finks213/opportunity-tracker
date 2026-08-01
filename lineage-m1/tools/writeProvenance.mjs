@@ -205,11 +205,46 @@ export function buildProvenance() {
 const isMain =
   process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isMain) {
+  // REVISION-8 REPAIR (revision-7 structural audit, Finding 4). Revision 7 said the
+  // writer "refuses to be written against a half-committed tree". It did not: it
+  // recorded the dirty state and exited 0. Reproduced by modifying tracked
+  // production source in a clone and running the shipped writer:
+  //
+  //   provenance.json: commit f49972a19093, 134 files hashed, working tree clean: false
+  //   uncommittedPaths: ["M lineage-m1/src/core/math.js"]   exit=0
+  //
+  // A later suite would have caught it, but the generator itself was fail-open, so
+  // an interrupted delivery could leave a confident-looking record of a tree no
+  // commit describes. It refuses now, before writing anything.
+  const preflight = gitFacts();
+  const dirtyBeyondSelf = (preflight.uncommittedPaths ?? [])
+    .map((line) => line.replace(/^\s*[A-Z?!]+\s+/, ""))
+    .filter((path) => !/audit\/provenance\.json$/.test(path));
+  const allowDirty = process.argv.includes("--allow-dirty");
+  if (preflight.resolved && dirtyBeyondSelf.length > 0 && !allowDirty) {
+    console.error(
+      "REFUSING to write audit/provenance.json: the working tree is dirty beyond the record itself.\n" +
+      dirtyBeyondSelf.map((p) => `  ${p}`).join("\n") +
+      "\n\nThis record binds the archive to a commit. Written now it would describe a tree no commit\n" +
+      "describes. Commit the changes first, then re-run. `--allow-dirty` writes anyway and marks the\n" +
+      "record provisional; it is for local inspection, never for a delivery."
+    );
+    process.exitCode = 1;
+  } else {
   const record = buildProvenance();
+  if (allowDirty && dirtyBeyondSelf.length > 0) {
+    record.provisional = {
+      reason: "written with --allow-dirty against a tree that is dirty beyond the record itself",
+      dirtyPaths: dirtyBeyondSelf,
+      note: "NOT a delivery record: it describes no single commit.",
+    };
+  }
   writeFileSync(join(ROOT, "audit", "provenance.json"), JSON.stringify(record, null, 2));
   const n = record.fileCount;
   console.error(
     `provenance.json: commit ${record.source.resolved ? record.source.shortCommit : "UNRESOLVED"}, ` +
-    `${n} files hashed, working tree clean: ${record.source.workingTreeClean}`
+    `${n} files hashed, working tree clean: ${record.source.workingTreeClean}` +
+    (record.provisional ? "  [PROVISIONAL — not a delivery record]" : "")
   );
+  }
 }

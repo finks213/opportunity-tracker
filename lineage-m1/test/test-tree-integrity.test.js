@@ -178,3 +178,50 @@ test("§20 — the scanner is deterministic and side-effect free on repeated cal
   const b = JSON.stringify(selfAuditScans());
   assert.equal(a, b, "two scans of an unchanged tree must agree exactly");
 });
+
+// ---------------------------------------------------------------------------
+// REVISION-8 REPAIR (revision-7 structural audit, Finding 2).
+//
+// The shipped revision-7 record contained three RED rounds —
+//
+//   round 1: 381/384, 3 failing, exit 1
+//   round 2: 381/384, 3 failing, exit 1
+//   round 3: 381/384, 3 failing, exit 1
+//   allRunsGreen: false
+//
+// — while `audit/gate-summary.json` reported all 35 automated gates passing and the
+// report said every automated result was reproducible. Nothing read `allRunsGreen`:
+// the tool's exit code checked only whether `src/` had changed, and no test checked
+// the record at all. These close that loop.
+// ---------------------------------------------------------------------------
+
+test("§20 — the committed tree-integrity record is a VALID proof, not merely a run", () => {
+  const rec = JSON.parse(readFileSync(join(ROOT, "audit", "tree-integrity.json"), "utf8"));
+  assert.equal(rec.treeUnchangedThroughout, true, "the source tree must be unchanged throughout");
+  assert.deepEqual(rec.deviations, [], "no sampled deviation may be recorded");
+  assert.equal(rec.allRunsParsed, true, "every round's suite summary must have been parseable");
+  assert.equal(rec.allRunsGreen, true, "every round's suite run must have been green");
+  assert.equal(rec.proofValid, true, "and the record must say the proof holds");
+  assert.ok(rec.runs.length >= 1);
+  for (const r of rec.runs) {
+    assert.equal(r.parsed, true, "an unparseable round proves nothing");
+    assert.equal(r.fail, 0, `a round with ${r.fail} failures cannot support the claim`);
+    assert.equal(r.exitCode, 0);
+  }
+});
+
+test("§20 — the tool fails the command when its own rounds do not support the claim", () => {
+  // A static check of the exit condition, so the fail-open path cannot return: the
+  // command must key on the whole proof, not just on file mutation.
+  const src = readFileSync(join(ROOT, "tools", "proveTreeIntegrity.mjs"), "utf8");
+  assert.ok(
+    /if \(!record\.proofValid\) \{/.test(src),
+    "the exit condition must be the validity of the proof"
+  );
+  assert.ok(
+    !/if \(!record\.treeUnchangedThroughout\) process\.exitCode = 1;/.test(src),
+    "the revision-7 condition ignored red and unparseable rounds"
+  );
+  // ...and the reporter is pinned, so the summary form is not the runtime's choice.
+  assert.ok(/--test-reporter=tap/.test(src), "the TAP reporter must be pinned");
+});
