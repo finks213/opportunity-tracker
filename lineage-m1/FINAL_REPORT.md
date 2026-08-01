@@ -457,11 +457,11 @@ it ran, which is why the memory channel is probed per run rather than assumed.
 | Measure | Normal mode | Render-stress |
 |---|---|---|
 | glyphs drawn | live world (224 animals) | 360 (declared 360, matches: true) |
-| frames sampled | 180 | 1472 |
-| median frame time | 16.60 ms | 16.70 ms |
-| 95th-percentile frame time | 17.20 ms | 17.50 ms |
-| maximum after warm-up | 19.30 ms | 47.50 ms |
-| p95 input-to-next-paint | not sampled | 13.20 ms (21 actions) |
+| frames sampled | 180 | 1504 |
+| median frame time | 16.70 ms | 16.70 ms |
+| 95th-percentile frame time | 17.40 ms | 18.10 ms |
+| maximum after warm-up | 20.30 ms | 49.70 ms |
+| p95 input-to-next-paint | not sampled | 13.80 ms (21 actions) |
 | page errors | 0 | 0 |
 
 ### Generation semantics (explicit, not inferred)
@@ -508,8 +508,8 @@ not ask is worse than an honest `UNVERIFIED`. The probe result is in the raw JSO
 |---|---|
 | channel | `node:process.memoryUsage()` |
 | measures Canvas or browser memory | **false** |
-| heapUsed before → after | 25,016,792 → 61,704,128 bytes (Δ 36,687,336) |
-| RSS before → after | 93,687,808 → 158,539,776 bytes (Δ 64,851,968) |
+| heapUsed before → after | 25,071,416 → 60,925,584 bytes (Δ 35,854,168) |
+| RSS before → after | 93,880,320 → 159,645,696 bytes (Δ 65,765,376) |
 | retained genealogy records | 22,470 |
 | living individuals | 224 |
 
