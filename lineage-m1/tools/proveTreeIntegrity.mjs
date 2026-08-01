@@ -111,7 +111,14 @@ if (isMain) {
       ["-c",
         `node --test --test-reporter=tap --test-timeout=3600000 ` +
         `--test-concurrency=${concurrency} test/*.test.js`],
-      { cwd: ROOT }
+      {
+        cwd: ROOT,
+        // Marks the suite as running INSIDE this proof. The record-validity test
+        // asserts `proofValid` only outside that context: while the proof is being
+        // produced, the record on disk is still the previous run's, so requiring it
+        // to be valid here would make a failed record permanently unfixable.
+        env: { ...process.env, LINEAGE_IN_TREE_INTEGRITY: "1" },
+      }
     );
     let out = "";
     child.stdout.on("data", (d) => { out += d; });

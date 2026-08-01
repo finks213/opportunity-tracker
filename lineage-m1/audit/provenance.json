@@ -4,11 +4,11 @@
   "purpose": "Bind this bundle to the source revision that produced it, without shipping .git. EVERY shipped file is hashed — production source, tests, tools, evidence, reports and package files — and `tools/verifyProvenance.mjs` recomputes all of them from an extraction.",
   "source": {
     "resolved": true,
-    "commit": "08a0a1c178c898b92c0f03240b987be9050318f0",
-    "shortCommit": "08a0a1c178c8",
+    "commit": "f95589fc529c8b7e4e896a89003bb274e37ba262",
+    "shortCommit": "f95589fc529c",
     "branch": "claude/lineage-m1-implementation-1m9zpq",
-    "treeHash": "310e899b4c14c451367cffcea02153f6016e1064",
-    "committedAt": "2026-08-01T03:34:30+00:00",
+    "treeHash": "7524c36d0cdf95550057805eca7b53532de06595",
+    "committedAt": "2026-08-01T03:39:02+00:00",
     "workingTreeClean": true,
     "uncommittedPaths": []
   },
@@ -24,11 +24,11 @@
   },
   "testResults": {
     "path": "audit/test-results.txt",
-    "sha256": "49293efee7aafa29c9392442425e5139559ab6760af2e5e8dc94d1dc619254a5",
-    "bytes": 85670,
-    "tests": 384,
-    "pass": 384,
-    "fail": 0,
+    "sha256": "7862a87c43f59adfdcfc2d6ddbaeaf705cc9e991c88431aae117db6ce7346ade",
+    "bytes": 89943,
+    "tests": 398,
+    "pass": 397,
+    "fail": 1,
     "boundBy": "bytes",
     "note": "Bound by its exact SHA-256, like every other shipped file (revision-7, Finding 3). Revision 6 exempted this file and checked only its three summary counts, so a non-summary line could be rewritten without detection. The suite that republishes it necessarily makes the working tree differ from this record until `npm run audit:provenance` is re-run; that is a regeneration step, not a verification exemption, and the DELIVERED archive is built after it."
   },
@@ -36,12 +36,16 @@
     "status": "M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED",
     "mayDeclareCompletion": false,
     "blockers": [
+      "the build-blocking suite reported failures",
+      "1 automated gate(s) FAIL: fullSuite",
+      "34 automated gate(s) UNVERIFIED: fixtureIntegrity, fixtureRoundTrip, deterministicHydration, pairedWorlds, exactProbability, matchedTrajectory, meaningfulTraits, birthImmutability, observerInvariance, noObserverDeps, neutralTraits, mutationIndependence, mutationProvenance, allocationOpportunity, spatialIntegrity, lifecycle, genealogyIntegrity, genealogyBounded, survivalComposition, rngIntegrity, populationGuardrails, traversal, desktopMeasurement, modelIdentity, modelHashProvenance, legibilitySelfContained, worldLoadRaceSafety, observerTransaction, generationResultImmutable, focalLineage, referencesUnchanged, reportIntegrity, testTreeIntegrity, reportDeterminism",
+      "1 failing test(s) map to no declared gate",
       "desktopCanvasMemory: UNVERIFIED",
       "stageAOrder: VIOLATED — principal decision required",
       "independentClosureAudit: PENDING",
       "ipadGate: PENDING_HUMAN_DEVICE_TEST [pending]"
     ],
-    "automatedGatesPass": true,
+    "automatedGatesPass": false,
     "externalBlockers": [
       "desktopCanvasMemory: UNVERIFIED",
       "stageAOrder: VIOLATED — principal decision required",
@@ -53,7 +57,7 @@
     "rejectedStatusStrings": []
   },
   "fileCount": 136,
-  "shippedTreeDigest": "5045f9cb58f40b261e24a889a3d57aab945dda8b12ad8fe4d427c599843478a4",
+  "shippedTreeDigest": "537e4b3ff142d6ee89b98e7840b7ac9061a096645418ae078d3d8ca190317869",
   "files": {
     "AUDIT_PACKAGE_MANIFEST.md": {
       "sha256": "fb4ca8a18ec3f5ede307f19137ba8de38c3996fd41b750dd901eb129b5e2aeb3",
@@ -72,8 +76,8 @@
       "bytes": 54972
     },
     "FINAL_REPORT.md": {
-      "sha256": "f2487caa83e57b22815302292946f16664a7f2737d09a90dc971d8134a5484ca",
-      "bytes": 38032
+      "sha256": "9f94655b7b312fce8a30bdd01b801ce49ea14fc7564fb87f1075d162d597e988",
+      "bytes": 39231
     },
     "IPAD_TEST_CHECKLIST.md": {
       "sha256": "85ec6f84d57bcd533f64deb5b2f71ae975a3ffeebe16f9b87439854a539a2929",
@@ -140,8 +144,8 @@
       "bytes": 184847
     },
     "audit/gate-summary.json": {
-      "sha256": "1b989af5a1ac79ff6cdb25c9aa6f474a1789d2d4c1c54a179629d0c3df72a331",
-      "bytes": 26843
+      "sha256": "3b7029ca628eb7cb00bbaf3a6d6a68aa49a21fe80ae00f1bad47019d3f8f85ac",
+      "bytes": 27968
     },
     "audit/meaningful-trait-gate.json": {
       "sha256": "e8a00dc832f2a1bb15cada4f159e0a92a90c7bf4c95e4b220d039c8225166519",
@@ -160,8 +164,8 @@
       "bytes": 3632
     },
     "audit/test-results.txt": {
-      "sha256": "49293efee7aafa29c9392442425e5139559ab6760af2e5e8dc94d1dc619254a5",
-      "bytes": 85670
+      "sha256": "7862a87c43f59adfdcfc2d6ddbaeaf705cc9e991c88431aae117db6ce7346ade",
+      "bytes": 89943
     },
     "audit/tree-integrity.json": {
       "sha256": "c0a590c5921a3f5aa6e94cf398eb4a07d5002c440f6501029948d8c7f982856e",
@@ -606,8 +610,8 @@
     "note": "An archive cannot contain its own hash, so no file inside it can record one: writing the value here would require rebuilding the archive, which changes the value. The SHA-256 is published with the delivery message. Verify with `sha256sum` against that value, then verify every file below against this record from the extraction."
   },
   "archiveRelationToCommit": {
-    "describesCommit": "08a0a1c178c898b92c0f03240b987be9050318f0",
-    "treeHash": "310e899b4c14c451367cffcea02153f6016e1064",
+    "describesCommit": "f95589fc529c8b7e4e896a89003bb274e37ba262",
+    "treeHash": "7524c36d0cdf95550057805eca7b53532de06595",
     "identicalExcept": [
       "audit/provenance.json"
     ],

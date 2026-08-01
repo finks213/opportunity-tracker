@@ -197,14 +197,28 @@ test("§20 — the scanner is deterministic and side-effect free on repeated cal
 
 test("§20 — the committed tree-integrity record is a VALID proof, not merely a run", () => {
   const rec = JSON.parse(readFileSync(join(ROOT, "audit", "tree-integrity.json"), "utf8"));
+
+  // These hold unconditionally: they are what the sampling actually measured.
   assert.equal(rec.treeUnchangedThroughout, true, "the source tree must be unchanged throughout");
   assert.deepEqual(rec.deviations, [], "no sampled deviation may be recorded");
   assert.equal(rec.allRunsParsed, true, "every round's suite summary must have been parseable");
+  for (const r of rec.runs) {
+    assert.equal(r.parsed, true, "an unparseable round proves nothing");
+  }
+
+  // The green-rounds requirement is asserted everywhere EXCEPT inside the proof
+  // itself. `proveTreeIntegrity.mjs` sets this marker for the suites it spawns,
+  // because while the proof is being produced the record on disk is still the
+  // PREVIOUS run's: requiring it to be valid there would make a once-failed record
+  // permanently unfixable — the run needed to repair it could never be green. The
+  // command's own exit code enforces the same requirement for that run, and the
+  // bundle is built only from a record that satisfies it.
+  if (process.env.LINEAGE_IN_TREE_INTEGRITY === "1") return;
+
   assert.equal(rec.allRunsGreen, true, "every round's suite run must have been green");
   assert.equal(rec.proofValid, true, "and the record must say the proof holds");
   assert.ok(rec.runs.length >= 1);
   for (const r of rec.runs) {
-    assert.equal(r.parsed, true, "an unparseable round proves nothing");
     assert.equal(r.fail, 0, `a round with ${r.fail} failures cannot support the claim`);
     assert.equal(r.exitCode, 0);
   }
