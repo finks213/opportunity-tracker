@@ -1,16 +1,17 @@
 {
   "schema": "lineage-m1-provenance-2",
   "contractSection": "23 / 27 (delivery and audit evidence)",
-  "purpose": "Bind this bundle to the source revision that produced it, without shipping .git. EVERY shipped file is hashed — production source, tests, tools, evidence, reports and package files — and `tools/verifyProvenance.mjs` recomputes all of them from an extraction.",
+  "purpose": "Bind this bundle to the source revision that produced it, without shipping .git. Every shipped file EXCEPT this record is hashed — production source, tests, tools, evidence, reports and package files — and `tools/verifyProvenance.mjs` recomputes all of them from an extraction. This record cannot hash itself; the published ZIP SHA-256 binds the complete archive, including this record.",
   "source": {
     "resolved": true,
-    "commit": "1fbacffd59dada796a0294020d1160f513fc43f6",
-    "shortCommit": "1fbacffd59da",
+    "commit": "90de565b6bfe41d7a2ee02791501c498f636e55a",
+    "shortCommit": "90de565b6bfe",
     "branch": "claude/lineage-m1-implementation-1m9zpq",
-    "treeHash": "d76356ddc628dfa49165e581c1cdbc6fac3dca4f",
-    "committedAt": "2026-08-01T05:25:29+00:00",
+    "treeHash": "7292c5abf54de70e4e28ada685f29b614a15b848",
+    "committedAt": "2026-08-01T09:21:08+00:00",
     "workingTreeClean": true,
-    "uncommittedPaths": []
+    "uncommittedPaths": [],
+    "pathPrefix": "lineage-m1/"
   },
   "model": {
     "configVersion": "lineage-m1-config-2",
@@ -52,12 +53,12 @@
     "ipadClass": "pending",
     "rejectedStatusStrings": []
   },
-  "fileCount": 136,
-  "shippedTreeDigest": "e59e08371f48217b68331ab02afc87ff20346d533bfbd728bb54c4d630f51dbd",
+  "fileCount": 139,
+  "shippedTreeDigest": "82a13367ef14e251f42d08f8df6300d617c7fb7075d2b1e10f48d4f337711489",
   "files": {
     "AUDIT_PACKAGE_MANIFEST.md": {
-      "sha256": "fb4ca8a18ec3f5ede307f19137ba8de38c3996fd41b750dd901eb129b5e2aeb3",
-      "bytes": 35341
+      "sha256": "a00f2d7a0c9c50d9fa5c78d2a13e238aa9dc8c8f4af3634b581b40508585000f",
+      "bytes": 36261
     },
     "CHARACTERIZATION.md": {
       "sha256": "01f2b6b63038669297fc7be914065845da8ea1108a2691303b5233649faef25a",
@@ -72,7 +73,7 @@
       "bytes": 54972
     },
     "FINAL_REPORT.md": {
-      "sha256": "5146dea256ef474c437e02f9eed4e42d5509d12ea6fe40c7061e3c0bcdeb5166",
+      "sha256": "f0c4cf2f6d52a454806472d7b8c663274e26d1dd3a3500eba37c2ca061b9236e",
       "bytes": 38032
     },
     "IPAD_TEST_CHECKLIST.md": {
@@ -100,8 +101,12 @@
       "bytes": 27985
     },
     "REVISION_7_REPAIR_RECORD.md": {
-      "sha256": "32d3115b0c1af93b8e9d84e29b9ab53be7584ca183255e7523bf81d19fea0439",
-      "bytes": 18735
+      "sha256": "4b49980fa06cee28bed7fa81f5478192b82fd91f258b955063fbb016c302d03b",
+      "bytes": 18760
+    },
+    "REVISION_8_1_DELIVERY_CORRECTION.md": {
+      "sha256": "d9b860c90abd1e497084d8c5e09402e17f73e5afa4616a2438012f9c6cb1e3c9",
+      "bytes": 9156
     },
     "REVISION_8_REPAIR_RECORD.md": {
       "sha256": "c8ab597a7f6e097f51701a60d2dab8f37f3e24437d0ab06260b61bfec7f818a0",
@@ -132,16 +137,16 @@
       "bytes": 256588
     },
     "audit/external-gate-status.json": {
-      "sha256": "39d3864499cbf50b68edb16c33cf44f9a82c1988a94ca2661fdc4bafeddcdd1d",
-      "bytes": 4267
+      "sha256": "7453fd0d76d8c1069c934fb3caafbdc1c4e75d916dcfb073996c684243cc112d",
+      "bytes": 4402
     },
     "audit/fixture-results.json": {
       "sha256": "d5a40817ed3458aff2a068927ea2621895a1bcfdb357dba20dfd77db1abb4c01",
       "bytes": 184847
     },
     "audit/gate-summary.json": {
-      "sha256": "05086a62b6e1aafdee16a2b90fe54b71d4099c26e2dfa3e497ba714cad0b2b2d",
-      "bytes": 26843
+      "sha256": "1f3dde6cc2f0561fada5878c040bcde70748d25e99c36f3207319c5be027a10b",
+      "bytes": 26681
     },
     "audit/meaningful-trait-gate.json": {
       "sha256": "e8a00dc832f2a1bb15cada4f159e0a92a90c7bf4c95e4b220d039c8225166519",
@@ -200,8 +205,8 @@
       "bytes": 1870
     },
     "src/config/milestoneStatus.js": {
-      "sha256": "a3d6e14087416d2c98c54aaaba2368d69c3b844a4ba681675da42d9574efe359",
-      "bytes": 4101
+      "sha256": "3ad0aeafaa65cb80c5221bb3292b353d7891cc21b7e84e0d445029e933c53752",
+      "bytes": 4549
     },
     "src/config/modelConfig.js": {
       "sha256": "88018d11ca4ab41cdad357a3db708a575c4ce3c8f0564572445d72881003e8ff",
@@ -326,6 +331,10 @@
     "styles.css": {
       "sha256": "8bda22096ae122065258ba48e4d0ac8c9d9740819c4a4558e956afc052046781",
       "bytes": 3576
+    },
+    "test/acceptance-tool-hardening.test.js": {
+      "sha256": "0b030bd3a1bdc415e07a8607296cc94f6bb0f914d77c24d50067a8f0b5e55d8f",
+      "bytes": 17637
     },
     "test/allocation-mutation-contract.test.js": {
       "sha256": "09d0f86dec0c4da132808f60973e46609f3bb260dc89ee5633e0ff34a17b7123",
@@ -500,12 +509,12 @@
       "bytes": 8146
     },
     "test/status-consistency.test.js": {
-      "sha256": "8192cbd94322a37ed71ef6b9c76b30da06742372df199776095e82457c9bc609",
-      "bytes": 11318
+      "sha256": "a925911d926a8f4638324bb3b9b3720d20e2a491948f54a8da90b3a257daca6b",
+      "bytes": 11631
     },
     "test/status-derivation-hardening.test.js": {
-      "sha256": "1c578d48a97395434032bbe55e1647882c6f94a361bbece6ca576aa4a6273d7f",
-      "bytes": 7607
+      "sha256": "14aba935e86c330163398126755aa331127373415773b6eb47a54be868295dd1",
+      "bytes": 8060
     },
     "test/status-truth-table.test.js": {
       "sha256": "f61556b885086d67e50f29782cf1d6d01d66c45838c7e1a174bb0250a75dd9fe",
@@ -516,8 +525,8 @@
       "bytes": 4111
     },
     "test/test-tree-integrity.test.js": {
-      "sha256": "b282f07fbb77fa5b591c309cf0b685b303d30970ef90196eaef074e7d7072150",
-      "bytes": 10997
+      "sha256": "1d86820b66ec80f508dec783b9828ee6ec9d6fa80560a3644fc6cf2bf236263b",
+      "bytes": 12083
     },
     "test/traversal-label-integrity.test.js": {
       "sha256": "656ff6acb8a03860ef0eea7e4b33e0c222989925af68569cab39b77922a8ce4a",
@@ -536,16 +545,16 @@
       "bytes": 2943
     },
     "tools/gateRegistry.mjs": {
-      "sha256": "5b06efa88a07edc34994d2a25798b4c74693109e00dddf46b2fd0958e1c7db83",
-      "bytes": 29716
+      "sha256": "e4b8400abf6207c76defd9c4c1c891ddfe4262698b23ffbbf459e6be7f282028",
+      "bytes": 31278
     },
     "tools/measureDesktop.mjs": {
       "sha256": "6b141f492d92fb324b632b00bc75b33eb7c34d4d2728dac691e971874f886707",
       "bytes": 23661
     },
     "tools/proveTreeIntegrity.mjs": {
-      "sha256": "43c8592d32609bc17855421e5521d7826b114d110cb4d24d3e8d734ead71ba34",
-      "bytes": 7909
+      "sha256": "49a079cc20a2ee32a9bc88edc66800fadc7308853fc732c481af183913ff95b5",
+      "bytes": 12163
     },
     "tools/runCharacterization.mjs": {
       "sha256": "c7d1c28a3d3af02c408604e1afd45b3ea634095b5fda2efb43ee447c7efbf7f0",
@@ -572,8 +581,8 @@
       "bytes": 5951
     },
     "tools/verifyProvenance.mjs": {
-      "sha256": "27d6163c74dead1339b8cf805c220c65ba074d693188024f6a7c9d6d0506f232",
-      "bytes": 5379
+      "sha256": "2b0a3270b04e69a3ab98c190e0dcc46700a2c6255c56033b5f57fbeb001a0dcc",
+      "bytes": 7681
     },
     "tools/writeAuditEvidence.mjs": {
       "sha256": "f41e6bb3b0364946c7adcf52c2a23d360d4e65e439a4ea89e59449421f9e2b57",
@@ -592,22 +601,26 @@
       "bytes": 64438
     },
     "tools/writeManifestPaths.mjs": {
-      "sha256": "a83e912c2601ab32c12cbcd5bda5d8760bf5f6bae2ee44f078a1982749d7ad3e",
-      "bytes": 4649
+      "sha256": "0aac590dfdc8e42cb6f0dfd49fce851f25d95ab8e46d2052dd19c0725e82a548",
+      "bytes": 5398
     },
     "tools/writeProvenance.mjs": {
-      "sha256": "93adf7a10e9579ae844cde1e8370fdff1a430aba226551aa31a64776c6183740",
-      "bytes": 12072
+      "sha256": "fc359c9b5620f81b4a23d41282521415d30ca07cdb9a51cc613d1bead281f9c0",
+      "bytes": 13364
+    },
+    "tree-integrity.config.json": {
+      "sha256": "c90ce3751f6575c4bf97263cb4f7d55e657fde0f2199047b2afd88f53bec688f",
+      "bytes": 633
     }
   },
   "archive": {
-    "name": "LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV8.zip",
+    "name": "LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV8_1.zip",
     "sha256": null,
     "note": "An archive cannot contain its own hash, so no file inside it can record one: writing the value here would require rebuilding the archive, which changes the value. The SHA-256 is published with the delivery message. Verify with `sha256sum` against that value, then verify every file below against this record from the extraction."
   },
   "archiveRelationToCommit": {
-    "describesCommit": "1fbacffd59dada796a0294020d1160f513fc43f6",
-    "treeHash": "d76356ddc628dfa49165e581c1cdbc6fac3dca4f",
+    "describesCommit": "90de565b6bfe41d7a2ee02791501c498f636e55a",
+    "treeHash": "7292c5abf54de70e4e28ada685f29b614a15b848",
     "identicalExcept": [
       "audit/provenance.json"
     ],
@@ -622,7 +635,7 @@
   "verification": [
     "sha256sum LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV*.zip   # compare with the published value",
     "unzip -q LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV*.zip && cd lineage-m1",
-    "node tools/verifyProvenance.mjs      # recomputes every shipped file's hash, strictly",
+    "node tools/verifyProvenance.mjs      # recomputes every recorded file's hash, strictly",
     "npm test                             # the suite, from the extraction, with no install"
   ]
 }
