@@ -4,11 +4,11 @@
   "purpose": "Bind this bundle to the source revision that produced it, without shipping .git. EVERY shipped file is hashed — production source, tests, tools, evidence, reports and package files — and `tools/verifyProvenance.mjs` recomputes all of them from an extraction.",
   "source": {
     "resolved": true,
-    "commit": "dfc6af701258789a9cbdfd71acc9057963f2c0ef",
-    "shortCommit": "dfc6af701258",
+    "commit": "1fbacffd59dada796a0294020d1160f513fc43f6",
+    "shortCommit": "1fbacffd59da",
     "branch": "claude/lineage-m1-implementation-1m9zpq",
-    "treeHash": "e5e82c61c8cdc80a7f6e41625d73d9f3ee711af7",
-    "committedAt": "2026-08-01T05:06:42+00:00",
+    "treeHash": "d76356ddc628dfa49165e581c1cdbc6fac3dca4f",
+    "committedAt": "2026-08-01T05:25:29+00:00",
     "workingTreeClean": true,
     "uncommittedPaths": []
   },
@@ -53,7 +53,7 @@
     "rejectedStatusStrings": []
   },
   "fileCount": 136,
-  "shippedTreeDigest": "4ab9c77f0f7656ec456863bb79d42f8c3d4c7dd8efb314417ba6374e7a25fc6c",
+  "shippedTreeDigest": "e59e08371f48217b68331ab02afc87ff20346d533bfbd728bb54c4d630f51dbd",
   "files": {
     "AUDIT_PACKAGE_MANIFEST.md": {
       "sha256": "fb4ca8a18ec3f5ede307f19137ba8de38c3996fd41b750dd901eb129b5e2aeb3",
@@ -164,7 +164,7 @@
       "bytes": 89335
     },
     "audit/tree-integrity.json": {
-      "sha256": "fde770b8fab97c4abd170859c8671035784bb81aef8951273642a2f811e2c846",
+      "sha256": "542f2392655ee5b8a4e9594ef5fb59067ffd4edb37e05aa533e5b2c9d63ed487",
       "bytes": 1163
     },
     "fixtures/defining_fixture_v1.json": {
@@ -606,8 +606,8 @@
     "note": "An archive cannot contain its own hash, so no file inside it can record one: writing the value here would require rebuilding the archive, which changes the value. The SHA-256 is published with the delivery message. Verify with `sha256sum` against that value, then verify every file below against this record from the extraction."
   },
   "archiveRelationToCommit": {
-    "describesCommit": "dfc6af701258789a9cbdfd71acc9057963f2c0ef",
-    "treeHash": "e5e82c61c8cdc80a7f6e41625d73d9f3ee711af7",
+    "describesCommit": "1fbacffd59dada796a0294020d1160f513fc43f6",
+    "treeHash": "d76356ddc628dfa49165e581c1cdbc6fac3dca4f",
     "identicalExcept": [
       "audit/provenance.json"
     ],
