@@ -4,11 +4,11 @@
   "purpose": "Bind this bundle to the source revision that produced it, without shipping .git. EVERY shipped file is hashed — production source, tests, tools, evidence, reports and package files — and `tools/verifyProvenance.mjs` recomputes all of them from an extraction.",
   "source": {
     "resolved": true,
-    "commit": "324017151a57e44349dee290f7bc01fac63b1297",
-    "shortCommit": "324017151a57",
+    "commit": "08a0a1c178c898b92c0f03240b987be9050318f0",
+    "shortCommit": "08a0a1c178c8",
     "branch": "claude/lineage-m1-implementation-1m9zpq",
-    "treeHash": "21e4b1a85ef762511d72f5a160b2b18352515738",
-    "committedAt": "2026-07-31T10:19:47+00:00",
+    "treeHash": "310e899b4c14c451367cffcea02153f6016e1064",
+    "committedAt": "2026-08-01T03:34:30+00:00",
     "workingTreeClean": true,
     "uncommittedPaths": []
   },
@@ -39,23 +39,25 @@
       "desktopCanvasMemory: UNVERIFIED",
       "stageAOrder: VIOLATED — principal decision required",
       "independentClosureAudit: PENDING",
-      "ipadGate: PENDING_HUMAN_DEVICE_TEST"
+      "ipadGate: PENDING_HUMAN_DEVICE_TEST [pending]"
     ],
     "automatedGatesPass": true,
     "externalBlockers": [
       "desktopCanvasMemory: UNVERIFIED",
       "stageAOrder: VIOLATED — principal decision required",
       "independentClosureAudit: PENDING",
-      "ipadGate: PENDING_HUMAN_DEVICE_TEST"
+      "ipadGate: PENDING_HUMAN_DEVICE_TEST [pending]"
     ],
-    "ipadStatus": "PENDING_HUMAN_DEVICE_TEST"
+    "ipadStatus": "PENDING_HUMAN_DEVICE_TEST",
+    "ipadClass": "pending",
+    "rejectedStatusStrings": []
   },
-  "fileCount": 134,
-  "shippedTreeDigest": "7c186727c20fec3e124da965a7ec977b4eb8598eff9e1a3eebe3cf1c61418126",
+  "fileCount": 136,
+  "shippedTreeDigest": "5045f9cb58f40b261e24a889a3d57aab945dda8b12ad8fe4d427c599843478a4",
   "files": {
     "AUDIT_PACKAGE_MANIFEST.md": {
-      "sha256": "cc1c5ecb20eaa4a5be87c953c0644e01e1ae464616d59e13be587f59dd5860cf",
-      "bytes": 33444
+      "sha256": "fb4ca8a18ec3f5ede307f19137ba8de38c3996fd41b750dd901eb129b5e2aeb3",
+      "bytes": 35341
     },
     "CHARACTERIZATION.md": {
       "sha256": "01f2b6b63038669297fc7be914065845da8ea1108a2691303b5233649faef25a",
@@ -70,11 +72,11 @@
       "bytes": 54972
     },
     "FINAL_REPORT.md": {
-      "sha256": "2984a5da652e52b306d0af93365644ce968e05e8d604d1a2c9a2a59f4f7ded8f",
-      "bytes": 38013
+      "sha256": "f2487caa83e57b22815302292946f16664a7f2737d09a90dc971d8134a5484ca",
+      "bytes": 38032
     },
     "IPAD_TEST_CHECKLIST.md": {
-      "sha256": "43b539e8003b703b4c1ac737afaaff4ba252b92f143267ced231957bc54fff3b",
+      "sha256": "85ec6f84d57bcd533f64deb5b2f71ae975a3ffeebe16f9b87439854a539a2929",
       "bytes": 5807
     },
     "PLAN.md": {
@@ -82,8 +84,8 @@
       "bytes": 8214
     },
     "README.md": {
-      "sha256": "393f386117d3f572f922354536126a5dc8b34eeff7d7992c0e4c970f6ffa6f38",
-      "bytes": 8111
+      "sha256": "6e22ca6cfc74a5c73db876dbb041f08de3e01e41eed4a4e7fe80a5709315e2f6",
+      "bytes": 8217
     },
     "REVISION_4_REPAIR_RECORD.md": {
       "sha256": "0ad419458b3bbb7177d020602af5140e2422a5ceed93554b7be91ac288c2f84b",
@@ -100,6 +102,10 @@
     "REVISION_7_REPAIR_RECORD.md": {
       "sha256": "32d3115b0c1af93b8e9d84e29b9ab53be7584ca183255e7523bf81d19fea0439",
       "bytes": 18735
+    },
+    "REVISION_8_REPAIR_RECORD.md": {
+      "sha256": "ddba4208395516a9dc9d7c9f09c26de5e3eaa8e5e39e10e427a8c7700b54a6fd",
+      "bytes": 8572
     },
     "STRUCTURAL_AUDIT_REPAIR_RECORD.md": {
       "sha256": "74f4a935c73168fe8871a9133143fc3fb02f358d14c698e76f4a376f9d0be6ab",
@@ -118,24 +124,24 @@
       "bytes": 1436815
     },
     "audit/desktop-measurements.json": {
-      "sha256": "1431f39eebd682bacfeefac5a436c281676f007c6b83921fb1f66f98bbec1da5",
-      "bytes": 6278
+      "sha256": "6eae5aaf267a35e0362afe587aaadef4583b553360e022fb2b81440a139807eb",
+      "bytes": 6306
     },
     "audit/edge-only-traversal-results.json": {
       "sha256": "7589820adba42bff0d04625cae3d01cebf3560db6385eb2352306dde56701c33",
       "bytes": 256588
     },
     "audit/external-gate-status.json": {
-      "sha256": "5140b22043c9b0498bf330afbda356fc48678ae0eb7168ea2a19b4ccf612b2ef",
-      "bytes": 4079
+      "sha256": "39d3864499cbf50b68edb16c33cf44f9a82c1988a94ca2661fdc4bafeddcdd1d",
+      "bytes": 4267
     },
     "audit/fixture-results.json": {
       "sha256": "d5a40817ed3458aff2a068927ea2621895a1bcfdb357dba20dfd77db1abb4c01",
       "bytes": 184847
     },
     "audit/gate-summary.json": {
-      "sha256": "035259017991dd2ac2ff63cf723ebe79558543d7450978864f33176619cfad5c",
-      "bytes": 26762
+      "sha256": "1b989af5a1ac79ff6cdb25c9aa6f474a1789d2d4c1c54a179629d0c3df72a331",
+      "bytes": 26843
     },
     "audit/meaningful-trait-gate.json": {
       "sha256": "e8a00dc832f2a1bb15cada4f159e0a92a90c7bf4c95e4b220d039c8225166519",
@@ -150,7 +156,7 @@
       "bytes": 1207
     },
     "audit/runtime-matrix.json": {
-      "sha256": "7c1fcb1007f2bca833e47e201fac7ac1b3b594cbe6931dd92a592049dff11756",
+      "sha256": "c40ff1d4a7ea299b392333c7c549d412e1203e7f96895e8e3a56924f27624b52",
       "bytes": 3632
     },
     "audit/test-results.txt": {
@@ -194,7 +200,7 @@
       "bytes": 1870
     },
     "src/config/milestoneStatus.js": {
-      "sha256": "fcd31bad8e91a4dcc3de7a799d174f05a63d48191b0b10ad607d4865258af549",
+      "sha256": "a3d6e14087416d2c98c54aaaba2368d69c3b844a4ba681675da42d9574efe359",
       "bytes": 4101
     },
     "src/config/modelConfig.js": {
@@ -302,8 +308,8 @@
       "bytes": 1781
     },
     "src/main.js": {
-      "sha256": "5f38ecddb0433fd9ccbdf86d1cbc7dc328edc90d2121a7e653f406d7a183f7ce",
-      "bytes": 34814
+      "sha256": "3ba47457c111c6ee77a5bf97a269608f5146822047ae94e86152d408e7db5745",
+      "bytes": 35894
     },
     "src/observer/currentZoneBins.js": {
       "sha256": "bdf38aee79aba2b5837e0fa6006704fa3131f04dd0ac5efd56127c49a8c10804",
@@ -398,8 +404,8 @@
       "bytes": 1576
     },
     "test/legibility-invariant.test.js": {
-      "sha256": "88c82d998ecfee70f9f3a07f7fd3b6cbf8750f441e479eebf4213df8cea632f5",
-      "bytes": 7560
+      "sha256": "869559b3932bb5a879f8371c3a7ba5d650232c30c10b4fae1b638f79371f22ff",
+      "bytes": 10010
     },
     "test/lifecycle-contract.test.js": {
       "sha256": "b1719ebcc779ebe9a874cb3cf82a6d8ce94810a80afa1841cf242aa74c673fcf",
@@ -462,8 +468,8 @@
       "bytes": 18947
     },
     "test/provenance-binding.test.js": {
-      "sha256": "b3b43974532721662bad376efba8321eadc6b84f17eb3953c3df18daea45297a",
-      "bytes": 10995
+      "sha256": "6811ddeb408b323bc187f9e123762a4005d7361941648899fabd9d2fc8eb96dc",
+      "bytes": 14424
     },
     "test/report-determinism.test.js": {
       "sha256": "a4a1aad30117dcb9a055d7ec5f26d9deba568c0f952397dddbd1c0863b4da926",
@@ -497,6 +503,10 @@
       "sha256": "8192cbd94322a37ed71ef6b9c76b30da06742372df199776095e82457c9bc609",
       "bytes": 11318
     },
+    "test/status-derivation-hardening.test.js": {
+      "sha256": "1c578d48a97395434032bbe55e1647882c6f94a361bbece6ca576aa4a6273d7f",
+      "bytes": 7607
+    },
     "test/status-truth-table.test.js": {
       "sha256": "f61556b885086d67e50f29782cf1d6d01d66c45838c7e1a174bb0250a75dd9fe",
       "bytes": 7916
@@ -506,8 +516,8 @@
       "bytes": 4111
     },
     "test/test-tree-integrity.test.js": {
-      "sha256": "b2dae84403a568f6d5c1b85d7ff86998961ed1dd844d68ddf98263e37fad6608",
-      "bytes": 7830
+      "sha256": "d9105a5b5430039ea9a670063224e7420a555223da141413d96ebafdfdc99851",
+      "bytes": 10270
     },
     "test/traversal-label-integrity.test.js": {
       "sha256": "656ff6acb8a03860ef0eea7e4b33e0c222989925af68569cab39b77922a8ce4a",
@@ -526,16 +536,16 @@
       "bytes": 2943
     },
     "tools/gateRegistry.mjs": {
-      "sha256": "9ae19da5f9e9200f80c4ecd8470478711e9b61de44baa803a2965ae44909ddc4",
-      "bytes": 26533
+      "sha256": "5b06efa88a07edc34994d2a25798b4c74693109e00dddf46b2fd0958e1c7db83",
+      "bytes": 29716
     },
     "tools/measureDesktop.mjs": {
       "sha256": "6b141f492d92fb324b632b00bc75b33eb7c34d4d2728dac691e971874f886707",
       "bytes": 23661
     },
     "tools/proveTreeIntegrity.mjs": {
-      "sha256": "e37664d359c6a8c152269a0289ac759e96613fecc66e76d9dfa9aede78e2f336",
-      "bytes": 5752
+      "sha256": "2dd72c37c2557f59323a0f28b812579fdfb486c9ac592946c80d7c679d0310de",
+      "bytes": 7500
     },
     "tools/runCharacterization.mjs": {
       "sha256": "c7d1c28a3d3af02c408604e1afd45b3ea634095b5fda2efb43ee447c7efbf7f0",
@@ -578,26 +588,26 @@
       "bytes": 22167
     },
     "tools/writeFinalReport.mjs": {
-      "sha256": "3468250c97ebdbfc96b91a8666a3d6d87628952bb800cbb12729516a6c945660",
-      "bytes": 64411
+      "sha256": "e76d46a03b243fda778ee32225e777d16119fc290af4ebd0dafaa8fcd6ad3f95",
+      "bytes": 64438
     },
     "tools/writeManifestPaths.mjs": {
       "sha256": "a83e912c2601ab32c12cbcd5bda5d8760bf5f6bae2ee44f078a1982749d7ad3e",
       "bytes": 4649
     },
     "tools/writeProvenance.mjs": {
-      "sha256": "8081c03ad177cb5e591e06c1fca2f9a91bd0e246b0df042f21a0a65d0a5d7fb2",
-      "bytes": 10135
+      "sha256": "93adf7a10e9579ae844cde1e8370fdff1a430aba226551aa31a64776c6183740",
+      "bytes": 12072
     }
   },
   "archive": {
-    "name": "LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV7.zip",
+    "name": "LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV8.zip",
     "sha256": null,
     "note": "An archive cannot contain its own hash, so no file inside it can record one: writing the value here would require rebuilding the archive, which changes the value. The SHA-256 is published with the delivery message. Verify with `sha256sum` against that value, then verify every file below against this record from the extraction."
   },
   "archiveRelationToCommit": {
-    "describesCommit": "324017151a57e44349dee290f7bc01fac63b1297",
-    "treeHash": "21e4b1a85ef762511d72f5a160b2b18352515738",
+    "describesCommit": "08a0a1c178c898b92c0f03240b987be9050318f0",
+    "treeHash": "310e899b4c14c451367cffcea02153f6016e1064",
     "identicalExcept": [
       "audit/provenance.json"
     ],

@@ -3,9 +3,9 @@
   "contractSection": "20 / 26 / 28",
   "note": "Derived from audit/test-results.txt and audit/external-gate-status.json through tools/gateRegistry.mjs. Every machine-verified gate maps to named tests; a gate whose evidencing test did not run is UNVERIFIED, never PASS. Externally determined gates are READ from their named inputs, are never machine-verified, and are counted once — as external — so the categories partition the gate set. The milestone status and completion flag below are derived from the same inputs, not written in source (revision-6, R6-J / R6-K). This file and the report's gate table are generated from the same call.",
   "suite": {
-    "tests": 384,
-    "pass": 384,
-    "fail": 0
+    "tests": 398,
+    "pass": 397,
+    "fail": 1
   },
   "externalStatuses": {
     "desktopCanvasMemory": {
@@ -45,12 +45,16 @@
     "status": "M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED",
     "mayDeclareCompletion": false,
     "blockers": [
+      "the build-blocking suite reported failures",
+      "1 automated gate(s) FAIL: fullSuite",
+      "34 automated gate(s) UNVERIFIED: fixtureIntegrity, fixtureRoundTrip, deterministicHydration, pairedWorlds, exactProbability, matchedTrajectory, meaningfulTraits, birthImmutability, observerInvariance, noObserverDeps, neutralTraits, mutationIndependence, mutationProvenance, allocationOpportunity, spatialIntegrity, lifecycle, genealogyIntegrity, genealogyBounded, survivalComposition, rngIntegrity, populationGuardrails, traversal, desktopMeasurement, modelIdentity, modelHashProvenance, legibilitySelfContained, worldLoadRaceSafety, observerTransaction, generationResultImmutable, focalLineage, referencesUnchanged, reportIntegrity, testTreeIntegrity, reportDeterminism",
+      "1 failing test(s) map to no declared gate",
       "desktopCanvasMemory: UNVERIFIED",
       "stageAOrder: VIOLATED — principal decision required",
       "independentClosureAudit: PENDING",
       "ipadGate: PENDING_HUMAN_DEVICE_TEST [pending]"
     ],
-    "automatedGatesPass": true,
+    "automatedGatesPass": false,
     "externalBlockers": [
       "desktopCanvasMemory: UNVERIFIED",
       "stageAOrder: VIOLATED — principal decision required",
@@ -63,9 +67,9 @@
   },
   "summary": {
     "total": 38,
-    "pass": 35,
-    "fail": 0,
-    "unverified": 0,
+    "pass": 0,
+    "fail": 1,
+    "unverified": 34,
     "external": 3,
     "externalByStatus": [
       {
@@ -81,25 +85,27 @@
         "status": "VIOLATED — principal decision required"
       }
     ],
-    "suiteHasFailures": false,
-    "everyAutomatedResultReproducible": "met"
+    "suiteHasFailures": true,
+    "everyAutomatedResultReproducible": "NOT met"
   },
-  "unattributedFailures": [],
+  "unattributedFailures": [
+    "§20 — the committed tree-integrity record is a VALID proof, not merely a run"
+  ],
   "gates": [
     {
       "id": "fullSuite",
       "label": "Full test suite",
       "section": "§20",
-      "status": "PASS",
+      "status": "FAIL",
       "evidence": "suite",
-      "detail": "384/384, 0 failing",
+      "detail": "397/398, 1 failing",
       "mappedTests": []
     },
     {
       "id": "fixtureIntegrity",
       "label": "Fixture raw SHA-256 integrity",
       "section": "§19 A",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -115,7 +121,7 @@
       "id": "fixtureRoundTrip",
       "label": "Fixture-envelope canonical round trip",
       "section": "§19 B",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -131,7 +137,7 @@
       "id": "deterministicHydration",
       "label": "Deterministic hydration",
       "section": "§19 C",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -147,7 +153,7 @@
       "id": "pairedWorlds",
       "label": "Paired-world construction",
       "section": "§19 D",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -165,7 +171,7 @@
       "id": "exactProbability",
       "label": "Exact probability gate",
       "section": "§19.3",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -181,7 +187,7 @@
       "id": "matchedTrajectory",
       "label": "Matched trajectory gate, seeds 1..200",
       "section": "§19.4",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -197,7 +203,7 @@
       "id": "meaningfulTraits",
       "label": "Meaningful-trait contextual gate",
       "section": "§9 / §20.5",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -213,7 +219,7 @@
       "id": "birthImmutability",
       "label": "Birth immutability",
       "section": "§20.1",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -231,7 +237,7 @@
       "id": "observerInvariance",
       "label": "Observer-state invariance",
       "section": "§20.2",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -247,7 +253,7 @@
       "id": "noObserverDeps",
       "label": "No observer dependencies in biology",
       "section": "§20.3",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -263,7 +269,7 @@
       "id": "neutralTraits",
       "label": "Neutral-trait integrity",
       "section": "§20.4",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -279,7 +285,7 @@
       "id": "mutationIndependence",
       "label": "Full-path body-mutation independence",
       "section": "§20.6",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -295,7 +301,7 @@
       "id": "mutationProvenance",
       "label": "Mutation provenance and counter ownership",
       "section": "§20.7",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -311,7 +317,7 @@
       "id": "allocationOpportunity",
       "label": "Allocation-mutation opportunity contract",
       "section": "§20.8",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -327,7 +333,7 @@
       "id": "spatialIntegrity",
       "label": "Spatial integrity and adjacency",
       "section": "§20.9",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -343,7 +349,7 @@
       "id": "lifecycle",
       "label": "Lifecycle and mating contract",
       "section": "§20.10",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -359,7 +365,7 @@
       "id": "genealogyIntegrity",
       "label": "Genealogy integrity + forced 360-boundary",
       "section": "§20.11",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -375,7 +381,7 @@
       "id": "genealogyBounded",
       "label": "Genealogy boundary records bounded",
       "section": "§15",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -391,7 +397,7 @@
       "id": "survivalComposition",
       "label": "Exact survival composition",
       "section": "§20.12",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -407,7 +413,7 @@
       "id": "rngIntegrity",
       "label": "RNG integrity",
       "section": "§20.13",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -423,7 +429,7 @@
       "id": "populationGuardrails",
       "label": "Population guardrails, 500 seeds",
       "section": "§21.4",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -439,7 +445,7 @@
       "id": "traversal",
       "label": "§21.6 adjacency traversal, isolated edge-only worlds",
       "section": "§21.6",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": "no contract threshold applies; the measurement is reported, not scored",
       "mappedTests": [
@@ -455,7 +461,7 @@
       "id": "desktopMeasurement",
       "label": "Desktop Canvas measurement, reproducible",
       "section": "§22",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": "§22 states no desktop pass law; the numeric pass law belongs to the iPad gate",
       "mappedTests": [
@@ -488,7 +494,7 @@
       "id": "modelIdentity",
       "label": "Canonical model identity binds state progression",
       "section": "§18 / §21.7",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -508,7 +514,7 @@
       "id": "modelHashProvenance",
       "label": "One authoritative model hash across all evidence",
       "section": "§9 / §18",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -526,7 +532,7 @@
       "id": "legibilitySelfContained",
       "label": "Legibility mode is self-contained",
       "section": "§22",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -542,7 +548,7 @@
       "id": "worldLoadRaceSafety",
       "label": "World loads are transactional against concurrent requests",
       "section": "§22",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -564,7 +570,7 @@
       "id": "observerTransaction",
       "label": "Generation advancement atomic against observer failure",
       "section": "§4 / §16",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -582,7 +588,7 @@
       "id": "generationResultImmutable",
       "label": "Generation result is deeply immutable",
       "section": "§4",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -598,7 +604,7 @@
       "id": "focalLineage",
       "label": "Focal lineage resolved, never reseeded, never falsely terminated",
       "section": "§16",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -616,7 +622,7 @@
       "id": "referencesUnchanged",
       "label": "Quarantined Python references unchanged",
       "section": "§27",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -632,7 +638,7 @@
       "id": "reportIntegrity",
       "label": "Report agrees with the raw evidence",
       "section": "§26 / §27",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -654,7 +660,7 @@
       "id": "testTreeIntegrity",
       "label": "Tests never mutate the production source tree",
       "section": "§20",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
@@ -672,7 +678,7 @@
       "id": "reportDeterminism",
       "label": "Report bytes are identical across every EXECUTED Node major",
       "section": "§26",
-      "status": "PASS",
+      "status": "UNVERIFIED",
       "evidence": "tests",
       "detail": null,
       "mappedTests": [
