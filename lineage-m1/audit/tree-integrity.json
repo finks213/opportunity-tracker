@@ -4,7 +4,7 @@
   "claim": "The production source tree under src/ is never modified at any instant while the full suite runs at high concurrency. Sampled continuously, not merely compared before and after.",
   "concurrency": 4,
   "rounds": 3,
-  "samplesTaken": 462300,
+  "samplesTaken": 460382,
   "baselineDigest": "b9f4232d625340d6a6efa866faea5ab1f059e9b3939645a85af7b7c213f03d64",
   "finalDigest": "b9f4232d625340d6a6efa866faea5ab1f059e9b3939645a85af7b7c213f03d64",
   "fileCount": 31,
@@ -12,43 +12,34 @@
   "deviations": [],
   "runs": [
     {
-      "exitCode": 1,
+      "exitCode": 0,
       "tests": 398,
-      "pass": 396,
-      "fail": 2,
+      "pass": 398,
+      "fail": 0,
       "parsed": true,
       "parseNote": null,
-      "failing": [
-        "§23/§27 — verification recomputes every recorded hash",
-        "§27 — tampering with ANY shipped file is detected"
-      ]
+      "failing": []
     },
     {
-      "exitCode": 1,
+      "exitCode": 0,
       "tests": 398,
-      "pass": 396,
-      "fail": 2,
+      "pass": 398,
+      "fail": 0,
       "parsed": true,
       "parseNote": null,
-      "failing": [
-        "§23/§27 — verification recomputes every recorded hash",
-        "§27 — tampering with ANY shipped file is detected"
-      ]
+      "failing": []
     },
     {
-      "exitCode": 1,
+      "exitCode": 0,
       "tests": 398,
-      "pass": 396,
-      "fail": 2,
+      "pass": 398,
+      "fail": 0,
       "parsed": true,
       "parseNote": null,
-      "failing": [
-        "§23/§27 — verification recomputes every recorded hash",
-        "§27 — tampering with ANY shipped file is detected"
-      ]
+      "failing": []
     }
   ],
   "allRunsParsed": true,
-  "allRunsGreen": false,
-  "proofValid": false
+  "allRunsGreen": true,
+  "proofValid": true
 }
