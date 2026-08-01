@@ -23,7 +23,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 import {
   deriveGateStatuses, deriveMilestoneStatus, isContractAuthorisedStatus,
-  classifyIpadStatus, CONTRACT_STATUS, REPAIRS_REQUIRED_STATUS,
+  classifyIpadStatus, blockedStatusForGate, CONTRACT_STATUS, REPAIRS_REQUIRED_STATUS,
 } from "../tools/gateRegistry.mjs";
 import { parseTap } from "../tools/writeFinalReport.mjs";
 
@@ -95,13 +95,17 @@ test("§26 — a proposal for the blocked case must itself be a BLOCKED status",
   assert.ok(m.rejectedStatusStrings.some((r) => r.includes("M1_ACCEPTED")));
 });
 
-test("§26 — an unauthorised status proposed by an external record is refused", () => {
+test("§26 — any status proposed by an external record is refused", () => {
+  // REVISION-8.1 (bounded closure audit, Finding 2). Revision 8 accepted a proposal
+  // that was itself a blocked status, which let `M1_BLOCKED — <anything>` through.
+  // No evidence-supplied string is usable now, authorised-looking or not: the
+  // sentence is chosen in source by gate id.
   const external = ext("PASS", {
     stageAOrder: { status: "PENDING", priority: 1, milestoneStatusWhenUnsatisfied: "M1_ALL_GATES_SATISFIED" },
   });
   const m = derive(external);
   assert.ok(isContractAuthorisedStatus(m.status), `published "${m.status}", which §26 does not authorise`);
-  assert.equal(m.status, REPAIRS_REQUIRED_STATUS, "an unusable proposal falls back to the blocked status");
+  assert.equal(m.status, blockedStatusForGate("stageAOrder"), "the sentence comes from source");
   assert.ok(
     m.rejectedStatusStrings.some((r) => r.includes("M1_ALL_GATES_SATISFIED")),
     "and the refusal must be recorded, not silent"
@@ -109,14 +113,16 @@ test("§26 — an unauthorised status proposed by an external record is refused"
   assert.ok(m.blockers.some((b) => /does not authorise/.test(b)));
 });
 
-test("§26 — a lower-priority AUTHORISED proposal is used when a higher one is refused", () => {
+test("§26 — the blocked sentence follows the gate, not the proposal", () => {
   const external = ext("PASS", {
     stageAOrder: { status: "PENDING", priority: 1, milestoneStatusWhenUnsatisfied: "TOTALLY_MADE_UP" },
     independentClosureAudit: { status: "PENDING", priority: 2, milestoneStatusWhenUnsatisfied: REPAIRS_REQUIRED_STATUS },
   });
   const m = derive(external);
-  assert.equal(m.status, REPAIRS_REQUIRED_STATUS);
+  // The lowest-priority-number unsatisfied gate names the reason — from source.
+  assert.equal(m.status, blockedStatusForGate("stageAOrder"));
   assert.ok(isContractAuthorisedStatus(m.status));
+  assert.ok(m.rejectedStatusStrings.some((r) => r.includes("TOTALLY_MADE_UP")));
 });
 
 test("§26 — no input in a wide sweep produces an unauthorised status or false acceptance", () => {

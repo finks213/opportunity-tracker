@@ -28,6 +28,7 @@ import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 import { selfAuditScans, stripCommentsAndStrings } from "../tools/writeFinalReport.mjs";
+import { readIntegrityConfig, evaluateProof } from "../tools/proveTreeIntegrity.mjs";
 
 const ROOT = resolve(join(dirname(fileURLToPath(import.meta.url)), ".."));
 
@@ -222,6 +223,23 @@ test("§20 — the committed tree-integrity record is a VALID proof, not merely 
     assert.equal(r.fail, 0, `a round with ${r.fail} failures cannot support the claim`);
     assert.equal(r.exitCode, 0);
   }
+
+  // REVISION-8.1 (bounded closure audit, Finding 1). The shipped record must be a
+  // proof about the SHIPPED suite: enough rounds, each running the full suite. The
+  // required values travel in the record, and `evaluateProof` re-decides the verdict
+  // from them rather than trusting the stored boolean.
+  const config = readIntegrityConfig(ROOT);
+  assert.equal(rec.requiredRounds, config.requiredRounds, "the record must state the requirement it met");
+  assert.ok(rec.runs.length >= config.requiredRounds, "and must contain at least that many rounds");
+  assert.equal(
+    rec.requiredTestTotal, config.requiredTestTotal,
+    "the record must have been produced against the suite that ships"
+  );
+  for (const r of rec.runs) {
+    assert.equal(r.tests, config.requiredTestTotal, "every round must have run the whole suite");
+  }
+  assert.deepEqual(evaluateProof(rec, config), { proofValid: true, problems: [] },
+    "and re-deciding the verdict from the record must reach the same answer");
 });
 
 test("§20 — the tool fails the command when its own rounds do not support the claim", () => {

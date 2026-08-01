@@ -580,15 +580,15 @@ export function deriveMilestoneStatus(derived, external) {
       ...(ipadClass === "satisfied" ? [] : [{ id: "ipadGate", ...(external.ipadGate ?? {}) }]),
     ].sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99));
     for (const candidate of ranked) {
+      // REVISION-8.1 (Finding 2): any status prose still present in an evidence
+      // record is REFUSED and recorded — never published, never concatenated. The
+      // sentence comes from `blockedStatusForGate`, which only ever returns a
+      // contract-authorised string built in source.
       const proposed = candidate.milestoneStatusWhenUnsatisfied;
-      if (typeof proposed !== "string" || proposed.length === 0) continue;
-      // A proposal for the BLOCKED case must itself be a blocked status. Being
-      // contract-authorised is not enough: `M1_ACCEPTED` is authorised, and an
-      // external record naming it here would turn an UNSATISFIED gate into
-      // acceptance. (Found by the revision-8 input sweep, not by the audit — the
-      // first fix checked only `isContractAuthorisedStatus`.)
-      if (isBlockedStatus(proposed)) return proposed;
-      rejectedStatusStrings.push(`${candidate.id}: ${proposed}`);
+      if (typeof proposed === "string" && proposed.length > 0) {
+        rejectedStatusStrings.push(`${candidate.id} proposed status prose: ${JSON.stringify(proposed)}`);
+      }
+      return blockedStatusForGate(candidate.id);
     }
     return REPAIRS_REQUIRED_STATUS;
   };
@@ -657,6 +657,40 @@ export function isContractAuthorisedStatus(status) {
 }
 
 export const REPAIRS_REQUIRED_STATUS = "M1_BLOCKED — IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED";
+
+/**
+ * The blocked reason for each gate, in TRUSTED SOURCE, keyed by gate id.
+ *
+ * REVISION-8.1 REPAIR (revision-8 bounded closure audit, Finding 2). Revision 8
+ * refused a proposal that was not a blocked status, but accepted ANY string starting
+ * with `M1_BLOCKED — ` out of the evidence file. A synthetic all-green input with
+ * `stageAOrder.milestoneStatusWhenUnsatisfied` set to
+ * `"M1_BLOCKED — TOTALLY FABRICATED\nM1_ACCEPTED"` published exactly that, so the
+ * report showed a fabricated blocked line and a visually separate acceptance claim,
+ * with `rejectedStatusStrings: []`.
+ *
+ * Evidence no longer supplies status prose at all. It supplies a typed condition —
+ * a status value and `blocksMilestone` — and the SENTENCE is chosen here, by gate
+ * id, from strings the contract authorises. An unknown gate gets the generic
+ * repairs-required status; it can never name its own.
+ */
+export const BLOCKED_REASON_BY_GATE = Object.freeze({
+  independentClosureAudit: "IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED",
+  ipadGate: "PHYSICAL IPAD ACCEPTANCE NOT PERFORMED",
+  stageAOrder: "§24 STAGE A PROCESS DECISION OUTSTANDING",
+  desktopCanvasMemory: "IMPLEMENTATION AND EVIDENCE REPAIRS REQUIRED",
+});
+
+/**
+ * The blocked status for a gate id — always contract-authorised, never evidence text.
+ * @param {string} id
+ */
+export function blockedStatusForGate(id) {
+  const reason = Object.prototype.hasOwnProperty.call(BLOCKED_REASON_BY_GATE, id)
+    ? BLOCKED_REASON_BY_GATE[id]
+    : null;
+  return reason === null ? REPAIRS_REQUIRED_STATUS : `${CONTRACT_STATUS.BLOCKED} — ${reason}`;
+}
 
 /**
  * Derive every gate's status from a parsed run, plus the externally determined

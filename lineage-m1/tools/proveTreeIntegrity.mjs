@@ -52,12 +52,112 @@ export function treeSnapshot() {
   return { digest: h.digest("hex"), fileCount: files.length, perFile };
 }
 
+/**
+ * The round count and the required test total, read from the checked-in config so
+ * the generator and the build-blocking test enforce one requirement.
+ *
+ * @param {string} root
+ */
+export function readIntegrityConfig(root = ROOT) {
+  const config = JSON.parse(readFileSync(join(root, "tree-integrity.config.json"), "utf8"));
+  const tap = readFileSync(join(root, config.requiredTestTotalSource), "utf8");
+  const plan = tap.match(/^1\.\.(\d+)$/m);
+  const summary = tap.match(/^[#\s]*tests\s+(\d+)$/m);
+  const requiredTestTotal = plan ? Number(plan[1]) : summary ? Number(summary[1]) : null;
+  return { ...config, requiredTestTotal };
+}
+
+/**
+ * Validate `--rounds` BEFORE any sampling or writing.
+ *
+ * REVISION-8.1 REPAIR (revision-8 bounded closure audit, Finding 1). The value was
+ * parsed with `Number()` and never checked, and `[].every(...)` is `true`, so a run
+ * that executed nothing certified itself:
+ *
+ *   $ node tools/proveTreeIntegrity.mjs --rounds 0
+ *   exit=0  rounds=0  runs=0  allRunsGreen=true  proofValid=true
+ *   $ node tools/proveTreeIntegrity.mjs --rounds banana
+ *   exit=0  rounds=null  runs=0  allRunsGreen=true  proofValid=true
+ *
+ * Zero, negative, fractional, non-numeric and missing values now fail closed,
+ * before the existing record is touched.
+ *
+ * @param {string[]} args
+ * @param {number} requiredRounds
+ * @returns {{ok:true, rounds:number}|{ok:false, problem:string}}
+ */
+export function parseRounds(args, requiredRounds) {
+  const idx = args.indexOf("--rounds");
+  if (idx < 0) return { ok: true, rounds: requiredRounds };
+  const raw = args[idx + 1];
+  if (raw === undefined || raw.startsWith("--")) {
+    return { ok: false, problem: "--rounds requires a value" };
+  }
+  if (!/^\d+$/.test(raw.trim())) {
+    return {
+      ok: false,
+      problem: `--rounds must be a whole number, got ${JSON.stringify(raw)}`,
+    };
+  }
+  const rounds = Number(raw.trim());
+  if (!Number.isSafeInteger(rounds)) {
+    return { ok: false, problem: `--rounds must be a finite integer, got ${JSON.stringify(raw)}` };
+  }
+  if (rounds < requiredRounds) {
+    return {
+      ok: false,
+      problem: `--rounds must be at least the configured minimum of ${requiredRounds}, got ${rounds}`,
+    };
+  }
+  return { ok: true, rounds };
+}
+
+/**
+ * Is this record a proof? Positive evidence only — never a vacuous `every()` over
+ * an empty array.
+ *
+ * @param {any} record
+ * @param {{requiredRounds:number, requiredTestTotal:number|null}} config
+ */
+export function evaluateProof(record, config) {
+  const problems = [];
+  const runs = Array.isArray(record.runs) ? record.runs : [];
+  if (runs.length === 0) problems.push("no round was executed");
+  if (runs.length !== record.rounds) {
+    problems.push(`${runs.length} round(s) recorded for a requested ${record.rounds}`);
+  }
+  if (runs.length < config.requiredRounds) {
+    problems.push(`fewer than the required ${config.requiredRounds} round(s)`);
+  }
+  if (!(record.samplesTaken > 0)) problems.push("no sample was taken; nothing was watched");
+  if (!record.treeUnchangedThroughout) problems.push("the source tree changed during the runs");
+  if ((record.deviations ?? []).length > 0) problems.push("a source deviation was sampled");
+  for (const [i, r] of runs.entries()) {
+    if (!r.parsed) { problems.push(`round ${i + 1}: the suite summary could not be parsed`); continue; }
+    if (r.fail !== 0 || r.exitCode !== 0) problems.push(`round ${i + 1}: the suite run was not green`);
+    if (config.requiredTestTotal !== null && r.tests !== config.requiredTestTotal) {
+      problems.push(
+        `round ${i + 1}: ran ${r.tests} test(s), not the required ${config.requiredTestTotal}`
+      );
+    }
+  }
+  return { proofValid: problems.length === 0, problems };
+}
+
 const isMain =
   process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isMain) {
   const args = process.argv.slice(2);
-  const roundsIdx = args.indexOf("--rounds");
-  const rounds = roundsIdx >= 0 ? Number(args[roundsIdx + 1]) : 3;
+  const config = readIntegrityConfig();
+  const parsedRounds = parseRounds(args, config.requiredRounds);
+  if (!parsedRounds.ok) {
+    console.error(
+      `REFUSING to run: ${parsedRounds.problem}.\n` +
+      "No sampling was performed and audit/tree-integrity.json was NOT replaced."
+    );
+    process.exit(1);
+  }
+  const rounds = parsedRounds.rounds;
   const concurrency = Math.max(4, cpus().length);
 
   const baseline = treeSnapshot();
@@ -154,10 +254,15 @@ if (isMain) {
   running = false;
 
   const final = treeSnapshot();
-  const allRunsParsed = runs.every((r) => r.parsed);
-  const allRunsGreen = runs.every((r) => r.parsed && r.fail === 0 && r.exitCode === 0);
+  // `runs.length > 0` is required explicitly: `[].every(...)` is true, which is how
+  // a zero-round run certified itself before revision 8.1.
+  const allRunsParsed = runs.length > 0 && runs.every((r) => r.parsed);
+  const allRunsGreen =
+    runs.length > 0 && runs.every((r) => r.parsed && r.fail === 0 && r.exitCode === 0);
   const record = {
-    schema: "lineage-m1-tree-integrity-2",
+    schema: "lineage-m1-tree-integrity-3",
+    requiredRounds: config.requiredRounds,
+    requiredTestTotal: config.requiredTestTotal,
     contractSection: "20 (build-blocking suite integrity)",
     claim:
       "The production source tree under src/ is never modified at any instant while the full suite " +
@@ -173,10 +278,14 @@ if (isMain) {
     runs,
     allRunsParsed,
     allRunsGreen,
-    // REVISION-8 (Finding 2): a proof whose own rounds were red or unparseable is
-    // not a proof. This one field is what the build-blocking test reads.
-    proofValid: deviations.length === 0 && final.digest === baseline.digest && allRunsGreen,
   };
+  // REVISION-8 (Finding 2): a proof whose own rounds were red or unparseable is not
+  // a proof. REVISION-8.1 (Finding 1): nor is one that executed nothing, sampled
+  // nothing, or ran a suite other than the one that ships. `proofValid` is the one
+  // field the build-blocking test reads, and it is now positive evidence only.
+  const verdict = evaluateProof(record, config);
+  record.proofValid = verdict.proofValid;
+  record.proofProblems = verdict.problems;
   writeFileSync(join(ROOT, "audit", "tree-integrity.json"), JSON.stringify(record, null, 2));
   console.error(
     `\ntree-integrity.json: ${samples} samples across ${rounds} run(s), ` +
@@ -185,9 +294,7 @@ if (isMain) {
     `proof valid: ${record.proofValid}`
   );
   if (!record.proofValid) {
-    if (!record.treeUnchangedThroughout) console.error("  PROBLEM: the source tree changed during the runs");
-    if (!allRunsParsed) console.error("  PROBLEM: at least one round's suite summary could not be parsed");
-    else if (!allRunsGreen) console.error("  PROBLEM: at least one round's suite run was not green");
+    for (const problem of verdict.problems) console.error(`  PROBLEM: ${problem}`);
     console.error(
       "\nThis evidence does NOT prove the claim, so the command exits nonzero rather than " +
       "recording a proof it did not obtain."

@@ -1,0 +1,7 @@
+{
+  "schema": "lineage-m1-tree-integrity-config-1",
+  "contractSection": "20 (build-blocking suite integrity)",
+  "requiredRounds": 3,
+  "requiredTestTotalSource": "audit/test-results.txt",
+  "note": "The generator and its build-blocking test read the SAME requirement from this file, so the documented regeneration command cannot succeed while producing evidence the suite rejects. `requiredTestTotal` is not typed here: it is read from the committed TAP plan named above, so it cannot drift from the suite that actually ships. A round whose test total differs from it did not run the shipped suite and cannot support the claim."
+}

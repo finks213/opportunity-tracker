@@ -24,7 +24,7 @@ Why it reads that way — every blocker the derivation found:
 - independentClosureAudit: PENDING
 - ipadGate: PENDING_HUMAN_DEVICE_TEST [pending]
 
-**This report is revision 8** (generated 2026-07-31). Revisions 1 through
+**This report is revision 8** (generated 2026-08-01). Revisions 1 through
 7 were each independently audited and each returned `BREAKS-FOUND`. The status above may not
 advance until revision 8 survives independent re-audit by both the structural code
 audit and the AFE-Δ evidence and claim audit — that requirement is itself one of the

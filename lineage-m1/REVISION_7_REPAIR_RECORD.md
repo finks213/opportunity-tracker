@@ -18,7 +18,7 @@ runs. All six reproduced exactly as reported; I disputed none of them.
 |---|---|---|---|---|---|---|
 | 1 | legibility mode does not preserve the defining fixture | Medium-Critical | controls after mode entry | `src/main.js` | `test/legibility-invariant.test.js` (8) | invariant continuous and re-checked each frame |
 | 2 | the status machine contradicts the §26 status law | Medium-Critical | derive with all inputs satisfied | `tools/gateRegistry.mjs`, `src/config/milestoneStatus.js` | `test/status-truth-table.test.js` (6) | the contract truth table, both passing states reachable |
-| 3 | provenance binds neither the shipped source nor the exact TAP | Medium | tamper in an extraction | `tools/writeProvenance.mjs`, `tools/verifyProvenance.mjs` | `test/provenance-binding.test.js` (8) | every shipped file bound, TAP by bytes |
+| 3 | provenance binds neither the shipped source nor the exact TAP | Medium | tamper in an extraction | `tools/writeProvenance.mjs`, `tools/verifyProvenance.mjs` | `test/provenance-binding.test.js` (8) | every shipped file except the record itself bound, TAP by bytes |
 | 4 | a hostile `Error` getter escapes observer isolation | Medium | throwing `message` accessor | `src/core/simulation.js` | `test/generation-result-immutable.test.js` (+5) | nothing escapes diagnostic capture |
 | 5 | random reset publishes incomplete observer-world state | Medium-Minor | load webbing fixture, reset | `src/main.js` | `test/world-reset-completeness.test.js` (5) | every world-identity field republished |
 | 6 | current artifacts retain obsolete audit revisions | Medium-Minor | grep the two documents | `tools/writeFinalReport.mjs`, manifest, README, checklist | `test/status-consistency.test.js` (+1) | generated from one revision value |

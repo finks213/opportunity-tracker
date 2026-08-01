@@ -4,8 +4,10 @@
  * strengthened in revision 7 after the revision-6 structural audit's Finding 3).
  *
  * Run from an extraction of the delivered archive. It recomputes the SHA-256 and
- * byte count of EVERY shipped file and reports any that differs, is missing, or is
- * present but unrecorded. It needs no network, no `.git`, and no dependency.
+ * byte count of every recorded file — every shipped file except `audit/provenance.json`,
+ * which cannot hash itself — and reports any that differs, is missing, or is present
+ * but unrecorded. The archive as a whole is bound by its published ZIP SHA-256. It
+ * needs no network, no `.git`, and no dependency.
  *
  * WHAT REVISION 6 GOT WRONG. It hashed only named audit evidence, a few generated
  * documents and the fixture — 20 files. The auditor changed `src/core/math.js` and
@@ -17,7 +19,8 @@
  *   exit=0
  *
  * So the record bound selected evidence to itself rather than the shipped code to
- * the delivery. Every shipped file is now recorded and verified, and the raw TAP is
+ * the delivery. Every shipped file except the record itself is now recorded and
+ * verified, and the raw TAP is
  * bound by its exact bytes rather than by its three summary counts.
  *
  * Usage: node tools/verifyProvenance.mjs [--tap-may-differ]
@@ -105,8 +108,34 @@ export function verifyProvenance(root = ROOT, opts = {}) {
 
 const isMain =
   process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
+/**
+ * Reasons a record is unfit for delivery, whatever its hashes say.
+ *
+ * REVISION-8.1 REPAIR (revision-8 bounded closure audit, Finding 3B). With tracked
+ * `src/core/math.js` dirty, `writeProvenance.mjs --allow-dirty` correctly stamped the
+ * record provisional — and then the strict verifier printed `PROVENANCE OK`, exit 0.
+ * A record explicitly labelled "NOT a delivery record" received the tool's strict
+ * success verdict. Strict verification refuses these outright; `--accept-provisional`
+ * inspects them locally and never prints the strict success line.
+ *
+ * @param {any} rec
+ */
+export function deliveryDisqualifiers(rec) {
+  const reasons = [];
+  if (rec.provisional) reasons.push("the record is marked provisional");
+  if (rec.source && rec.source.workingTreeClean === false) {
+    reasons.push("it was written against a working tree that was not clean");
+  }
+  if (rec.workingTreeClean === false) reasons.push("workingTreeClean is false");
+  if (rec.deliveryEligible === false) reasons.push("deliveryEligible is false");
+  if (rec.allowDirty) reasons.push("it was generated with --allow-dirty");
+  return reasons;
+}
+
 if (isMain) {
   const rec = JSON.parse(readFileSync(join(ROOT, "audit", "provenance.json"), "utf8"));
+  const acceptProvisional = process.argv.includes("--accept-provisional");
+  const disqualifiers = deliveryDisqualifiers(rec);
   const r = verifyProvenance(ROOT, { tapMayDiffer: process.argv.includes("--tap-may-differ") });
   console.log(`source commit : ${rec.source.resolved ? rec.source.commit : "UNRESOLVED"}`);
   console.log(`model identity: ${rec.model.modelDefinitionHash}`);
@@ -116,6 +145,26 @@ if (isMain) {
   for (const m of r.mismatches) console.log(`MISMATCH   ${m}`);
   for (const m of r.missing) console.log(`MISSING    ${m}`);
   for (const m of r.unrecorded) console.log(`UNRECORDED ${m}`);
-  console.log(r.ok ? "PROVENANCE OK" : "PROVENANCE FAILED");
-  if (!r.ok) process.exitCode = 1;
+  if (disqualifiers.length > 0) {
+    for (const reason of disqualifiers) console.log(`PROVISIONAL ${reason}`);
+    if (acceptProvisional) {
+      // A named diagnostic mode. It reports the hash comparison for local
+      // inspection and deliberately never prints the strict success line.
+      console.log(
+        r.ok
+          ? "PROVISIONAL RECORD — hashes agree, but this is NOT a delivery verification"
+          : "PROVISIONAL RECORD — and its hashes do not agree"
+      );
+    } else {
+      console.log(
+        "PROVENANCE FAILED — the record is provisional and unsuitable for delivery.\n" +
+        "Commit the tree and re-run `npm run audit:provenance`. To inspect a provisional\n" +
+        "record locally, pass --accept-provisional; it never returns the strict verdict."
+      );
+    }
+    process.exitCode = 1;
+  } else {
+    console.log(r.ok ? "PROVENANCE OK" : "PROVENANCE FAILED");
+    if (!r.ok) process.exitCode = 1;
+  }
 }

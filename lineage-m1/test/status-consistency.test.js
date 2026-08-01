@@ -145,9 +145,13 @@ test("the audit manifest names the CURRENT bundle revision", () => {
   // unchanged: the manifest must name the bundle it actually is.
   const manifest = read("AUDIT_PACKAGE_MANIFEST.md");
   const rev = MILESTONE_STATUS.revision;
+  // REVISION-8.1: the archive tag, not the bare revision — a correction within a
+  // revision ships as `REV8_1.zip`, and the manifest must name the file that is
+  // actually delivered. `tools/writeProvenance.mjs` reads the same field.
+  const tag = MILESTONE_STATUS.archiveTag ?? String(rev);
   assert.ok(
-    manifest.includes(`LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV${rev}.zip`),
-    `the manifest must name the revision-${rev} bundle`
+    manifest.includes(`LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV${tag}.zip`),
+    `the manifest must name the bundle it actually is (REV${tag}.zip)`
   );
   assert.ok(
     new RegExp(`Bundle revision \\| \\*\\*${rev}\\*\\*`).test(manifest),

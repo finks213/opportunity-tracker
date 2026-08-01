@@ -21,6 +21,9 @@ import { dirname, join, resolve, relative, sep } from "node:path";
 const ROOT = resolve(join(dirname(fileURLToPath(import.meta.url)), ".."));
 
 const BEGIN = "<!-- BEGIN GENERATED PATH INVENTORY -->";
+
+/** Shipped files the provenance record cannot cover — it cannot hash itself. */
+export const SELF_EXCLUDED = Object.freeze(["audit/provenance.json"]);
 const END = "<!-- END GENERATED PATH INVENTORY -->";
 
 /** Directory names excluded wholesale — exactly the §27 categories. */
@@ -79,6 +82,14 @@ export function renderInventory(paths) {
     "`test/manifest-inventory.test.js` runs that check in the build-blocking suite.",
     "",
     `**${paths.length} files.**`,
+    "",
+    // REVISION-8.1 REPAIR (revision-8 bounded closure audit, Finding 4). Active text
+    // still read "every shipped file is hashed and verified", which the record cannot
+    // do: it cannot hash itself. All three numbers below are COUNTED from the
+    // inventory, never typed.
+    `The archive ships ${paths.length} files. ${paths.length - SELF_EXCLUDED.length} files are ` +
+    `internally recorded and verified. \`${SELF_EXCLUDED.join("`, `")}\` is excluded because it ` +
+    "cannot hash itself. The published ZIP SHA-256 binds the complete archive, including that record.",
     "",
     ...paths.map((p) => `- \`${p}\``),
     "",

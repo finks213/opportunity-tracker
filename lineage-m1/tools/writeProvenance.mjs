@@ -28,6 +28,8 @@ import { dirname, join, resolve } from "node:path";
 import { MILESTONE_STATUS } from "../src/config/milestoneStatus.js";
 
 const MILESTONE_REVISION = MILESTONE_STATUS.revision;
+/** `8_1` for the corrected revision-8 bundle; falls back to the plain revision. */
+const ARCHIVE_TAG = MILESTONE_STATUS.archiveTag ?? String(MILESTONE_REVISION);
 
 const ROOT = resolve(join(dirname(fileURLToPath(import.meta.url)), ".."));
 
@@ -66,6 +68,10 @@ function gitFacts() {
       committedAt: run(["log", "-1", "--format=%cI"]),
       workingTreeClean: dirty === "",
       uncommittedPaths: dirty === "" ? [] : dirty.split("\n").map((l) => l.trim()),
+      // `git status --porcelain` prints paths relative to the REPOSITORY root, so
+      // the record's own path is this prefix plus its project-relative path. Used
+      // for exact-equality self-exemption (revision-8.1, Finding 3A).
+      pathPrefix: run(["rev-parse", "--show-prefix"]),
     };
   } catch (err) {
     return { resolved: false, reason: String(err && err.message ? err.message : err) };
@@ -98,7 +104,8 @@ export function buildProvenance() {
   // few generated documents and the fixture — 20 files. `src/`, `test/`, `tools/`,
   // the browser files and the package files were never bound, so an auditor could
   // change `src/core/math.js` in an extraction and still get `PROVENANCE OK`,
-  // exit 0. EVERY shipped file is recorded now.
+  // exit 0. Every shipped file except this record is recorded now; it cannot hash
+  // itself, and the published ZIP SHA-256 binds the archive as a whole.
   /** @type {Record<string, {sha256:string, bytes:number}>} */
   const files = {};
   for (const rel of shippedFiles()) files[rel] = fileRecord(rel);
@@ -121,9 +128,11 @@ export function buildProvenance() {
     schema: "lineage-m1-provenance-2",
     contractSection: "23 / 27 (delivery and audit evidence)",
     purpose:
-      "Bind this bundle to the source revision that produced it, without shipping .git. EVERY " +
-      "shipped file is hashed — production source, tests, tools, evidence, reports and package " +
-      "files — and `tools/verifyProvenance.mjs` recomputes all of them from an extraction.",
+      "Bind this bundle to the source revision that produced it, without shipping .git. Every " +
+      "shipped file EXCEPT this record is hashed — production source, tests, tools, evidence, " +
+      "reports and package files — and `tools/verifyProvenance.mjs` recomputes all of them from " +
+      "an extraction. This record cannot hash itself; the published ZIP SHA-256 binds the " +
+      "complete archive, including this record.",
     source: git,
     model: {
       configVersion: charEvidence.configVersion,
@@ -151,7 +160,7 @@ export function buildProvenance() {
     shippedTreeDigest: treeDigest.digest("hex"),
     files,
     archive: {
-      name: `LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV${MILESTONE_REVISION}.zip`,
+      name: `LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV${ARCHIVE_TAG}.zip`,
       sha256: null,
       note:
         "An archive cannot contain its own hash, so no file inside it can record one: writing the " +
@@ -196,7 +205,7 @@ export function buildProvenance() {
     verification: [
       "sha256sum LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV*.zip   # compare with the published value",
       "unzip -q LINEAGE_M1_IMPLEMENTATION_AUDIT_BUNDLE_REV*.zip && cd lineage-m1",
-      "node tools/verifyProvenance.mjs      # recomputes every shipped file's hash, strictly",
+      "node tools/verifyProvenance.mjs      # recomputes every recorded file's hash, strictly",
       "npm test                             # the suite, from the extraction, with no install",
     ],
   };
@@ -216,10 +225,18 @@ if (isMain) {
   // A later suite would have caught it, but the generator itself was fail-open, so
   // an interrupted delivery could leave a confident-looking record of a tree no
   // commit describes. It refuses now, before writing anything.
+  // REVISION-8.1 REPAIR (revision-8 bounded closure audit, Finding 3A). The
+  // exemption was a SUFFIX match, `/audit\/provenance\.json$/`, so any tracked file
+  // whose path merely ended that way was waved through. Reproduced by dirtying a
+  // tracked `nested/audit/provenance.json`: the writer exited 0 and recorded
+  // `working tree clean: false` with no `--allow-dirty`. Only the exact normalized
+  // root record — the one file that cannot hash itself — is exempt now.
   const preflight = gitFacts();
+  const selfPath = `${preflight.pathPrefix ?? ""}audit/provenance.json`;
   const dirtyBeyondSelf = (preflight.uncommittedPaths ?? [])
     .map((line) => line.replace(/^\s*[A-Z?!]+\s+/, ""))
-    .filter((path) => !/audit\/provenance\.json$/.test(path));
+    .map((path) => path.replace(/^"(.*)"$/, "$1"))
+    .filter((path) => path !== selfPath);
   const allowDirty = process.argv.includes("--allow-dirty");
   if (preflight.resolved && dirtyBeyondSelf.length > 0 && !allowDirty) {
     console.error(

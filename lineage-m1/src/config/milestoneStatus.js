@@ -32,7 +32,18 @@
 export const MILESTONE_STATUS = Object.freeze({
   /** Revision of the implementation and of every generated report. */
   revision: 8,
-  reportDate: "2026-07-31",
+
+  /**
+   * Correction number WITHIN this revision; 0 is the original delivery.
+   *
+   * Revision 8.1 is a surgical acceptance-tooling correction, not a new revision:
+   * the biological model is frozen, and `src/` is byte-identical to the revision-8
+   * bundle. `archiveTag` names the archive so the delivered file and the provenance
+   * record cannot disagree about which artifact is which.
+   */
+  revisionCorrection: 1,
+  archiveTag: "8_1",
+  reportDate: "2026-08-01",
 
   /**
    * The three statuses contract v3.3 §26 authorises. Nothing else may be published
