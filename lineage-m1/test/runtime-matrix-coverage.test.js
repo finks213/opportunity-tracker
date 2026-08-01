@@ -24,6 +24,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, existsSync, mkdtempSync, cpSync, rmSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
@@ -124,6 +125,27 @@ test("§26 — the GENERATOR exits nonzero when coverage is insufficient", () =>
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test("§26/§27 — the committed matrix certifies the committed report, not an older one", () => {
+  // Found while assembling revision 8: the shipped matrix recorded
+  // committedReportSha256 f2487caa8… while FINAL_REPORT.md hashed bee593df1…. The
+  // matrix's whole claim — "these majors render THE COMMITTED REPORT identically" —
+  // was therefore about a report that no longer shipped, and nothing in the suite
+  // said so. The report deliberately embeds no matrix figures (see the test below),
+  // so this binding cannot loop: regenerating the matrix never moves the report.
+  const m = readJson("audit/runtime-matrix.json");
+  const actual = createHash("sha256")
+    .update(readFileSync(join(ROOT, "FINAL_REPORT.md")))
+    .digest("hex");
+  assert.equal(
+    m.committedReportSha256, actual,
+    "the matrix certifies a stale report — re-run `npm run audit:runtime-matrix` after the report changes"
+  );
+  assert.equal(m.allRuntimesMatchCommittedReport, true);
+  assert.equal(m.allDeterminismTestsPass, true);
+  assert.equal(m.sufficientCoverage, true);
+  assert.deepEqual(m.coverageProblems, []);
 });
 
 test("§26 — the committed record separates DECLARED compatibility from EXECUTED majors", () => {
